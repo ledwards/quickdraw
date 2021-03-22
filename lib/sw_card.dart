@@ -9,7 +9,7 @@ class SwCard {
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         side = json['side'],
-        title = json['front']['title'],
+        title = SwCard.scrub(json['front']['title']),
         imageUrl = json['front']['imageUrl'];
 
   Map<String, dynamic> toJson() => {
@@ -18,6 +18,10 @@ class SwCard {
         'title': title,
         'imageUrl': imageUrl,
       };
+
+  static String scrub(String s) {
+    return s.replaceAll('•', '').replaceAll('<>', '');
+  }
 
   static List listFromJson(List list) {
     return list.map((cardMap) => SwCard.fromJson(cardMap)).toList();

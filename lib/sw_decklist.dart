@@ -20,8 +20,4 @@ class SwDecklist {
         'archetype': archetype,
         'cardNames': cardNames,
       };
-
-  List normalized() {
-    return []; // take a list of SwCards and return a list of objects joinend by name
-  }
 }

@@ -5,6 +5,7 @@ import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 import 'sw_card.dart';
 import 'sw_decklist.dart';
+import 'sw_stack.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,6 +34,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List allCards = [];
   List allDecklists = [];
+  SwStack stack;
 
   @override
   initState() {
@@ -49,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         var cardsData = json.decode(data);
         setState(() {
           allCards.addAll(SwCard.listFromJson(cardsData['cards']));
+          _initStack();
         });
       });
     });
@@ -73,11 +76,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  _initStack() {
+    setState(() {
+      stack = SwStack.fromCardNames("Light",
+          ["junk", "Han Solo", "Home One", "Admiral Ackbar (V)"], allCards);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     CardController controller;
 
-    if (allCards == [] || allDecklists == []) {
+    if (stack == null) {
       return new Scaffold(
         appBar: new AppBar(
           title: new Text("Loading..."),
@@ -92,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               swipeUp: true,
               swipeDown: true,
               orientation: AmassOrientation.TOP,
-              totalNum: allCards.length,
+              totalNum: stack.cards.length,
               stackNum: 8,
               swipeEdge: 4.0,
               maxWidth: MediaQuery.of(context).size.width * 0.9,
@@ -100,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(
-                child: Image.network(allCards[index].imageUrl),
+                child: Image.network(stack.cards[index].imageUrl),
                 color: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
