@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  List<SwCard> cardLibrary = [];
+  List allCards = [];
 
   @override
   initState() {
@@ -38,15 +38,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     rootBundle.loadString('data/cards/Light.json').then((String data) {
       var cardsData = json.decode(data);
-      List cardsMapsList = cardsData["cards"];
-      var swCards = cardsMapsList.map((cardMap) => SwCard.fromJson(cardMap));
-
       setState(() {
-        cardLibrary.addAll(swCards);
+        allCards.addAll(SwCard.listFromJson(cardsData["cards"]));
       });
-
-      print(cardLibrary[0].toJson());
-      print(cardLibrary[1].toJson());
     });
   }
 
@@ -54,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     CardController controller;
 
-    if (cardLibrary == null) {
+    if (allCards == null) {
       return new Scaffold(
         appBar: new AppBar(
           title: new Text("Loading..."),
@@ -69,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               swipeUp: true,
               swipeDown: true,
               orientation: AmassOrientation.TOP,
-              totalNum: cardLibrary.length,
+              totalNum: allCards.length,
               stackNum: 3,
               swipeEdge: 4.0,
               maxWidth: MediaQuery.of(context).size.width * 0.9,
@@ -77,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(
-                child: Image.network(cardLibrary[index].imageUrl),
+                child: Image.network(allCards[index].imageUrl),
                 color: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),

@@ -18,4 +18,8 @@ class SwCard {
         'title': title,
         'imageUrl': imageUrl,
       };
+
+  static List listFromJson(List list) {
+    return list.map((cardMap) => SwCard.fromJson(cardMap)).toList();
+  }
 }
