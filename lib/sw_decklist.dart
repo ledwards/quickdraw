@@ -1,11 +1,11 @@
-class SwDeck {
-  SwDeck(this.side, this.archetype, this.cardNames);
+class SwDecklist {
+  SwDecklist(this.side, this.archetype, this.cardNames);
 
   String side;
   String archetype;
   List cardNames;
 
-  SwDeck.fromJson(Map<String, dynamic> json)
+  SwDecklist.fromJson(Map<String, dynamic> json)
       : side = json['userinfo']['deckside'],
         archetype = json['userinfo']['deckname'],
         cardNames = json.keys

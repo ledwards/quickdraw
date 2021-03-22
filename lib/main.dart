@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 import 'sw_card.dart';
-import 'sw_deck.dart';
+import 'sw_decklist.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,7 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List allCards = [];
-  List allDecks = [];
+  List allDecklists = [];
 
   @override
   initState() {
@@ -59,15 +59,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
 
-    final filenames =
-        manifestMap.keys.where((key) => key.contains('data/decks/')).toList();
+    final filenames = manifestMap.keys
+        .where((key) => key.contains('data/decklists/'))
+        .toList();
 
-    setState(() {
-      filenames.forEach((f) {
-        rootBundle.loadString(f).then((String data) {
-          setState(() {
-            allDecks.add(SwDeck.fromJson(json.decode(data).values.toList()[0]));
-          });
+    filenames.forEach((f) {
+      rootBundle.loadString(f).then((String data) {
+        setState(() {
+          final deckJson = json.decode(data).values.toList()[0];
+          allDecklists.add(SwDecklist.fromJson(deckJson));
         });
       });
     });
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     CardController controller;
 
-    if (allCards == null) {
+    if (allCards == [] || allDecklists == []) {
       return new Scaffold(
         appBar: new AppBar(
           title: new Text("Loading..."),
@@ -110,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 if (align.x < 0) {
                   print("left swipe");
                 } else if (align.x > 0) {
+                  print(allCards[0].toJson());
                   print("right swipe");
                 } else if (align.y > 0) {
                   print("down swipe");
