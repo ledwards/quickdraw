@@ -36,14 +36,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List allDecklists = [];
   SwStack stack;
 
-  @override
-  initState() {
-    super.initState();
-
-    _initCards();
-    _initDecklists();
-  }
-
   Future _initCards() async {
     final filenames = ['data/cards/Light.json', 'data/cards/Dark.json'];
     filenames.forEach((f) {
@@ -51,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         var cardsData = json.decode(data);
         setState(() {
           allCards.addAll(SwCard.listFromJson(cardsData['cards']));
-          _initStack();
         });
       });
     });
@@ -76,66 +67,70 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  _initStack() {
+  Future asyncInit() async {
+    await _initCards();
+    await _initDecklists();
+
     setState(() {
-      stack = SwStack.fromCardNames("Light",
-          ["junk", "Han Solo", "Home One", "Admiral Ackbar (V)"], allCards);
+      stack =
+          SwStack.fromCardNames("Light", allDecklists[1].cardNames, allCards);
     });
+
+    return stack;
   }
 
   @override
   Widget build(BuildContext context) {
     CardController controller;
 
-    if (stack == null) {
-      return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("Loading..."),
-        ),
-      );
-    } else {
-      return new Scaffold(
-        body: new Center(
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: new TinderSwapCard(
-              swipeUp: true,
-              swipeDown: true,
-              orientation: AmassOrientation.TOP,
-              totalNum: stack.cards.length,
-              stackNum: 8,
-              swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-              maxHeight: MediaQuery.of(context).size.width * 0.9,
-              minWidth: MediaQuery.of(context).size.width * 0.8,
-              minHeight: MediaQuery.of(context).size.width * 0.8,
-              cardBuilder: (context, index) => Card(
-                child: Image.network(stack.cards[index].imageUrl),
-                color: Colors.transparent,
-                shadowColor: Colors.transparent,
-              ),
-              cardController: controller = CardController(),
-              swipeUpdateCallback:
-                  (DragUpdateDetails details, Alignment align) {
-                if (align.x < 0) {
-                  print("left swipe");
-                } else if (align.x > 0) {
-                  print(allCards[0].toJson());
-                  print("right swipe");
-                } else if (align.y > 0) {
-                  print("down swipe");
-                } else if (align.y < 0) {
-                  print("up swipe");
-                }
-              },
-              swipeCompleteCallback:
-                  (CardSwipeOrientation orientation, int index) {
-                print("Swipe Complete");
-              },
-            ),
-          ),
-        ),
-      );
-    }
+    return new FutureBuilder(
+      future: asyncInit(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return snapshot.hasData
+            ? new Scaffold(
+                body: new Center(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: new TinderSwapCard(
+                      swipeUp: true,
+                      swipeDown: true,
+                      orientation: AmassOrientation.TOP,
+                      totalNum: snapshot.data.cards.length,
+                      stackNum: 8,
+                      swipeEdge: 4.0,
+                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                      maxHeight: MediaQuery.of(context).size.width * 0.9,
+                      minWidth: MediaQuery.of(context).size.width * 0.8,
+                      minHeight: MediaQuery.of(context).size.width * 0.8,
+                      cardBuilder: (context, index) => Card(
+                        child:
+                            Image.network(snapshot.data.cards[index].imageUrl),
+                        color: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
+                      cardController: controller = CardController(),
+                      swipeUpdateCallback:
+                          (DragUpdateDetails details, Alignment align) {
+                        if (align.x < 0) {
+                          print("left swipe");
+                        } else if (align.x > 0) {
+                          print("right swipe");
+                        } else if (align.y > 0) {
+                          print("down swipe");
+                        } else if (align.y < 0) {
+                          print("up swipe");
+                        }
+                      },
+                      swipeCompleteCallback:
+                          (CardSwipeOrientation orientation, int index) {
+                        print("Swipe Complete");
+                      },
+                    ),
+                  ),
+                ),
+              )
+            : new CircularProgressIndicator();
+      },
+    );
   }
 }

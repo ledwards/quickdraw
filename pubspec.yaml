@@ -36,8 +36,8 @@ flutter:
   assets:
     - data/cards/Light.json
     - data/cards/Dark.json
-    - data/decklists/2020_worlds_day1/
-    - data/decklists/2020_worlds_day2/
+    # - data/decklists/2020_worlds_day1/
+    # - data/decklists/2020_worlds_day2/
     - data/decklists/2020_worlds_day3/
 
   # An image asset can refer to one or more resolution-specific "variants", see
