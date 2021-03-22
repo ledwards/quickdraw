@@ -6,6 +6,10 @@ class SwStack {
   String side;
   List<SwCard> cards;
 
+  int get length => cards.length;
+
+  operator [](int index) => cards[index];
+
   SwStack.fromCardNames(
       String side, List<String> names, List<SwCard> cardLibrary)
       : side = side,

@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
               swipeUp: true,
               swipeDown: true,
               orientation: AmassOrientation.TOP,
-              totalNum: stack.cards.length,
+              totalNum: stack.length,
               stackNum: 8,
               swipeEdge: 4.0,
               maxWidth: MediaQuery.of(context).size.width * 0.9,
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(
-                child: Image.network(stack.cards[index].imageUrl),
+                child: Image.network(stack[index].imageUrl),
                 color: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
