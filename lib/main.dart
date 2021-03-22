@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 
 import 'sw_card.dart';
+import 'sw_deck.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,6 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List allCards = [];
+  List allDecks = [];
 
   @override
   initState() {
@@ -39,7 +41,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     rootBundle.loadString('data/cards/Light.json').then((String data) {
       var cardsData = json.decode(data);
       setState(() {
-        allCards.addAll(SwCard.listFromJson(cardsData["cards"]));
+        allCards.addAll(SwCard.listFromJson(cardsData['cards']));
+      });
+    });
+
+    _initDecklists();
+  }
+
+  Future _initDecklists() async {
+    final manifestContent =
+        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+    final filenames =
+        manifestMap.keys.where((key) => key.contains('data/decks/')).toList();
+
+    setState(() {
+      filenames.forEach((f) {
+        rootBundle.loadString(f).then((String data) {
+          setState(() {
+            var jsonData = json.decode(data);
+            var deck = SwDeck.fromJson(jsonData.values.toList()[0]);
+            allDecks.add(deck);
+          });
+        });
       });
     });
   }
@@ -64,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               swipeDown: true,
               orientation: AmassOrientation.TOP,
               totalNum: allCards.length,
-              stackNum: 3,
+              stackNum: 8,
               swipeEdge: 4.0,
               maxWidth: MediaQuery.of(context).size.width * 0.9,
               maxHeight: MediaQuery.of(context).size.width * 0.9,
@@ -82,9 +107,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   print("left swipe");
                 } else if (align.x > 0) {
                   print("right swipe");
-                } else if (align.y < 0) {
-                  print("down swipe");
                 } else if (align.y > 0) {
+                  print("down swipe");
+                } else if (align.y < 0) {
                   print("up swipe");
                 }
               },
