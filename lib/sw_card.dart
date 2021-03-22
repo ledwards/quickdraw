@@ -23,7 +23,7 @@ class SwCard {
     return s.replaceAll('•', '').replaceAll('<>', '');
   }
 
-  static List listFromJson(List list) {
+  static List<SwCard> listFromJson(List list) {
     return list.map((cardMap) => SwCard.fromJson(cardMap)).toList();
   }
 }

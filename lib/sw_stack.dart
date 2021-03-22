@@ -1,5 +1,3 @@
-import 'sw_card.dart';
-
 class SwStack {
   SwStack(this.side, this.cards);
 
