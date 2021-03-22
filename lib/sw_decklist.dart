@@ -3,7 +3,7 @@ class SwDecklist {
 
   String side;
   String archetype;
-  List cardNames;
+  List<String> cardNames;
 
   SwDecklist.fromJson(Map<String, dynamic> json)
       : side = json['userinfo']['deckside'],
@@ -13,7 +13,8 @@ class SwDecklist {
                 ['userinfo', 'deckinfo'].contains(element) == false)
             .map((k) => json[k])
             .expand((e) => e) // flatten
-            .toList();
+            .toList()
+            .cast<String>();
 
   Map<String, dynamic> toJson() => {
         'side': side,

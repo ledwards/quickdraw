@@ -44,9 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (var f in filenames) {
       await rootBundle.loadString(f).then((data) {
-        var cardsData = json.decode(data);
+        final cardsData = json.decode(data);
         cards.addAll(SwCard.listFromJson(cardsData['cards']));
-        print(cards[0].toJson());
       });
     }
     return cards;
@@ -84,8 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _setup() async {
-    List _cards;
-    List _decklists;
+    List<SwCard> _cards;
+    List<SwDecklist> _decklists;
     SwStack _stack;
 
     _stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
