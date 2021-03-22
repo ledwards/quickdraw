@@ -38,14 +38,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   initState() {
     super.initState();
 
-    rootBundle.loadString('data/cards/Light.json').then((String data) {
-      var cardsData = json.decode(data);
-      setState(() {
-        allCards.addAll(SwCard.listFromJson(cardsData['cards']));
+    _initCards();
+    _initDecklists();
+  }
+
+  Future _initCards() async {
+    final filenames = ['data/cards/Light.json', 'data/cards/Dark.json'];
+    filenames.forEach((f) {
+      rootBundle.loadString(f).then((String data) {
+        var cardsData = json.decode(data);
+        setState(() {
+          allCards.addAll(SwCard.listFromJson(cardsData['cards']));
+        });
       });
     });
-
-    _initDecklists();
   }
 
   Future _initDecklists() async {
@@ -60,9 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       filenames.forEach((f) {
         rootBundle.loadString(f).then((String data) {
           setState(() {
-            var jsonData = json.decode(data);
-            var deck = SwDeck.fromJson(jsonData.values.toList()[0]);
-            allDecks.add(deck);
+            allDecks.add(SwDeck.fromJson(json.decode(data).values.toList()[0]));
           });
         });
       });
