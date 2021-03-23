@@ -36,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
-  String _currentSide = 'Light';
+  String _currentSide = 'Dark';
   SwStack _currentStack;
   SwStack _maybeStack;
   SwDeck _currentDeck;
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
     stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
       loadedCards = res[0];
       loadedDecklists = res[1];
-      final decklist = loadedDecklists[1];
+      final decklist = loadedDecklists[0];
       return _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
           decklist.title);
     });

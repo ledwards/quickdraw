@@ -11,7 +11,7 @@ class SwCard {
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         side = json['side'],
-        title = SwCard.scrub(json['front']['title']).split(' / ')[0],
+        title = SwCard.normalizeTitle(json['front']['title']),
         type = json['front']['type'],
         subType = json['front']['subType'],
         imageUrl = json['front']['imageUrl'];
@@ -25,8 +25,13 @@ class SwCard {
         'imageUrl': imageUrl,
       };
 
-  static String scrub(String s) {
-    return s.replaceAll('•', '').replaceAll('<>', '');
+  static String normalizeTitle(String s) {
+    List<String> titles = s.split(' / ');
+    String frontTitle = titles[0];
+    String backTitle = titles.length > 1 ? titles[1] : '';
+    String vSuffix = backTitle.endsWith('(V)') ? ' (V)' : '';
+
+    return (frontTitle + vSuffix).replaceAll('•', '').replaceAll('<>', '');
   }
 
   static List<SwCard> listFromJson(List list) {
