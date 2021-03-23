@@ -1,4 +1,5 @@
 import 'dart:convert' show json;
+import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -132,7 +133,14 @@ class _HomeScreenState extends State<HomeScreen> {
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(
-                child: Image.network(_currentStack[index].imageUrl),
+                // child: Image.network(_currentStack[index].imageUrl),
+                child: Transform(
+                    alignment: Alignment.center,
+                    transform: _currentStack[index].subType == 'Site'
+                        ? Matrix4.rotationZ(pi / 2)
+                        : Matrix4.rotationZ(0),
+                    child: Image.network(_currentStack[index].imageUrl,
+                        alignment: Alignment.center)),
                 color: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
