@@ -139,19 +139,25 @@ class _HomeScreenState extends State<HomeScreen> {
               cardController: CardController(),
               swipeUpdateCallback:
                   (DragUpdateDetails details, Alignment align) {
-                if (align.x < 0) {
-                  print("left swipe");
-                } else if (align.x > 0) {
-                  print("right swipe");
-                } else if (align.y > 0) {
-                  print("down swipe");
-                } else if (align.y < 0) {
-                  print("up swipe");
+                if (align.x.abs() > align.y.abs()) {
+                  if (align.x < 0) {
+                    print("left swipe");
+                  } else if (align.x > 0) {
+                    print("right swipe");
+                  }
+                } else if (align.x.abs() < align.y.abs()) {
+                  if (align.y < 0) {
+                    print("up swipe");
+                  } else if (align.y > 0) {
+                    print("down swipe");
+                  }
                 }
               },
               swipeCompleteCallback:
                   (CardSwipeOrientation orientation, int index) {
                 print("Swipe Complete");
+                print(_currentStack[index].title);
+                print(orientation.toString());
               },
             ),
           ),
