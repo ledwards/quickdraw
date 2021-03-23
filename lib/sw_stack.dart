@@ -15,7 +15,8 @@ class SwStack {
       : side = side,
         cards = names
             .map((name) {
-              return cardLibrary.firstWhere((c) => c.title == name, orElse: () {
+              return cardLibrary.firstWhere(
+                  (c) => (c.title == name && c.side == side), orElse: () {
                 print("Could not find card when creating Stack");
                 print(name);
                 return null;

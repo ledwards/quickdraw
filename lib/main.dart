@@ -35,7 +35,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
-  String _currentSide = "Dark";
+  String _currentSide = "Light";
   SwStack _currentStack;
   SwDeck _currentDeck;
 
