@@ -64,16 +64,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     for (var f in filenames) {
       await rootBundle.loadString(f).then((String data) {
+        final deckTitle = json.decode(data).keys.toList()[0];
         final deckJson = json.decode(data).values.toList()[0];
-        decklists.add(SwDecklist.fromJson(deckJson));
+        decklists.add(SwDecklist.fromJson(deckJson, deckTitle));
       });
     }
 
     return decklists;
   }
 
-  SwStack _loadStack(List names, List<SwCard> cards) {
-    return SwStack.fromCardNames(side, names, cards);
+  SwStack _loadStack(List names, List<SwCard> cards, String title) {
+    return SwStack.fromCardNames(side, names, cards, title);
   }
 
   @override
@@ -90,7 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
       _cards = res[0];
       _decklists = res[1];
-      return _loadStack(_decklists[0].cardNames, _cards);
+      final decklist = _decklists[1];
+      return _loadStack(decklist.cardNames, _cards, decklist.title);
     });
 
     setState(() {
@@ -110,6 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       return Scaffold(
+        appBar: new AppBar(
+          title: new Text(stack.title),
+          backgroundColor: Colors.transparent,
+        ),
         body: new Center(
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
@@ -120,8 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
               totalNum: stack.length,
               stackNum: 8,
               swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-              maxHeight: MediaQuery.of(context).size.width * 0.9,
+              maxWidth: MediaQuery.of(context).size.width,
+              maxHeight: MediaQuery.of(context).size.width,
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(

@@ -1,17 +1,17 @@
 import 'sw_card.dart';
 
 class SwStack {
-  SwStack(this.side, this.cards);
+  SwStack(this.side, this.cards, this.title);
 
   String side;
   List<SwCard> cards;
+  String title;
 
   int get length => cards.length;
-
   operator [](int index) => cards[index];
 
   SwStack.fromCardNames(
-      String side, List<String> names, List<SwCard> cardLibrary)
+      String side, List<String> names, List<SwCard> cardLibrary, String title)
       : side = side,
         cards = names
             .map((name) {
@@ -23,5 +23,6 @@ class SwStack {
             })
             .where((value) => value != null)
             .toList()
-            .cast<SwCard>();
+            .cast<SwCard>(),
+        title = title;
 }

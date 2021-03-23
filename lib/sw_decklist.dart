@@ -1,12 +1,14 @@
 class SwDecklist {
-  SwDecklist(this.side, this.archetype, this.cardNames);
+  SwDecklist(this.side, this.title, this.archetype, this.cardNames);
 
   String side;
+  String title;
   String archetype;
   List<String> cardNames;
 
-  SwDecklist.fromJson(Map<String, dynamic> json)
+  SwDecklist.fromJson(Map<String, dynamic> json, String title)
       : side = json['userinfo']['deckside'],
+        title = title,
         archetype = json['userinfo']['deckname'],
         cardNames = json.keys
             .where((element) =>
@@ -18,6 +20,7 @@ class SwDecklist {
 
   Map<String, dynamic> toJson() => {
         'side': side,
+        'title': title,
         'archetype': archetype,
         'cardNames': cardNames,
       };
