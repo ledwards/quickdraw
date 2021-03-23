@@ -36,7 +36,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
-  String _currentSide = "Light";
+  String _currentSide = 'Light';
   SwStack _currentStack;
   SwStack _maybeStack;
   SwDeck _currentDeck;
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return new Scaffold(
         key: UniqueKey(),
         appBar: new AppBar(
-          title: new Text("Loading..."),
+          title: new Text('Loading...'),
         ),
       );
     } else {
@@ -190,9 +190,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Card(
       child: Transform(
           alignment: Alignment.center,
-          transform: _currentStack[index].subType == 'Site'
-              ? Matrix4.rotationZ(-pi / 2)
-              : Matrix4.rotationZ(0),
+          transform: _currentStack[0].subType != 'Site'
+              ? (_currentStack[index].subType == 'Site') // all vertical
+                  ? Matrix4.rotationZ(-pi / 2)
+                  : Matrix4.rotationZ(0)
+              : (_currentStack[index].subType == 'Site') // all horizontal
+                  ? Matrix4.rotationZ(0)
+                  : Matrix4.rotationZ(_currentSide == 'Light'
+                      ? -pi / 2
+                      : pi / 2), // according to side
           child: Image.network(_currentStack[index].imageUrl,
               alignment: Alignment.center)),
       color: Colors.transparent,
