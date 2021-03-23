@@ -6,6 +6,7 @@ import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'sw_card.dart';
 import 'sw_decklist.dart';
 import 'sw_stack.dart';
+import 'sw_deck.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,10 +33,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<SwCard> allCards = [];
-  List<SwDecklist> allDecklists = [];
-  SwStack stack;
-  String side = "Dark";
+  List<SwCard> _allCards = [];
+  List<SwDecklist> _allDecklists = [];
+  String _currentSide = "Dark";
+  SwStack _currentStack;
+  SwDeck _currentDeck;
 
   Future<List<SwCard>> _loadCards() async {
     List<SwCard> cards = [];
@@ -69,12 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
         decklists.add(SwDecklist.fromJson(deckJson, deckTitle));
       });
     }
-
     return decklists;
   }
 
   SwStack _loadStack(List names, List<SwCard> cards, String title) {
-    return SwStack.fromCardNames(side, names, cards, title);
+    return SwStack.fromCardNames(_currentSide, names, cards, title);
   }
 
   @override
@@ -84,27 +85,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _setup() async {
-    List<SwCard> _cards;
-    List<SwDecklist> _decklists;
-    SwStack _stack;
+    List<SwCard> cards;
+    List<SwDecklist> decklists;
+    SwStack stack;
 
-    _stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
-      _cards = res[0];
-      _decklists = res[1];
-      final decklist = _decklists[1];
-      return _loadStack(decklist.cardNames, _cards, decklist.title);
+    stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
+      cards = res[0];
+      decklists = res[1];
+      final decklist = decklists[1];
+      return _loadStack(decklist.cardNames, cards, decklist.title);
     });
 
     setState(() {
-      allCards = _cards;
-      allDecklists = _decklists;
-      stack = _stack;
+      _allCards = cards;
+      _allDecklists = decklists;
+      _currentStack = stack;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (stack == null) {
+    if (_currentStack == null) {
       return new Scaffold(
         appBar: new AppBar(
           title: new Text("Loading..."),
@@ -113,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return Scaffold(
         appBar: new AppBar(
-          title: new Text(stack.title),
+          title: new Text(_currentStack.title),
           backgroundColor: Colors.transparent,
         ),
         body: new Center(
@@ -123,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
               swipeUp: true,
               swipeDown: true,
               orientation: AmassOrientation.TOP,
-              totalNum: stack.length,
+              totalNum: _currentStack.length,
               stackNum: 8,
               swipeEdge: 4.0,
               maxWidth: MediaQuery.of(context).size.width,
@@ -131,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: (context, index) => Card(
-                child: Image.network(stack[index].imageUrl),
+                child: Image.network(_currentStack[index].imageUrl),
                 color: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
