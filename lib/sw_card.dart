@@ -9,7 +9,7 @@ class SwCard {
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         side = json['side'],
-        title = SwCard.scrub(json['front']['title']),
+        title = SwCard.scrub(json['front']['title']).split(' / ')[0],
         imageUrl = json['front']['imageUrl'];
 
   Map<String, dynamic> toJson() => {
