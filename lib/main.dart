@@ -39,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String _currentSide = "Light";
   SwStack _currentStack;
   SwDeck _currentDeck;
+  SwStack _maybeStack;
+  SwStack _tempStack;
 
   Future<List<SwCard>> _loadCards() async {
     List<SwCard> cards = [];
@@ -86,21 +88,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _setup() async {
-    List<SwCard> cards;
-    List<SwDecklist> decklists;
+    List<SwCard> loadedCards;
+    List<SwDecklist> loadedDecklists;
     SwStack stack;
 
     stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
-      cards = res[0];
-      decklists = res[1];
-      final decklist = decklists[1];
-      return _loadStack(decklist.cardNames, cards, decklist.title);
+      loadedCards = res[0];
+      loadedDecklists = res[1];
+      final decklist = loadedDecklists[1];
+      return _loadStack(decklist.cardNames.getRange(0, 3).toList(), loadedCards,
+          decklist.title);
     });
 
     setState(() {
-      _allCards = cards;
-      _allDecklists = decklists;
+      _allCards = loadedCards;
+      _allDecklists = loadedDecklists;
       _currentStack = stack;
+      _currentDeck = new SwDeck(_currentSide, [], 'Default Deck');
+      _maybeStack = new SwStack(_currentSide, [], 'Maybe Cards');
+      _tempStack = new SwStack(_currentSide, [], 'never seen by user');
     });
   }
 
@@ -115,7 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return Scaffold(
         appBar: new AppBar(
-          title: new Text(_currentStack.title),
+          title: new Text(
+              "Stack: ${_currentStack.length} | Temp: ${_tempStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
           backgroundColor: Colors.transparent,
         ),
         body: new Center(
@@ -137,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Transform(
                     alignment: Alignment.center,
                     transform: _currentStack[index].subType == 'Site'
-                        ? Matrix4.rotationZ(pi / 2)
+                        ? Matrix4.rotationZ(-pi / 2)
                         : Matrix4.rotationZ(0),
                     child: Image.network(_currentStack[index].imageUrl,
                         alignment: Alignment.center)),
@@ -149,23 +156,74 @@ class _HomeScreenState extends State<HomeScreen> {
                   (DragUpdateDetails details, Alignment align) {
                 if (align.x.abs() > align.y.abs()) {
                   if (align.x < 0) {
-                    print("left swipe");
+                    // print("left swipe");
                   } else if (align.x > 0) {
-                    print("right swipe");
+                    // print("right swipe");
                   }
                 } else if (align.x.abs() < align.y.abs()) {
                   if (align.y < 0) {
-                    print("up swipe");
+                    // print("up swipe");
                   } else if (align.y > 0) {
-                    print("down swipe");
+                    // print("down swipe");
                   }
                 }
               },
               swipeCompleteCallback:
                   (CardSwipeOrientation orientation, int index) {
-                print("Swipe Complete");
-                print(_currentStack[index].title);
-                print(orientation.toString());
+                setState(() {
+                  print("CURR: ${_currentStack.cards.map((e) => e.title)}");
+                  print("TEMP: ${_tempStack.cards.map((e) => e.title)}");
+
+                  // There are probably other cases too where you can
+                  //end up in the fucked up sitatuion
+
+                  if (orientation != CardSwipeOrientation.RIGHT &&
+                      _currentStack.length == 2 &&
+                      _tempStack.length == 0) {
+                    print("***ITS GONNA FUCK UP IF YOU SWIPE RIGHT, NEXT***");
+                    // TODO: disable swipe right?
+                  }
+                  if (orientation == CardSwipeOrientation.RIGHT &&
+                      _currentStack.length == 1 &&
+                      _tempStack.length == 0) {
+                    print("***ITS FUCKING UP RN***");
+                    orientation = CardSwipeOrientation.RECOVER;
+                  }
+
+                  switch (orientation) {
+                    case CardSwipeOrientation.LEFT:
+                      SwCard swipedCard = _currentStack.removeAt(index);
+                      break;
+                    case CardSwipeOrientation.RIGHT:
+                      SwCard swipedCard = _currentStack.removeAt(index);
+                      _tempStack.add(swipedCard);
+                      break;
+                    case CardSwipeOrientation.UP:
+                      SwCard swipedCard = _currentStack.removeAt(index);
+                      _currentDeck.add(swipedCard);
+                      break;
+                    case CardSwipeOrientation.DOWN:
+                      SwCard swipedCard = _currentStack.removeAt(index);
+                      _maybeStack.add(swipedCard);
+                      break;
+                    case CardSwipeOrientation.RECOVER:
+                      break;
+                  }
+                });
+
+                // print(_currentStack.length);
+                // print(_tempStack.length);
+
+                setState(() {
+                  if (_currentStack.length == 0) {
+                    print('all done');
+                    for (int i = 0; i < _tempStack.length; i++) {
+                      _currentStack.insert(index + i, _tempStack.cards[i]);
+                      print("inserting into ${index + i}");
+                    }
+                    _tempStack.cards.clear();
+                  }
+                });
               },
             ),
           ),

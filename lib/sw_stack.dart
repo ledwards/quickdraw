@@ -10,6 +10,11 @@ class SwStack {
   int get length => cards.length;
   operator [](int index) => cards[index];
 
+  SwCard removeAt(int index) => cards.removeAt(index);
+  insert(int index, SwCard card) => cards.insert(index, card);
+  add(SwCard card) => cards.add(card);
+  addAll(List<SwCard> cards) => cards.addAll(cards);
+
   SwStack.fromCardNames(
       String side, List<String> names, List<SwCard> cardLibrary, String title)
       : side = side,
