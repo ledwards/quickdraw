@@ -42,6 +42,28 @@ class _RootPageState extends State<RootPage> {
   SwStack _maybeStack;
   SwDeck _currentDeck;
 
+  _setup() async {
+    List<SwCard> loadedCards;
+    List<SwDecklist> loadedDecklists;
+    SwStack stack;
+
+    stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
+      loadedCards = res[0];
+      loadedDecklists = res[1];
+      final decklist = loadedDecklists[0];
+      return _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
+          decklist.title);
+    });
+
+    setState(() {
+      this._currentStep = 1;
+      this._allCards = loadedCards;
+      this._allDecklists = loadedDecklists;
+      this._currentStack = stack;
+      this._maybeStack = new SwStack(_currentSide, [], 'Maybe Cards');
+    });
+  }
+
   Future<List<SwCard>> _loadCards() async {
     List<SwCard> cards = [];
 
@@ -87,29 +109,6 @@ class _RootPageState extends State<RootPage> {
     super.initState();
   }
 
-  _setup() async {
-    List<SwCard> loadedCards;
-    List<SwDecklist> loadedDecklists;
-    SwStack stack;
-
-    stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
-      loadedCards = res[0];
-      loadedDecklists = res[1];
-      final decklist = loadedDecklists[0];
-      return _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
-          decklist.title);
-    });
-
-    setState(() {
-      this._currentStep = 1;
-      this._allCards = loadedCards;
-      this._allDecklists = loadedDecklists;
-      this._currentStack = stack;
-      this._maybeStack = new SwStack(_currentSide, [], 'Maybe Cards');
-      this._currentDeck = new SwDeck(_currentSide, [], 'Default Deck');
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_currentStack == null) {
@@ -120,26 +119,78 @@ class _RootPageState extends State<RootPage> {
         ),
       );
     } else {
-      return new Scaffold(
-        key: UniqueKey(),
-        appBar: new AppBar(
-          title: new Text(
-              "Stack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
-          backgroundColor: Colors.transparent,
-        ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: _drawerWidgets(context),
-          ),
-        ),
-        body: new Center(
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: _tinderCards(context),
-          ),
-        ),
-      );
+      switch (_currentStep) {
+        case 1: // Side
+          return new Scaffold(
+            appBar: new AppBar(
+              title: new Text('Pick a Side'),
+              backgroundColor: Colors.transparent,
+            ),
+            drawer: _drawerWidget(context),
+            body: new Center(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                padding: EdgeInsets.all(10),
+                child: Column(children: [
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          this._currentSide = 'Dark';
+                          this._currentDeck =
+                              new SwDeck(_currentSide, [], 'New Deck');
+                          this._currentStep = 8; // needs to be + 1 instead
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        child: Image(
+                            image: AssetImage('assets/images/ds-back.jpg')),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: new GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          this._currentSide = 'Light';
+                          this._currentDeck =
+                              new SwDeck(_currentSide, [], 'New Deck');
+                          this._currentStep = 8; // needs to be + 1 instead
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        child: Image(
+                            image: AssetImage('assets/images/ls-back.jpg')),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          );
+          break;
+
+        case 8: // Main Deck
+          return new Scaffold(
+            key: UniqueKey(),
+            appBar: new AppBar(
+              title: new Text(
+                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
+              backgroundColor: Colors.transparent,
+            ),
+            drawer: _drawerWidget(context),
+            body: new Center(
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: _tinderCards(context),
+              ),
+            ),
+          );
+          break;
+      }
+      ;
     }
   }
 
@@ -249,6 +300,15 @@ class _RootPageState extends State<RootPage> {
         title: Text('Main Deck'),
       ),
     ];
+  }
+
+  Widget _drawerWidget(context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: _drawerWidgets(context),
+      ),
+    );
   }
 
   Widget _cardBuilder(context, index) {
