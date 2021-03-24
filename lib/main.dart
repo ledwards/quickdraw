@@ -125,6 +125,60 @@ class _RootPageState extends State<RootPage> {
               "Stack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
           backgroundColor: Colors.transparent,
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text(
+                  'Create Deck',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.filter_1),
+                title: Text('Side'),
+                onTap: () {
+                  Navigator.pop(context); // close the drawer
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.filter_2),
+                title: Text('Objective'),
+              ),
+              ListTile(
+                leading: Icon(Icons.subdirectory_arrow_right_rounded),
+                title: Text('Deployed by Objective'),
+              ),
+              ListTile(
+                leading: Icon(Icons.filter_3),
+                title: Text('Starting Interrupt'),
+              ),
+              ListTile(
+                leading: Icon(Icons.subdirectory_arrow_right_rounded),
+                title: Text('Deployed by Starting Interrupt'),
+              ),
+              ListTile(
+                leading: Icon(Icons.filter_5),
+                title: Text('Starting Effect'),
+              ),
+              ListTile(
+                leading: Icon(Icons.subdirectory_arrow_right_rounded),
+                title: Text('Defensive Shields'),
+              ),
+              ListTile(
+                leading: Icon(Icons.filter_4),
+                title: Text('Main Deck'),
+              ),
+            ],
+          ),
+        ),
         body: new Center(
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
