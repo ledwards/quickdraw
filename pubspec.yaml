@@ -38,8 +38,8 @@ flutter:
     - assets/images/ds-back.jpg
     - data/cards/Light.json
     - data/cards/Dark.json
-    # - data/decklists/2020_worlds_day1/
-    # - data/decklists/2020_worlds_day2/
+    - data/decklists/2020_worlds_day1/
+    - data/decklists/2020_worlds_day2/
     - data/decklists/2020_worlds_day3/
 
   # To add custom fonts to your application, add a fonts section here,

@@ -130,52 +130,12 @@ class _RootPageState extends State<RootPage> {
             body: new Center(
               child: Container(
                 height: MediaQuery.of(context).size.height,
-                padding: EdgeInsets.all(10),
                 child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(children: [
-                        Expanded(
-                          child: new GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                this._currentSide = 'Dark';
-                                this._currentDeck =
-                                    new SwDeck(_currentSide, [], 'New Deck');
-                                this._currentStep =
-                                    8; // needs to be + 1 instead
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(5),
-                              child: Image(
-                                  image:
-                                      AssetImage('assets/images/ds-back.jpg')),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: new GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                this._currentSide = 'Light';
-                                this._currentDeck =
-                                    new SwDeck(_currentSide, [], 'New Deck');
-                                this._currentStep =
-                                    8; // needs to be + 1 instead
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(5),
-                              child: Image(
-                                  image:
-                                      AssetImage('assets/images/ls-back.jpg')),
-                            ),
-                          ),
-                        ),
-                      ])
-                    ]),
+                  children: [
+                    _cardBackWidget(context, 'Dark'),
+                    _cardBackWidget(context, 'Light'),
+                  ],
+                ),
               ),
             ),
           );
@@ -337,6 +297,26 @@ class _RootPageState extends State<RootPage> {
               alignment: Alignment.center)),
       color: Colors.transparent,
       shadowColor: Colors.transparent,
+    );
+  }
+
+  Widget _cardBackWidget(context, side) {
+    return Expanded(
+      child: new GestureDetector(
+        onTap: () {
+          setState(() {
+            this._currentSide = side;
+            this._currentDeck = new SwDeck(side, [], 'New Deck');
+            this._currentStep = 8; // needs to be + 1 instead
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.all(5),
+          child: Image(
+              image: AssetImage(
+                  "assets/images/${side == 'Dark' ? 'ds' : 'ls'}-back.jpg")),
+        ),
+      ),
     );
   }
 }
