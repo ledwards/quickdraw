@@ -131,42 +131,51 @@ class _RootPageState extends State<RootPage> {
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 padding: EdgeInsets.all(10),
-                child: Column(children: [
-                  Expanded(
-                    child: new GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          this._currentSide = 'Dark';
-                          this._currentDeck =
-                              new SwDeck(_currentSide, [], 'New Deck');
-                          this._currentStep = 8; // needs to be + 1 instead
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(5),
-                        child: Image(
-                            image: AssetImage('assets/images/ds-back.jpg')),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: new GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          this._currentSide = 'Light';
-                          this._currentDeck =
-                              new SwDeck(_currentSide, [], 'New Deck');
-                          this._currentStep = 8; // needs to be + 1 instead
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(5),
-                        child: Image(
-                            image: AssetImage('assets/images/ls-back.jpg')),
-                      ),
-                    ),
-                  ),
-                ]),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(children: [
+                        Expanded(
+                          child: new GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                this._currentSide = 'Dark';
+                                this._currentDeck =
+                                    new SwDeck(_currentSide, [], 'New Deck');
+                                this._currentStep =
+                                    8; // needs to be + 1 instead
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(5),
+                              child: Image(
+                                  image:
+                                      AssetImage('assets/images/ds-back.jpg')),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: new GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                this._currentSide = 'Light';
+                                this._currentDeck =
+                                    new SwDeck(_currentSide, [], 'New Deck');
+                                this._currentStep =
+                                    8; // needs to be + 1 instead
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(5),
+                              child: Image(
+                                  image:
+                                      AssetImage('assets/images/ls-back.jpg')),
+                            ),
+                          ),
+                        ),
+                      ])
+                    ]),
               ),
             ),
           );
