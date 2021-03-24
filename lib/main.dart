@@ -8,6 +8,7 @@ import 'sw_card.dart';
 import 'sw_decklist.dart';
 import 'sw_stack.dart';
 import 'sw_deck.dart';
+import 'sw_archetype.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,6 +38,7 @@ class _RootPageState extends State<RootPage> {
   int _currentStep;
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
+  List<SwArchetype> _allArchetypes = [];
   String _currentSide = 'Dark';
   SwStack _currentStack;
   SwStack _maybeStack;
@@ -47,19 +49,27 @@ class _RootPageState extends State<RootPage> {
     List<SwDecklist> loadedDecklists;
     SwStack stack;
 
-    stack = await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
+    List results =
+        await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
       loadedCards = res[0];
       loadedDecklists = res[1];
+
+      // temp
       final decklist = loadedDecklists[0];
-      return _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
-          decklist.title);
+
+      return [
+        _loadArchetypes(loadedDecklists, loadedCards),
+        _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
+            decklist.title),
+      ];
     });
 
     setState(() {
       this._currentStep = 1;
       this._allCards = loadedCards;
       this._allDecklists = loadedDecklists;
-      this._currentStack = stack;
+      this._allArchetypes = results[0];
+      this._currentStack = results[1];
       this._maybeStack = new SwStack(_currentSide, [], 'Maybe Cards');
     });
   }
@@ -78,7 +88,7 @@ class _RootPageState extends State<RootPage> {
     return cards;
   }
 
-  Future _loadDecklists() async {
+  Future<List<SwDecklist>> _loadDecklists() async {
     List<SwDecklist> decklists = [];
 
     final manifestContent =
@@ -99,9 +109,26 @@ class _RootPageState extends State<RootPage> {
     return decklists;
   }
 
-  SwStack _loadStack(List names, List<SwCard> cards, String title) {
-    return SwStack.fromCardNames(_currentSide, names, cards, title);
+  List<SwArchetype> _loadArchetypes(
+      List<SwDecklist> decklists, List<SwCard> library) {
+    List<SwArchetype> archetypes = [];
+
+    for (SwDecklist d in decklists) {
+      SwArchetype archetype = archetypes
+          .firstWhere((a) => a.title == d.archetypeName, orElse: () => null);
+
+      if (archetype == null) {
+        SwArchetype newArchetype = new SwArchetype.fromDecklist(d, library);
+        archetypes.add(newArchetype);
+      } else {
+        archetype.decklists.add(d);
+      }
+    }
+    return archetypes;
   }
+
+  SwStack _loadStack(List names, List<SwCard> library, String title) =>
+      SwStack.fromCardNames(_currentSide, names, library, title);
 
   @override
   void initState() {
@@ -141,6 +168,27 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
+        case 2: // Objective / Archetype
+          return new Scaffold(
+            appBar: new AppBar(
+              title: new Text('Pick an Objective (or Starting Location)'),
+              backgroundColor: Colors.transparent,
+            ),
+            drawer: _drawerWidget(context),
+            body: new Center(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  children: [
+                    _cardBackWidget(context, 'Dark'),
+                    _cardBackWidget(context, 'Light'),
+                  ],
+                ),
+              ),
+            ),
+          );
+          break;
+
         case 8: // Main Deck
           return new Scaffold(
             key: UniqueKey(),
@@ -159,7 +207,6 @@ class _RootPageState extends State<RootPage> {
           );
           break;
       }
-      ;
     }
   }
 
@@ -242,7 +289,7 @@ class _RootPageState extends State<RootPage> {
       ),
       ListTile(
         leading: Icon(Icons.filter_2),
-        title: Text('Objective'),
+        title: Text('Objective (or Starting Location)'),
       ),
       ListTile(
         leading: Icon(Icons.subdirectory_arrow_right_rounded),
@@ -307,7 +354,7 @@ class _RootPageState extends State<RootPage> {
           setState(() {
             this._currentSide = side;
             this._currentDeck = new SwDeck(side, [], 'New Deck');
-            this._currentStep = 8; // needs to be + 1 instead
+            this._currentStep += 1;
           });
         },
         child: Container(
