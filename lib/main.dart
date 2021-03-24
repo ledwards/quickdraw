@@ -21,19 +21,19 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: RootPage(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({Key key}) : super(key: key);
+class RootPage extends StatefulWidget {
+  RootPage({Key key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _RootPageState createState() => _RootPageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _RootPageState extends State<RootPage> {
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
   String _currentSide = 'Dark';
