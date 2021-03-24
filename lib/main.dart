@@ -34,6 +34,7 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
+  int _currentStep;
   List<SwCard> _allCards = [];
   List<SwDecklist> _allDecklists = [];
   String _currentSide = 'Dark';
@@ -100,6 +101,7 @@ class _RootPageState extends State<RootPage> {
     });
 
     setState(() {
+      this._currentStep = 1;
       this._allCards = loadedCards;
       this._allDecklists = loadedDecklists;
       this._currentStack = stack;
@@ -128,116 +130,125 @@ class _RootPageState extends State<RootPage> {
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Text(
-                  'Create Deck',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.filter_1),
-                title: Text('Side'),
-                onTap: () {
-                  Navigator.pop(context); // close the drawer
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.filter_2),
-                title: Text('Objective'),
-              ),
-              ListTile(
-                leading: Icon(Icons.subdirectory_arrow_right_rounded),
-                title: Text('Deployed by Objective'),
-              ),
-              ListTile(
-                leading: Icon(Icons.filter_3),
-                title: Text('Starting Interrupt'),
-              ),
-              ListTile(
-                leading: Icon(Icons.subdirectory_arrow_right_rounded),
-                title: Text('Deployed by Starting Interrupt'),
-              ),
-              ListTile(
-                leading: Icon(Icons.filter_5),
-                title: Text('Starting Effect'),
-              ),
-              ListTile(
-                leading: Icon(Icons.subdirectory_arrow_right_rounded),
-                title: Text('Defensive Shields'),
-              ),
-              ListTile(
-                leading: Icon(Icons.filter_4),
-                title: Text('Main Deck'),
-              ),
-            ],
+            children: _drawerWidgets(context),
           ),
         ),
         body: new Center(
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
-            child: new TinderSwapCard(
-              swipeUp: true,
-              swipeDown: true,
-              orientation: AmassOrientation.TOP,
-              totalNum: _currentStack.length,
-              stackNum: 8,
-              swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width,
-              maxHeight: MediaQuery.of(context).size.width,
-              minWidth: MediaQuery.of(context).size.width * 0.8,
-              minHeight: MediaQuery.of(context).size.width * 0.8,
-              cardBuilder: _cardBuilder,
-              cardController: CardController(),
-              swipeUpdateCallback:
-                  (DragUpdateDetails details, Alignment align) {
-                if (align.x.abs() > align.y.abs()) {
-                  if (align.x < 0) {
-                    // print("left swipe");
-                  } else if (align.x > 0) {
-                    // print("right swipe");
-                  }
-                } else if (align.x.abs() < align.y.abs()) {
-                  if (align.y < 0) {
-                    // print("up swipe");
-                  } else if (align.y > 0) {
-                    // print("down swipe");
-                  }
-                }
-              },
-              swipeCompleteCallback:
-                  (CardSwipeOrientation orientation, int index) {
-                setState(() {
-                  SwCard swipedCard = this._currentStack.removeAt(index);
-                  switch (orientation) {
-                    case CardSwipeOrientation.LEFT:
-                      break;
-                    case CardSwipeOrientation.RIGHT:
-                      _currentStack.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.UP:
-                      _currentDeck.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.DOWN:
-                      _maybeStack.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.RECOVER:
-                      _currentStack.insert(index, swipedCard);
-                      break;
-                  }
-                });
-              },
-            ),
+            child: _tinderCards(context),
           ),
         ),
       );
     }
+  }
+
+  Widget _tinderCards(context) {
+    return TinderSwapCard(
+      swipeUp: true,
+      swipeDown: true,
+      orientation: AmassOrientation.TOP,
+      totalNum: _currentStack.length,
+      stackNum: 8,
+      swipeEdge: 4.0,
+      maxWidth: MediaQuery.of(context).size.width,
+      maxHeight: MediaQuery.of(context).size.width,
+      minWidth: MediaQuery.of(context).size.width * 0.8,
+      minHeight: MediaQuery.of(context).size.width * 0.8,
+      cardBuilder: _cardBuilder,
+      cardController: CardController(),
+      swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
+        if (align.x.abs() > align.y.abs()) {
+          if (align.x < 0) {
+            // print("left swipe");
+          } else if (align.x > 0) {
+            // print("right swipe");
+          }
+        } else if (align.x.abs() < align.y.abs()) {
+          if (align.y < 0) {
+            // print("up swipe");
+          } else if (align.y > 0) {
+            // print("down swipe");
+          }
+        }
+      },
+      swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+        setState(() {
+          SwCard swipedCard = this._currentStack.removeAt(index);
+          switch (orientation) {
+            case CardSwipeOrientation.LEFT:
+              break;
+            case CardSwipeOrientation.RIGHT:
+              _currentStack.add(swipedCard);
+              break;
+            case CardSwipeOrientation.UP:
+              _currentDeck.add(swipedCard);
+              break;
+            case CardSwipeOrientation.DOWN:
+              _maybeStack.add(swipedCard);
+              break;
+            case CardSwipeOrientation.RECOVER:
+              _currentStack.insert(index, swipedCard);
+              break;
+          }
+        });
+      },
+    );
+  }
+
+  List<Widget> _drawerWidgets(context) {
+    return [
+      DrawerHeader(
+        decoration: BoxDecoration(
+          color: Colors.blue,
+        ),
+        child: Text(
+          'Create Deck',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+          ),
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.filter_1),
+        title: Text('Side'),
+        onTap: () {
+          setState(() {
+            _currentStack.cards.clear();
+          });
+          Navigator.pop(context); // close the drawer
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.filter_2),
+        title: Text('Objective'),
+      ),
+      ListTile(
+        leading: Icon(Icons.subdirectory_arrow_right_rounded),
+        title: Text('Deployed by Objective'),
+      ),
+      ListTile(
+        leading: Icon(Icons.filter_3),
+        title: Text('Starting Interrupt'),
+      ),
+      ListTile(
+        leading: Icon(Icons.subdirectory_arrow_right_rounded),
+        title: Text('Deployed by Starting Interrupt'),
+      ),
+      ListTile(
+        leading: Icon(Icons.filter_5),
+        title: Text('Starting Effect'),
+      ),
+      ListTile(
+        leading: Icon(Icons.subdirectory_arrow_right_rounded),
+        title: Text('Defensive Shields'),
+      ),
+      ListTile(
+        leading: Icon(Icons.filter_4),
+        title: Text('Main Deck'),
+      ),
+    ];
   }
 
   Widget _cardBuilder(context, index) {
