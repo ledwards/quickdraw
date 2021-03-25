@@ -1,3 +1,6 @@
+import 'sw_card.dart';
+import 'sw_stack.dart';
+
 class SwDecklist {
   SwDecklist(this.side, this.title, this.archetypeName, this.cardNames);
 
@@ -7,6 +10,11 @@ class SwDecklist {
   List<String> cardNames;
 
   int get length => cardNames.length;
+
+  String startingCardName() => cardNames[1];
+  SwCard startingCard(SwStack library) {
+    return library.findByName(this.startingCardName());
+  }
 
   SwDecklist.fromJson(Map<String, dynamic> json, String title)
       : side = json['userinfo']['deckside'] == 'DS' ? 'Dark' : 'Light',

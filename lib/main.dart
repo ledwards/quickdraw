@@ -36,7 +36,7 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   int _currentStep;
-  List<SwCard> _allCards = [];
+  SwStack _allCards;
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
   String _currentSide = 'Dark';
@@ -47,7 +47,6 @@ class _RootPageState extends State<RootPage> {
   _setup() async {
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
-    SwStack stack;
 
     List results =
         await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
@@ -59,14 +58,14 @@ class _RootPageState extends State<RootPage> {
 
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
-        _loadStack(decklist.cardNames.getRange(0, 5).toList(), loadedCards,
-            decklist.title),
+        SwStack.fromCards(_currentSide, loadedCards, "Default"),
       ];
     });
 
     setState(() {
       this._currentStep = 1;
-      this._allCards = loadedCards;
+      this._allCards =
+          new SwStack.fromCards(_currentSide, loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
       this._currentStack = results[1];
@@ -77,9 +76,7 @@ class _RootPageState extends State<RootPage> {
   Future<List<SwCard>> _loadCards() async {
     List<SwCard> cards = [];
 
-    final filenames = ['data/cards/Light.json', 'data/cards/Dark.json'];
-
-    for (var f in filenames) {
+    for (String f in ['data/cards/Light.json', 'data/cards/Dark.json']) {
       await rootBundle.loadString(f).then((data) {
         final cardsData = json.decode(data);
         cards.addAll(SwCard.listFromJson(cardsData['cards']));
@@ -99,7 +96,7 @@ class _RootPageState extends State<RootPage> {
         .where((key) => key.contains('data/decklists/'))
         .toList();
 
-    for (var f in filenames) {
+    for (String f in filenames) {
       await rootBundle.loadString(f).then((String data) {
         final deckTitle = json.decode(data).keys.toList()[0];
         final deckJson = json.decode(data).values.toList()[0];
@@ -127,7 +124,7 @@ class _RootPageState extends State<RootPage> {
     return archetypes;
   }
 
-  SwStack _loadStack(List names, List<SwCard> library, String title) =>
+  SwStack _loadStackFromNames(List names, List<SwCard> library, String title) =>
       SwStack.fromCardNames(_currentSide, names, library, title);
 
   @override
@@ -138,29 +135,40 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget w;
+
     if (_currentStack == null) {
-      return new Scaffold(
+      w = new Scaffold(
         key: UniqueKey(),
-        appBar: new AppBar(
-          title: new Text('Loading...'),
+        appBar: AppBar(
+          title: Text('Loading...'),
         ),
       );
     } else {
+      // Wizard Entry
       switch (_currentStep) {
         case 1: // Side
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Pick a Side'),
+          w = Scaffold(
+            appBar: AppBar(
+              title: Text('Pick a Side'),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
-            body: new Center(
+            body: Center(
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 child: Column(
                   children: [
-                    _cardBackWidget(context, 'Dark'),
-                    _cardBackWidget(context, 'Light'),
+                    _cardBackWidget(
+                      context,
+                      'Dark',
+                      _step1Callback,
+                    ),
+                    _cardBackWidget(
+                      context,
+                      'Light',
+                      _step1Callback,
+                    ),
                   ],
                 ),
               ),
@@ -168,37 +176,34 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
-        case 2: // Objective / Archetype
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Pick an Objective (or Starting Location)'),
+        case 2: // Objective or Starting Location
+          // TODO: If stack ends up empty, refresh it
+
+          w = Scaffold(
+            key: UniqueKey(),
+            appBar: AppBar(
+              // title: Text('Pick an Objective\n(or Starting Location)'),
+              title: Text(
+                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
-            body: new Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                child: Column(
-                  children: [
-                    _cardBackWidget(context, 'Dark'),
-                    _cardBackWidget(context, 'Light'),
-                  ],
-                ),
-              ),
+            body: Center(
+              child: _step2Screen(context),
             ),
           );
           break;
 
         case 8: // Main Deck
-          return new Scaffold(
+          w = Scaffold(
             key: UniqueKey(),
-            appBar: new AppBar(
-              title: new Text(
+            appBar: AppBar(
+              title: Text(
                   "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
-            body: new Center(
+            body: Center(
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.6,
                 child: _tinderCards(context),
@@ -208,6 +213,7 @@ class _RootPageState extends State<RootPage> {
           break;
       }
     }
+    return w;
   }
 
   Widget _tinderCards(context) {
@@ -246,7 +252,6 @@ class _RootPageState extends State<RootPage> {
             case CardSwipeOrientation.LEFT:
               break;
             case CardSwipeOrientation.RIGHT:
-              _currentStack.add(swipedCard);
               break;
             case CardSwipeOrientation.UP:
               _currentDeck.add(swipedCard);
@@ -290,6 +295,10 @@ class _RootPageState extends State<RootPage> {
       ListTile(
         leading: Icon(Icons.filter_2),
         title: Text('Objective (or Starting Location)'),
+        onTap: () {
+          setState(() {});
+          Navigator.pop(context); // close the drawer
+        },
       ),
       ListTile(
         leading: Icon(Icons.subdirectory_arrow_right_rounded),
@@ -347,16 +356,10 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
-  Widget _cardBackWidget(context, side) {
+  Widget _cardBackWidget(context, String side, Function callback) {
     return Expanded(
       child: new GestureDetector(
-        onTap: () {
-          setState(() {
-            this._currentSide = side;
-            this._currentDeck = new SwDeck(side, [], 'New Deck');
-            this._currentStep += 1;
-          });
-        },
+        onTap: () => callback(side),
         child: Container(
           padding: EdgeInsets.all(5),
           child: Image(
@@ -364,6 +367,41 @@ class _RootPageState extends State<RootPage> {
                   "assets/images/${side == 'Dark' ? 'ds' : 'ls'}-back.jpg")),
         ),
       ),
+    );
+  }
+
+  _step1Callback(String side) {
+    setState(() {
+      this._currentSide = side;
+      this._currentDeck = new SwDeck(side, [], 'New Deck');
+      _loadStep2();
+
+      this._currentStep += 1;
+    });
+  }
+
+  _loadStep2() {
+    setState(() {
+      List<SwArchetype> allPossibleArchetypes =
+          _allArchetypes.where((a) => a.side == _currentSide).toList();
+
+      SwStack objectives =
+          _currentStack.bySide(_currentSide).byType('Objective');
+
+      SwStack startingLocations = new SwStack.fromCards(
+        _currentSide,
+        allPossibleArchetypes.map((a) => a.startingCard).toList(),
+        'Starting Locations',
+      ).bySide(_currentSide).byType('Location');
+
+      _currentStack = objectives.extend(startingLocations);
+    });
+  }
+
+  Widget _step2Screen(context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      child: _tinderCards(context),
     );
   }
 }

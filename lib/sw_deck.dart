@@ -11,5 +11,5 @@ class SwDeck {
   operator [](int index) => cards[index];
 
   add(SwCard card) => cards.add(card);
-  addAll(List<SwCard> cards) => cards.addAll(cards);
+  addCards(List<SwCard> cards) => cards.addAll(cards);
 }
