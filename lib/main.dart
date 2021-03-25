@@ -53,9 +53,6 @@ class _RootPageState extends State<RootPage> {
       loadedCards = res[0];
       loadedDecklists = res[1];
 
-      // temp
-      final decklist = loadedDecklists[0];
-
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
         SwStack.fromCards(_currentSide, loadedCards, "Default"),
@@ -124,9 +121,6 @@ class _RootPageState extends State<RootPage> {
     return archetypes;
   }
 
-  SwStack _loadStackFromNames(List names, List<SwCard> library, String title) =>
-      SwStack.fromCardNames(_currentSide, names, library, title);
-
   @override
   void initState() {
     _setup();
@@ -178,7 +172,6 @@ class _RootPageState extends State<RootPage> {
 
         case 2: // Objective or Starting Location
           // TODO: If stack ends up empty, refresh it
-
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
@@ -188,9 +181,22 @@ class _RootPageState extends State<RootPage> {
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
-            body: Center(
-              child: _step2Screen(context),
+            body: _swipeableStack(context),
+          );
+          break;
+
+        case 3: // Starting Innterrupt
+          // TODO: If stack ends up empty, refresh it
+          w = Scaffold(
+            key: UniqueKey(),
+            appBar: AppBar(
+              // title: Text('Pick an Objective\n(or Starting Location)'),
+              title: Text(
+                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
+              backgroundColor: Colors.transparent,
             ),
+            drawer: _drawerWidget(context),
+            body: _swipeableStack(context),
           );
           break;
 
@@ -203,12 +209,7 @@ class _RootPageState extends State<RootPage> {
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
-            body: Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.6,
-                child: _tinderCards(context),
-              ),
-            ),
+            body: _swipeableStack(context),
           );
           break;
       }
@@ -216,59 +217,72 @@ class _RootPageState extends State<RootPage> {
     return w;
   }
 
-  Widget _tinderCards(context) {
-    return TinderSwapCard(
-      swipeUp: true,
-      swipeDown: true,
-      orientation: AmassOrientation.TOP,
-      totalNum: _currentStack.length,
-      stackNum: 8,
-      swipeEdge: 4.0,
-      maxWidth: MediaQuery.of(context).size.width,
-      maxHeight: MediaQuery.of(context).size.width,
-      minWidth: MediaQuery.of(context).size.width * 0.8,
-      minHeight: MediaQuery.of(context).size.width * 0.8,
-      cardBuilder: _cardBuilder,
-      cardController: CardController(),
-      swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
-        if (align.x.abs() > align.y.abs()) {
-          if (align.x < 0) {
-            // print("left swipe");
-          } else if (align.x > 0) {
-            // print("right swipe");
-          }
-        } else if (align.x.abs() < align.y.abs()) {
-          if (align.y < 0) {
-            // print("up swipe");
-          } else if (align.y > 0) {
-            // print("down swipe");
-          }
-        }
-      },
-      swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
-        setState(() {
-          SwCard swipedCard = this._currentStack.removeAt(index);
-          switch (orientation) {
-            case CardSwipeOrientation.LEFT:
-              break;
-            case CardSwipeOrientation.RIGHT:
-              break;
-            case CardSwipeOrientation.UP:
-              _currentDeck.add(swipedCard);
-              break;
-            case CardSwipeOrientation.DOWN:
-              _maybeStack.add(swipedCard);
-              break;
-            case CardSwipeOrientation.RECOVER:
-              _currentStack.insert(index, swipedCard);
-              break;
-          }
-        });
-      },
+  Widget _swipeableStack(context) {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: TinderSwapCard(
+          swipeUp: true,
+          swipeDown: true,
+          orientation: AmassOrientation.TOP,
+          totalNum: _currentStack.length,
+          stackNum: 8,
+          swipeEdge: 4.0,
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: MediaQuery.of(context).size.width,
+          minWidth: MediaQuery.of(context).size.width * 0.8,
+          minHeight: MediaQuery.of(context).size.width * 0.8,
+          cardBuilder: _cardBuilder,
+          cardController: CardController(),
+          swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
+            if (align.x.abs() > align.y.abs()) {
+              if (align.x < 0) {
+                // print("left swipe");
+              } else if (align.x > 0) {
+                // print("right swipe");
+              }
+            } else if (align.x.abs() < align.y.abs()) {
+              if (align.y < 0) {
+                // print("up swipe");
+              } else if (align.y > 0) {
+                // print("down swipe");
+              }
+            }
+          },
+          swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+            setState(() {
+              SwCard swipedCard = this._currentStack.removeAt(index);
+              switch (orientation) {
+                case CardSwipeOrientation.LEFT:
+                  break;
+                case CardSwipeOrientation.RIGHT:
+                  _currentStack.add(swipedCard);
+                  break;
+                case CardSwipeOrientation.UP:
+                  _currentDeck.add(swipedCard);
+
+                  if (_currentStep == 2) {
+                    _loadStep3();
+                    //} else if (_currentStep == 3) {
+                    //  _loadStep4();
+                  }
+                  break;
+                case CardSwipeOrientation.DOWN:
+                  _maybeStack.add(swipedCard);
+                  break;
+                case CardSwipeOrientation.RECOVER:
+                  _currentStack.insert(index, swipedCard);
+                  break;
+              }
+            });
+          },
+        ),
+      ),
     );
   }
 
   List<Widget> _drawerWidgets(context) {
+    // TODO: Refresh any state to initial state if you go back to an earlier step
     return [
       DrawerHeader(
         decoration: BoxDecoration(
@@ -374,34 +388,40 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       this._currentSide = side;
       this._currentDeck = new SwDeck(side, [], 'New Deck');
-      _loadStep2();
-
-      this._currentStep += 1;
+      _loadStep2(side);
     });
   }
 
-  _loadStep2() {
+  _loadStep2(String side) {
+    List<SwArchetype> allPossibleArchetypes =
+        _allArchetypes.where((a) => a.side == _currentSide).toList();
+
+    SwStack objectives = _allCards.bySide(_currentSide).byType('Objective');
+
+    SwStack startingLocations = new SwStack.fromCards(
+      _currentSide,
+      allPossibleArchetypes.map((a) => a.startingCard).toList(),
+      'Starting Locations',
+    ).bySide(_currentSide).byType('Location');
+
     setState(() {
-      List<SwArchetype> allPossibleArchetypes =
-          _allArchetypes.where((a) => a.side == _currentSide).toList();
-
-      SwStack objectives =
-          _currentStack.bySide(_currentSide).byType('Objective');
-
-      SwStack startingLocations = new SwStack.fromCards(
-        _currentSide,
-        allPossibleArchetypes.map((a) => a.startingCard).toList(),
-        'Starting Locations',
-      ).bySide(_currentSide).byType('Location');
-
-      _currentStack = objectives.extend(startingLocations);
+      this._currentStack = objectives.extend(startingLocations);
+      this._currentStep = 2;
     });
   }
 
-  Widget _step2Screen(context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: _tinderCards(context),
-    );
+  // _loadStep2a(SwCard objective) {} // show all cards possible to deploy with objective
+  // step 2a might just be step 2 but with your Obj set, see a diff view?
+
+  _loadStep3() {
+    SwStack startingInterrupts = _allCards
+        .bySide(_currentSide)
+        .byType('Interrupt')
+        .matchesSubType('Starting');
+
+    setState(() {
+      this._currentStack = startingInterrupts;
+      this._currentStep = 3;
+    });
   }
 }

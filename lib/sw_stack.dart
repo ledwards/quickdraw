@@ -1,5 +1,4 @@
 import 'sw_card.dart';
-import 'sw_decklist.dart';
 
 class SwStack {
   SwStack(this.side, this.cards, this.title);
@@ -30,6 +29,10 @@ class SwStack {
 
   SwStack bySubType(String q) {
     return this.subset(this.cards.where((c) => c.subType == q).toList());
+  }
+
+  SwStack matchesSubType(String q) {
+    return this.subset(this.cards.where((c) => c.subType.contains(q)).toList());
   }
 
   SwCard findByName(String q) {
