@@ -185,14 +185,13 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
-        case 3: // Starting Innterrupt
+        case 3: // Starting Interrupt
           // TODO: If stack ends up empty, refresh it
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
               // title: Text('Pick an Objective\n(or Starting Location)'),
-              title: Text(
-                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
+              title: Text("${_currentDeck.title} (${_currentDeck.length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -200,12 +199,12 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
-        case 8: // Main Deck
+        case 6: // Main Deck
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
               title: Text(
-                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
+                  "${_currentSide[0]}S: ${_currentDeck.title} (${_currentDeck.length}) | Maybe: ${_maybeStack.length}"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -218,66 +217,92 @@ class _RootPageState extends State<RootPage> {
   }
 
   Widget _swipeableStack(context) {
-    return Center(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: TinderSwapCard(
-          swipeUp: true,
-          swipeDown: true,
-          orientation: AmassOrientation.TOP,
-          totalNum: _currentStack.length,
-          stackNum: 8,
-          swipeEdge: 4.0,
-          maxWidth: MediaQuery.of(context).size.width,
-          maxHeight: MediaQuery.of(context).size.width,
-          minWidth: MediaQuery.of(context).size.width * 0.8,
-          minHeight: MediaQuery.of(context).size.width * 0.8,
-          cardBuilder: _cardBuilder,
-          cardController: CardController(),
-          swipeUpdateCallback: (DragUpdateDetails details, Alignment align) {
-            if (align.x.abs() > align.y.abs()) {
-              if (align.x < 0) {
-                // print("left swipe");
-              } else if (align.x > 0) {
-                // print("right swipe");
-              }
-            } else if (align.x.abs() < align.y.abs()) {
-              if (align.y < 0) {
-                // print("up swipe");
-              } else if (align.y > 0) {
-                // print("down swipe");
-              }
-            }
-          },
-          swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
-            setState(() {
-              SwCard swipedCard = this._currentStack.removeAt(index);
-              switch (orientation) {
-                case CardSwipeOrientation.LEFT:
-                  break;
-                case CardSwipeOrientation.RIGHT:
-                  _currentStack.add(swipedCard);
-                  break;
-                case CardSwipeOrientation.UP:
-                  _currentDeck.add(swipedCard);
-
-                  if (_currentStep == 2) {
-                    _loadStep3();
-                    //} else if (_currentStep == 3) {
-                    //  _loadStep4();
-                  }
-                  break;
-                case CardSwipeOrientation.DOWN:
-                  _maybeStack.add(swipedCard);
-                  break;
-                case CardSwipeOrientation.RECOVER:
-                  _currentStack.insert(index, swipedCard);
-                  break;
-              }
-            });
-          },
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          child: Center(
+            child: Text(
+              "${_currentStack.title} (${_currentStack.length})",
+              style: Theme.of(context).textTheme.headline6,
+            ),
+          ),
         ),
-      ),
+        Center(
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: TinderSwapCard(
+              swipeUp: true,
+              swipeDown: true,
+              orientation: AmassOrientation.TOP,
+              totalNum: _currentStack.length,
+              stackNum: 8,
+              swipeEdge: 4.0,
+              maxWidth: MediaQuery.of(context).size.width,
+              maxHeight: MediaQuery.of(context).size.width,
+              minWidth: MediaQuery.of(context).size.width * 0.8,
+              minHeight: MediaQuery.of(context).size.width * 0.8,
+              cardBuilder: _cardBuilder,
+              cardController: CardController(),
+              swipeUpdateCallback:
+                  (DragUpdateDetails details, Alignment align) {
+                if (align.x.abs() > align.y.abs()) {
+                  if (align.x < 0) {
+                    // print("left swipe");
+                  } else if (align.x > 0) {
+                    // print("right swipe");
+                  }
+                } else if (align.x.abs() < align.y.abs()) {
+                  if (align.y < 0) {
+                    // print("up swipe");
+                  } else if (align.y > 0) {
+                    // print("down swipe");
+                  }
+                }
+              },
+              swipeCompleteCallback:
+                  (CardSwipeOrientation orientation, int index) {
+                setState(() {
+                  SwCard swipedCard = this._currentStack.removeAt(index);
+                  switch (orientation) {
+                    case CardSwipeOrientation.LEFT:
+                      break;
+                    case CardSwipeOrientation.RIGHT:
+                      _currentStack.add(swipedCard);
+                      break;
+                    case CardSwipeOrientation.UP:
+                      _currentDeck.add(swipedCard);
+
+                      if (_currentStep == 2) {
+                        _loadStep3();
+                        //} else if (_currentStep == 3) {
+                        //  _loadStep4();
+                      }
+                      break;
+                    case CardSwipeOrientation.DOWN:
+                      _maybeStack.add(swipedCard);
+                      break;
+                    case CardSwipeOrientation.RECOVER:
+                      _currentStack.insert(index, swipedCard);
+                      break;
+                  }
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _drawerItem(context, String title, IconData icon) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        // need a callback, or simply call _stepX() method
+        Navigator.pop(context); // close the drawer
+      },
     );
   }
 
@@ -296,48 +321,17 @@ class _RootPageState extends State<RootPage> {
           ),
         ),
       ),
-      ListTile(
-        leading: Icon(Icons.filter_1),
-        title: Text('Side'),
-        onTap: () {
-          setState(() {
-            _currentStack.cards.clear();
-          });
-          Navigator.pop(context); // close the drawer
-        },
-      ),
-      ListTile(
-        leading: Icon(Icons.filter_2),
-        title: Text('Objective (or Starting Location)'),
-        onTap: () {
-          setState(() {});
-          Navigator.pop(context); // close the drawer
-        },
-      ),
-      ListTile(
-        leading: Icon(Icons.subdirectory_arrow_right_rounded),
-        title: Text('Deployed by Objective'),
-      ),
-      ListTile(
-        leading: Icon(Icons.filter_3),
-        title: Text('Starting Interrupt'),
-      ),
-      ListTile(
-        leading: Icon(Icons.subdirectory_arrow_right_rounded),
-        title: Text('Deployed by Starting Interrupt'),
-      ),
-      ListTile(
-        leading: Icon(Icons.filter_5),
-        title: Text('Starting Effect'),
-      ),
-      ListTile(
-        leading: Icon(Icons.subdirectory_arrow_right_rounded),
-        title: Text('Defensive Shields'),
-      ),
-      ListTile(
-        leading: Icon(Icons.filter_4),
-        title: Text('Main Deck'),
-      ),
+      _drawerItem(context, 'Side', Icons.filter_1),
+      _drawerItem(context, 'Objective', Icons.filter_2),
+      _drawerItem(context, 'Deployed by Objective',
+          Icons.subdirectory_arrow_right_rounded),
+      _drawerItem(context, 'Starting Interrupt', Icons.filter_3),
+      _drawerItem(context, 'Deployed By Starting Interrupt',
+          Icons.subdirectory_arrow_right_rounded),
+      _drawerItem(context, 'Main Deck', Icons.filter_4),
+      _drawerItem(context, 'Starting Effect', Icons.filter_5),
+      _drawerItem(
+          context, 'Defensive Shields', Icons.subdirectory_arrow_right_rounded),
     ];
   }
 
@@ -406,6 +400,7 @@ class _RootPageState extends State<RootPage> {
 
     setState(() {
       this._currentStack = objectives.extend(startingLocations);
+      this._currentStack.title = 'Objectives & Starting Locations';
       this._currentStep = 2;
     });
   }
@@ -421,6 +416,7 @@ class _RootPageState extends State<RootPage> {
 
     setState(() {
       this._currentStack = startingInterrupts;
+      this._currentStack.title = 'Starting Interrupts';
       this._currentStep = 3;
     });
   }
