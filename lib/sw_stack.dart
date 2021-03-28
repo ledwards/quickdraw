@@ -14,6 +14,8 @@ class SwStack {
   add(SwCard card) => cards.add(card);
   addCards(List<SwCard> cards) => cards.addAll(cards);
   SwCard removeAt(int index) => cards.removeAt(index);
+  SwCard firstWhere(Function fn) => cards.firstWhere(fn);
+  clear() => cards.clear();
 
   SwStack subset(List<SwCard> cards) {
     return new SwStack.fromCards(this.side, cards, this.title);
@@ -35,11 +37,38 @@ class SwStack {
     return this.subset(this.cards.where((c) => c.subType.contains(q)).toList());
   }
 
+  SwStack matchesGametext(String q) {
+    return this
+        .subset(this.cards.where((c) => c.gametext.contains(q)).toList());
+  }
+
+  SwStack hasCharacteristic(String q) {
+    List<SwCard> matches = cards.where((e) {
+      return e.characteristics != null && e.characteristics.contains(q);
+    }).toList();
+    return this.subset(matches);
+  }
+
   SwCard findByName(String q) {
     return cards.firstWhere((e) => e.title.toLowerCase() == q.toLowerCase());
   }
 
-  SwStack extend(SwStack that) {
+  SwStack findAllByName(List<String> qs) {
+    List<SwCard> foundCards = qs
+        .map((q) {
+          return cards.firstWhere(
+              (e) => e.title.toLowerCase() == q.toLowerCase(), orElse: () {
+            print("findAllByName: Failed to find $q");
+            return null;
+          });
+        })
+        .whereType<SwCard>()
+        .toList();
+
+    return new SwStack(this.side, foundCards, 'Found all by name');
+  }
+
+  SwStack concat(SwStack that) {
     return new SwStack(this.side, this.cards + that.cards, this.title);
   }
 

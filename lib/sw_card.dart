@@ -1,5 +1,17 @@
 class SwCard {
-  SwCard(this.id, this.side, this.title, this.imageUrl);
+  SwCard(
+      this.id,
+      this.side,
+      this.title,
+      this.imageUrl,
+      this.gametext,
+      this.lore,
+      this.icons,
+      this.lightSideIcons,
+      this.darkSideIcons,
+      this.characteristics,
+      this.matchingStarship,
+      this.matchingWeapon);
 
   int id;
   String side;
@@ -7,6 +19,14 @@ class SwCard {
   String imageUrl;
   String type;
   String subType;
+  String gametext;
+  String lore;
+  List icons;
+  int lightSideIcons;
+  int darkSideIcons;
+  List characteristics;
+  List matchingStarship;
+  List matchingWeapon;
 
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -14,6 +34,14 @@ class SwCard {
         title = SwCard.normalizeTitle(json['front']['title']),
         type = json['front']['type'],
         subType = json['front']['subType'],
+        gametext = json['front']['gametext'],
+        lore = json['front']['lore'],
+        icons = json['front']['icons'],
+        lightSideIcons = json['front']['lightSideIcons'],
+        darkSideIcons = json['front']['darkSideIcons'],
+        characteristics = json['front']['characteristics'],
+        matchingStarship = json['front']['matching'],
+        matchingWeapon = json['front']['matchingWeapon'],
         imageUrl = json['front']['imageUrl'];
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +50,14 @@ class SwCard {
         'title': title,
         'type': type,
         'subType': subType,
+        'gametext': gametext,
+        'lore': lore,
+        'icons': icons,
+        'lightSideIcons': lightSideIcons,
+        'darkSideIcons': darkSideIcons,
+        'characteristics': characteristics,
+        'matching': matchingStarship,
+        'matchingWeapon': matchingWeapon,
         'imageUrl': imageUrl,
       };
 

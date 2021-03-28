@@ -9,6 +9,7 @@ import 'sw_decklist.dart';
 import 'sw_stack.dart';
 import 'sw_deck.dart';
 import 'sw_archetype.dart';
+import 'sw_helpers.dart';
 
 void main() {
   runApp(MyApp());
@@ -275,8 +276,15 @@ class _RootPageState extends State<RootPage> {
 
                       if (_currentStep == 2) {
                         _loadStep3();
-                        //} else if (_currentStep == 3) {
-                        //  _loadStep4();
+                      } else if (_currentStep == 3) {
+                        switch (swipedCard.type) {
+                          case 'Interrupt':
+                            {
+                              _currentStack = pullByStartingInterrupt(
+                                  swipedCard,
+                                  _allCards.bySide(swipedCard.side));
+                            }
+                        }
                       }
                       break;
                     case CardSwipeOrientation.DOWN:
@@ -399,7 +407,7 @@ class _RootPageState extends State<RootPage> {
     ).bySide(_currentSide).byType('Location');
 
     setState(() {
-      this._currentStack = objectives.extend(startingLocations);
+      this._currentStack = objectives.concat(startingLocations);
       this._currentStack.title = 'Objectives & Starting Locations';
       this._currentStep = 2;
     });
