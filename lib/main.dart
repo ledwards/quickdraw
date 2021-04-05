@@ -1,21 +1,33 @@
 import 'dart:convert' show json;
 import 'dart:math' show pi;
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
+import 'package:provider/provider.dart';
 
 import 'sw_card.dart';
 import 'sw_decklist.dart';
 import 'sw_stack.dart';
 import 'sw_deck.dart';
 import 'sw_archetype.dart';
-import 'sw_helpers.dart';
+import 'starting_interrupts.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SwDeck(null, [], 'New Deck')),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -43,7 +55,6 @@ class _RootPageState extends State<RootPage> {
   String _currentSide = 'Dark';
   SwStack _currentStack;
   SwStack _maybeStack;
-  SwDeck _currentDeck;
 
   _setup() async {
     List<SwCard> loadedCards;
@@ -176,9 +187,8 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              // title: Text('Pick an Objective\n(or Starting Location)'),
               title: Text(
-                  "${_currentSide[0]}S | ${_currentDeck.title}\nStack: ${_currentStack.length} | Deck: ${_currentDeck.length} | Maybe: ${_maybeStack.length}"),
+                  "${context.watch<SwDeck>().title} (${context.watch<SwDeck>().length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -191,8 +201,8 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              // title: Text('Pick an Objective\n(or Starting Location)'),
-              title: Text("${_currentDeck.title} (${_currentDeck.length})"),
+              title: Text(
+                  "${context.watch<SwDeck>().title} (${context.watch<SwDeck>().length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -205,7 +215,7 @@ class _RootPageState extends State<RootPage> {
             key: UniqueKey(),
             appBar: AppBar(
               title: Text(
-                  "${_currentSide[0]}S: ${_currentDeck.title} (${_currentDeck.length}) | Maybe: ${_maybeStack.length}"),
+                  "${_currentSide[0]}S: ${context.read<SwDeck>().title} (${context.read<SwDeck>().length}) | Maybe: ${_maybeStack.length}"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -219,9 +229,10 @@ class _RootPageState extends State<RootPage> {
 
   Widget _swipeableStack(context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Center(
             child: Text(
               "${_currentStack.title} (${_currentStack.length})",
@@ -237,10 +248,10 @@ class _RootPageState extends State<RootPage> {
               swipeDown: true,
               orientation: AmassOrientation.TOP,
               totalNum: _currentStack.length,
-              stackNum: 8,
+              stackNum: 12,
               swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width,
-              maxHeight: MediaQuery.of(context).size.width,
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.width * 0.9,
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: _cardBuilder,
@@ -249,15 +260,15 @@ class _RootPageState extends State<RootPage> {
                   (DragUpdateDetails details, Alignment align) {
                 if (align.x.abs() > align.y.abs()) {
                   if (align.x < 0) {
-                    // print("left swipe");
+                    print("left swipe");
                   } else if (align.x > 0) {
-                    // print("right swipe");
+                    print("right swipe");
                   }
                 } else if (align.x.abs() < align.y.abs()) {
                   if (align.y < 0) {
-                    // print("up swipe");
+                    print("up swipe");
                   } else if (align.y > 0) {
-                    // print("down swipe");
+                    print("down swipe");
                   }
                 }
               },
@@ -272,7 +283,8 @@ class _RootPageState extends State<RootPage> {
                       _currentStack.add(swipedCard);
                       break;
                     case CardSwipeOrientation.UP:
-                      _currentDeck.add(swipedCard);
+                      Provider.of<SwDeck>(context, listen: false)
+                          .add(swipedCard);
 
                       if (_currentStep == 2) {
                         _loadStep3();
@@ -365,8 +377,11 @@ class _RootPageState extends State<RootPage> {
                   : Matrix4.rotationZ(_currentSide == 'Light'
                       ? -pi / 2
                       : pi / 2), // according to side
-          child: Image.network(_currentStack[index].imageUrl,
-              alignment: Alignment.center)),
+          child: Image.network(
+            _currentStack[index].imageUrl,
+            fit: BoxFit.fitHeight,
+            alignment: Alignment.center,
+          )),
       color: Colors.transparent,
       shadowColor: Colors.transparent,
     );
@@ -389,7 +404,7 @@ class _RootPageState extends State<RootPage> {
   _step1Callback(String side) {
     setState(() {
       this._currentSide = side;
-      this._currentDeck = new SwDeck(side, [], 'New Deck');
+      context.read<SwDeck>().side = side;
       _loadStep2(side);
     });
   }

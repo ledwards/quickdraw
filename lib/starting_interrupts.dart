@@ -31,13 +31,16 @@ SwStack pullByStartingInterrupt(SwCard startingInterrupt, SwStack library) {
           .concat(effects_3);
       break;
 
+// TODO: these methods should return a list of Stacks that caller can do things with
     case 'Any Methods Necessary':
       SwStack prisons = library.hasCharacteristic('prison');
+      SwStack despair = library.findAllByName(['Despair (V)', 'Despair']);
       SwStack bountyHunters = library.hasCharacteristic('bounty hunter');
       // TODO: matching weapons
       // TODO: matching ship
 
-      startingCards = startingCards.concat(prisons).concat(bountyHunters);
+      startingCards =
+          startingCards.concat(prisons).concat(despair).concat(bountyHunters);
       break;
   }
 
