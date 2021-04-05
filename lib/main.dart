@@ -27,9 +27,6 @@ void main() {
   );
 }
 
-String _currentSide(context) =>
-    Provider.of<SwDeck>(context, listen: false).side;
-
 class MyApp extends StatelessWidget {
   const MyApp({Key key}) : super(key: key);
 
@@ -62,8 +59,11 @@ class _RootPageState extends State<RootPage> {
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
-  _setup(context) async {
-    String side = _currentSide(context);
+  SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
+  String _currentSide() => _currentDeck().side;
+
+  _setup() async {
+    String side = _currentSide();
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
 
@@ -141,7 +141,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    _setup(context);
+    _setup();
     super.initState();
   }
 
@@ -193,8 +193,7 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              title: Text(
-                  "${context.watch<SwDeck>().title} (${context.watch<SwDeck>().length})"),
+              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -207,8 +206,7 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              title: Text(
-                  "${context.watch<SwDeck>().title} (${context.watch<SwDeck>().length})"),
+              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -220,8 +218,7 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              title: Text(
-                  "${_currentSide(context)[0]}S: ${context.read<SwDeck>().title} (${context.read<SwDeck>().length}) | Maybe: ${_maybeStack.length}"),
+              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -289,8 +286,7 @@ class _RootPageState extends State<RootPage> {
                       _currentStack.add(swipedCard);
                       break;
                     case CardSwipeOrientation.UP:
-                      Provider.of<SwDeck>(context, listen: false)
-                          .add(swipedCard);
+                      _currentDeck().add(swipedCard);
 
                       if (_currentStep == 2) {
                         _loadStep3();
@@ -380,7 +376,7 @@ class _RootPageState extends State<RootPage> {
                   : Matrix4.rotationZ(0)
               : (_currentStack[index].subType == 'Site') // all horizontal
                   ? Matrix4.rotationZ(0)
-                  : Matrix4.rotationZ(_currentSide(context) == 'Light'
+                  : Matrix4.rotationZ(_currentSide() == 'Light'
                       ? -pi / 2
                       : pi / 2), // according to side
           child: Image.network(
@@ -409,7 +405,7 @@ class _RootPageState extends State<RootPage> {
 
   _step1Callback(String side) {
     setState(() {
-      context.read<SwDeck>().side = side;
+      _currentDeck().side = side;
       _loadStep2(side);
     });
   }
@@ -438,7 +434,7 @@ class _RootPageState extends State<RootPage> {
 
   _loadStep3() {
     SwStack startingInterrupts = _allCards
-        .bySide(_currentSide(context))
+        .bySide(_currentSide())
         .byType('Interrupt')
         .matchesSubType('Starting');
 
