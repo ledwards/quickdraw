@@ -1,5 +1,5 @@
-import 'package:swccg_builder/sw_card.dart';
-import 'package:swccg_builder/sw_stack.dart';
+import 'models/sw_card.dart';
+import 'models/sw_stack.dart';
 
 SwStack pullByStartingInterrupt(SwCard startingInterrupt, SwStack library) {
   SwStack startingCards = new SwStack(

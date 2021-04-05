@@ -7,11 +7,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:provider/provider.dart';
 
-import 'sw_card.dart';
-import 'sw_decklist.dart';
-import 'sw_stack.dart';
-import 'sw_deck.dart';
-import 'sw_archetype.dart';
+import 'models/sw_card.dart';
+import 'models/sw_decklist.dart';
+import 'models/sw_stack.dart';
+import 'models/sw_deck.dart';
+import 'models/sw_archetype.dart';
 import 'wizard.dart';
 import 'starting_interrupts.dart';
 
@@ -96,7 +96,7 @@ class _RootPageState extends State<RootPage> {
 
     _wizard().addListener(() {
       int step = _wizard().step;
-      print("Step: ${step}");
+      print("Step: $step");
       _setupStep(step);
     });
 
@@ -440,7 +440,7 @@ class _RootPageState extends State<RootPage> {
         SwStack objectives = _allCards.bySide(side).byType('Objective');
         SwStack startingLocations = new SwStack.fromCards(
           side,
-          allPossibleArchetypes.map((a) => a.startingCard).toList(),
+          allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
           'Starting Locations',
         ).bySide(side).byType('Location');
 
@@ -449,6 +449,8 @@ class _RootPageState extends State<RootPage> {
           this._currentStack.title = 'Objectives & Starting Locations';
         });
         break;
+
+      // Step 3 should be Obj deploys
 
       case 3: // Pick a Starting Interrupt
         SwStack startingInterrupts = _allCards
@@ -461,6 +463,8 @@ class _RootPageState extends State<RootPage> {
           this._currentStack.title = 'Starting Interrupts';
         });
         break;
+
+      case 4: // Cards deployed by Starting Interrupts
     }
   }
   // _loadStep2a(SwCard objective) {} // show all cards possible to deploy with objective
