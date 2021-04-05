@@ -11,12 +11,10 @@ class SwDeck with ChangeNotifier {
   int get length => cards.length;
   operator [](int index) => cards[index];
 
-  insert(int index, SwCard card) => cards.insert(index, card);
-  add(SwCard card) => cards.add(card);
+  SwCard lastCard() => cards[length - 1];
 
-  addCards(List<SwCard> cards) => cards.addAll(cards);
-
-  void onChange() {
+  add(SwCard card) {
+    cards.add(card);
     notifyListeners();
   }
 }

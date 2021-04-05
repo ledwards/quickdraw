@@ -5,9 +5,8 @@ class Wizard with ChangeNotifier {
 
   int step;
 
-  void next() => step += 1;
-
-  void onChange() {
+  void next() {
+    step += 1;
     notifyListeners();
   }
 }

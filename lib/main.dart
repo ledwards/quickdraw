@@ -63,9 +63,11 @@ class _RootPageState extends State<RootPage> {
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
+  // Accessors
   SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
   String _currentSide() => _currentDeck().side;
   Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
+  void _nextStep() => context.read<Wizard>().next();
   int _currentStep() => _wizard().step;
 
   _setup() async {
@@ -90,6 +92,19 @@ class _RootPageState extends State<RootPage> {
       this._allArchetypes = results[0];
       this._currentStack = results[1];
       this._maybeStack = new SwStack(side, [], 'Maybe Cards');
+    });
+
+    _wizard().addListener(() {
+      int step = _wizard().step;
+      print("Step: ${step}");
+      _setupStep(step);
+    });
+
+    _currentDeck().addListener(() {
+      int length = _currentDeck().length;
+      SwCard card = _currentDeck().lastCard();
+      _nextStep();
+      print("Added a card to deck: ${card.title}");
     });
   }
 
@@ -293,17 +308,15 @@ class _RootPageState extends State<RootPage> {
                     case CardSwipeOrientation.UP:
                       _currentDeck().add(swipedCard);
 
-                      if (_currentStep() == 2) {
-                        _loadStep3();
-                      } else if (_currentStep() == 3) {
-                        switch (swipedCard.type) {
-                          case 'Interrupt':
-                            {
-                              _currentStack = pullByStartingInterrupt(
-                                  swipedCard, _allCards.bySide(_currentSide()));
-                            }
-                        }
-                      }
+                      // if (_currentStep() == 3) {
+                      //   switch (swipedCard.type) {
+                      //     case 'Interrupt':
+                      //       {
+                      //         _currentStack = pullByStartingInterrupt(
+                      //             swipedCard, _allCards.bySide(_currentSide()));
+                      //       }
+                      //   }
+                      // }
                       break;
                     case CardSwipeOrientation.DOWN:
                       _maybeStack.add(swipedCard);
@@ -410,44 +423,46 @@ class _RootPageState extends State<RootPage> {
   _step1Callback(String side) {
     setState(() {
       _currentDeck().side = side;
-      _loadStep2();
+      _nextStep();
     });
   }
 
-  _loadStep2() {
+  _setupStep(int s) {
     String side = _currentSide();
 
-    List<SwArchetype> allPossibleArchetypes =
-        _allArchetypes.where((a) => a.side == side).toList();
+    switch (s) {
+      case 1: // Pick a Side
+        break;
 
-    SwStack objectives = _allCards.bySide(side).byType('Objective');
+      case 2: // Pick an Objective or Starting Location
+        List<SwArchetype> allPossibleArchetypes =
+            _allArchetypes.where((a) => a.side == side).toList();
+        SwStack objectives = _allCards.bySide(side).byType('Objective');
+        SwStack startingLocations = new SwStack.fromCards(
+          side,
+          allPossibleArchetypes.map((a) => a.startingCard).toList(),
+          'Starting Locations',
+        ).bySide(side).byType('Location');
 
-    SwStack startingLocations = new SwStack.fromCards(
-      side,
-      allPossibleArchetypes.map((a) => a.startingCard).toList(),
-      'Starting Locations',
-    ).bySide(side).byType('Location');
+        setState(() {
+          this._currentStack = objectives.concat(startingLocations);
+          this._currentStack.title = 'Objectives & Starting Locations';
+        });
+        break;
 
-    setState(() {
-      this._currentStack = objectives.concat(startingLocations);
-      this._currentStack.title = 'Objectives & Starting Locations';
-      this._wizard().next();
-    });
+      case 3: // Pick a Starting Interrupt
+        SwStack startingInterrupts = _allCards
+            .bySide(_currentSide())
+            .byType('Interrupt')
+            .matchesSubType('Starting');
+
+        setState(() {
+          this._currentStack = startingInterrupts;
+          this._currentStack.title = 'Starting Interrupts';
+        });
+        break;
+    }
   }
-
   // _loadStep2a(SwCard objective) {} // show all cards possible to deploy with objective
   // step 2a might just be step 2 but with your Obj set, see a diff view?
-
-  _loadStep3() {
-    SwStack startingInterrupts = _allCards
-        .bySide(_currentSide())
-        .byType('Interrupt')
-        .matchesSubType('Starting');
-
-    setState(() {
-      this._currentStack = startingInterrupts;
-      this._currentStack.title = 'Starting Interrupts';
-      this._wizard().next();
-    });
-  }
 }
