@@ -12,12 +12,14 @@ import 'sw_decklist.dart';
 import 'sw_stack.dart';
 import 'sw_deck.dart';
 import 'sw_archetype.dart';
+import 'wizard.dart';
 import 'starting_interrupts.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => Wizard()),
         ChangeNotifierProvider(create: (_) => SwDeck(null, [], 'New Deck')),
         ChangeNotifierProvider(
             create: (_) => SwStack(null, [], 'Choose a Side')),
@@ -50,17 +52,21 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  int _currentStep;
   // TODO: Belongs in a Metagame or Library class?
   SwStack _allCards;
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
+
+  // TODO: currentStack gets  anotifier
   SwStack _currentStack;
+
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
   SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
   String _currentSide() => _currentDeck().side;
+  Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
+  int _currentStep() => _wizard().step;
 
   _setup() async {
     String side = _currentSide();
@@ -79,7 +85,6 @@ class _RootPageState extends State<RootPage> {
     });
 
     setState(() {
-      this._currentStep = 1;
       this._allCards = new SwStack.fromCards(side, loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
@@ -158,7 +163,7 @@ class _RootPageState extends State<RootPage> {
       );
     } else {
       // Wizard Entry
-      switch (_currentStep) {
+      switch (context.watch<Wizard>().step) {
         case 1: // Side
           w = Scaffold(
             appBar: AppBar(
@@ -288,15 +293,14 @@ class _RootPageState extends State<RootPage> {
                     case CardSwipeOrientation.UP:
                       _currentDeck().add(swipedCard);
 
-                      if (_currentStep == 2) {
+                      if (_currentStep() == 2) {
                         _loadStep3();
-                      } else if (_currentStep == 3) {
+                      } else if (_currentStep() == 3) {
                         switch (swipedCard.type) {
                           case 'Interrupt':
                             {
                               _currentStack = pullByStartingInterrupt(
-                                  swipedCard,
-                                  _allCards.bySide(swipedCard.side));
+                                  swipedCard, _allCards.bySide(_currentSide()));
                             }
                         }
                       }
@@ -406,11 +410,13 @@ class _RootPageState extends State<RootPage> {
   _step1Callback(String side) {
     setState(() {
       _currentDeck().side = side;
-      _loadStep2(side);
+      _loadStep2();
     });
   }
 
-  _loadStep2(String side) {
+  _loadStep2() {
+    String side = _currentSide();
+
     List<SwArchetype> allPossibleArchetypes =
         _allArchetypes.where((a) => a.side == side).toList();
 
@@ -425,7 +431,7 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       this._currentStack = objectives.concat(startingLocations);
       this._currentStack.title = 'Objectives & Starting Locations';
-      this._currentStep = 2;
+      this._wizard().next();
     });
   }
 
@@ -441,7 +447,7 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       this._currentStack = startingInterrupts;
       this._currentStack.title = 'Starting Interrupts';
-      this._currentStep = 3;
+      this._wizard().next();
     });
   }
 }

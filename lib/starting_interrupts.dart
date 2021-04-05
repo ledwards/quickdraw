@@ -19,8 +19,8 @@ SwStack pullByStartingInterrupt(SwCard startingInterrupt, SwStack library) {
           .byType('Effect')
           .bySubType(null)
           .matchesGametext('(Immune to Alter.)');
-      SwStack effects_1 = effects..matchesGametext('Deploy on table.');
-      SwStack effects_2 = effects..matchesGametext('Deploy on table if');
+      SwStack effects_1 = effects.matchesGametext('Deploy on table.');
+      SwStack effects_2 = effects.matchesGametext('Deploy on table if');
       SwStack effects_3 = effects
         ..matchesGametext('Deploy on your side of table.');
 
