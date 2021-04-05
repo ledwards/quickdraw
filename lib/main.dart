@@ -19,11 +19,16 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SwDeck(null, [], 'New Deck')),
+        ChangeNotifierProvider(
+            create: (_) => SwStack(null, [], 'Choose a Side')),
       ],
       child: MyApp(),
     ),
   );
 }
+
+String _currentSide(context) =>
+    Provider.of<SwDeck>(context, listen: false).side;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key key}) : super(key: key);
@@ -49,14 +54,16 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   int _currentStep;
+  // TODO: Belongs in a Metagame or Library class?
   SwStack _allCards;
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
-  String _currentSide = 'Dark';
   SwStack _currentStack;
+  // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
-  _setup() async {
+  _setup(context) async {
+    String side = _currentSide(context);
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
 
@@ -67,18 +74,17 @@ class _RootPageState extends State<RootPage> {
 
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
-        SwStack.fromCards(_currentSide, loadedCards, "Default"),
+        SwStack.fromCards(side, loadedCards, "Default"),
       ];
     });
 
     setState(() {
       this._currentStep = 1;
-      this._allCards =
-          new SwStack.fromCards(_currentSide, loadedCards, 'All Cards');
+      this._allCards = new SwStack.fromCards(side, loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
       this._currentStack = results[1];
-      this._maybeStack = new SwStack(_currentSide, [], 'Maybe Cards');
+      this._maybeStack = new SwStack(side, [], 'Maybe Cards');
     });
   }
 
@@ -135,7 +141,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    _setup();
+    _setup(context);
     super.initState();
   }
 
@@ -156,7 +162,7 @@ class _RootPageState extends State<RootPage> {
         case 1: // Side
           w = Scaffold(
             appBar: AppBar(
-              title: Text('Pick a Side'),
+              title: Text(context.watch<SwStack>().title),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -215,7 +221,7 @@ class _RootPageState extends State<RootPage> {
             key: UniqueKey(),
             appBar: AppBar(
               title: Text(
-                  "${_currentSide[0]}S: ${context.read<SwDeck>().title} (${context.read<SwDeck>().length}) | Maybe: ${_maybeStack.length}"),
+                  "${_currentSide(context)[0]}S: ${context.read<SwDeck>().title} (${context.read<SwDeck>().length}) | Maybe: ${_maybeStack.length}"),
               backgroundColor: Colors.transparent,
             ),
             drawer: _drawerWidget(context),
@@ -374,7 +380,7 @@ class _RootPageState extends State<RootPage> {
                   : Matrix4.rotationZ(0)
               : (_currentStack[index].subType == 'Site') // all horizontal
                   ? Matrix4.rotationZ(0)
-                  : Matrix4.rotationZ(_currentSide == 'Light'
+                  : Matrix4.rotationZ(_currentSide(context) == 'Light'
                       ? -pi / 2
                       : pi / 2), // according to side
           child: Image.network(
@@ -403,7 +409,6 @@ class _RootPageState extends State<RootPage> {
 
   _step1Callback(String side) {
     setState(() {
-      this._currentSide = side;
       context.read<SwDeck>().side = side;
       _loadStep2(side);
     });
@@ -411,15 +416,15 @@ class _RootPageState extends State<RootPage> {
 
   _loadStep2(String side) {
     List<SwArchetype> allPossibleArchetypes =
-        _allArchetypes.where((a) => a.side == _currentSide).toList();
+        _allArchetypes.where((a) => a.side == side).toList();
 
-    SwStack objectives = _allCards.bySide(_currentSide).byType('Objective');
+    SwStack objectives = _allCards.bySide(side).byType('Objective');
 
     SwStack startingLocations = new SwStack.fromCards(
-      _currentSide,
+      side,
       allPossibleArchetypes.map((a) => a.startingCard).toList(),
       'Starting Locations',
-    ).bySide(_currentSide).byType('Location');
+    ).bySide(side).byType('Location');
 
     setState(() {
       this._currentStack = objectives.concat(startingLocations);
@@ -433,7 +438,7 @@ class _RootPageState extends State<RootPage> {
 
   _loadStep3() {
     SwStack startingInterrupts = _allCards
-        .bySide(_currentSide)
+        .bySide(_currentSide(context))
         .byType('Interrupt')
         .matchesSubType('Starting');
 
