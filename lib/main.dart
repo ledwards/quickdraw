@@ -58,7 +58,7 @@ class _RootPageState extends State<RootPage> {
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
 
-  // TODO: currentStack gets  anotifier
+  // TODO: currentStack gets a notifier
   SwStack _currentStack;
   List<SwStack> _futureStacks = [];
 
@@ -119,7 +119,7 @@ class _RootPageState extends State<RootPage> {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
             duration: Duration(seconds: 1),
             content: new Text(
-              "Added: ${card.title}",
+              "Added ${card.title}",
               textAlign: TextAlign.center,
             )));
         print("Added a card to deck: ${card.title}");
@@ -227,46 +227,8 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
-        case 2: // Objective or Starting Location
+        default: // Objective or Starting Location
           // TODO: If stack ends up empty, refresh it
-          w = Scaffold(
-            key: UniqueKey(),
-            appBar: AppBar(
-              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
-              backgroundColor: Colors.transparent,
-            ),
-            drawer: _drawerWidget(context),
-            body: _swipeableStack(context),
-          );
-          break;
-
-        case 3: // Pulled by Objective
-          // TODO: If stack ends up empty, refresh it
-          w = Scaffold(
-            key: UniqueKey(),
-            appBar: AppBar(
-              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
-              backgroundColor: Colors.transparent,
-            ),
-            drawer: _drawerWidget(context),
-            body: _swipeableStack(context),
-          );
-          break;
-
-        case 4: // Starting Interrupt
-          // TODO: If stack ends up empty, refresh it
-          w = Scaffold(
-            key: UniqueKey(),
-            appBar: AppBar(
-              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
-              backgroundColor: Colors.transparent,
-            ),
-            drawer: _drawerWidget(context),
-            body: _swipeableStack(context),
-          );
-          break;
-
-        case 6: // Main Deck
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
@@ -454,7 +416,6 @@ class _RootPageState extends State<RootPage> {
   }
 
   _step3Callback() {
-    print('executing step3 callback');
     if (_futureStacks.isEmpty) {
       _nextStep();
     } else {
