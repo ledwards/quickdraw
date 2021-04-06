@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:provider/provider.dart';
+import 'package:swccg_builder/objectives.dart';
 
 import 'models/sw_card.dart';
 import 'models/sw_decklist.dart';
@@ -20,7 +21,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Wizard()),
-        ChangeNotifierProvider(create: (_) => SwDeck(null, [], 'New Deck')),
+        ChangeNotifierProvider(create: (_) => SwDeck(null, 'New Deck')),
         ChangeNotifierProvider(
             create: (_) => SwStack(null, [], 'Choose a Side')),
       ],
@@ -59,6 +60,7 @@ class _RootPageState extends State<RootPage> {
 
   // TODO: currentStack gets  anotifier
   SwStack _currentStack;
+  List<SwStack> _futureStacks = [];
 
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
@@ -67,8 +69,15 @@ class _RootPageState extends State<RootPage> {
   SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
   String _currentSide() => _currentDeck().side;
   Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
-  void _nextStep() => context.read<Wizard>().next();
   int _currentStep() => _wizard().step;
+
+  // Mutators
+  void _nextStep() => context.read<Wizard>().next();
+  void _currentDeckAdd(SwCard card) => context.read<SwDeck>().add(card);
+  void _currentDeckAddStack(SwStack stack) =>
+      context.read<SwDeck>().addStack(stack);
+  void _currentDeckRemoveListener(Function f) =>
+      context.read<SwDeck>().removeListener(f);
 
   _setup() async {
     String side = _currentSide();
@@ -101,10 +110,20 @@ class _RootPageState extends State<RootPage> {
     });
 
     _currentDeck().addListener(() {
+      int cursor = _wizard().cursor;
       int length = _currentDeck().length;
-      SwCard card = _currentDeck().lastCard();
-      _nextStep();
-      print("Added a card to deck: ${card.title}");
+      List<SwCard> newCards = _currentDeck().sublist(cursor, length);
+      _wizard().cursor = length;
+
+      for (SwCard card in newCards) {
+        ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
+            duration: Duration(seconds: 1),
+            content: new Text(
+              "Added: ${card.title}",
+              textAlign: TextAlign.center,
+            )));
+        print("Added a card to deck: ${card.title}");
+      }
     });
   }
 
@@ -221,7 +240,20 @@ class _RootPageState extends State<RootPage> {
           );
           break;
 
-        case 3: // Starting Interrupt
+        case 3: // Pulled by Objective
+          // TODO: If stack ends up empty, refresh it
+          w = Scaffold(
+            key: UniqueKey(),
+            appBar: AppBar(
+              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
+              backgroundColor: Colors.transparent,
+            ),
+            drawer: _drawerWidget(context),
+            body: _swipeableStack(context),
+          );
+          break;
+
+        case 4: // Starting Interrupt
           // TODO: If stack ends up empty, refresh it
           w = Scaffold(
             key: UniqueKey(),
@@ -307,16 +339,6 @@ class _RootPageState extends State<RootPage> {
                       break;
                     case CardSwipeOrientation.UP:
                       _currentDeck().add(swipedCard);
-
-                      // if (_currentStep() == 3) {
-                      //   switch (swipedCard.type) {
-                      //     case 'Interrupt':
-                      //       {
-                      //         _currentStack = pullByStartingInterrupt(
-                      //             swipedCard, _allCards.bySide(_currentSide()));
-                      //       }
-                      //   }
-                      // }
                       break;
                     case CardSwipeOrientation.DOWN:
                       _maybeStack.add(swipedCard);
@@ -362,10 +384,10 @@ class _RootPageState extends State<RootPage> {
       ),
       _drawerItem(context, 'Side', Icons.filter_1),
       _drawerItem(context, 'Objective', Icons.filter_2),
-      _drawerItem(context, 'Deployed by Objective',
+      _drawerItem(context, 'Pulled by Objective',
           Icons.subdirectory_arrow_right_rounded),
       _drawerItem(context, 'Starting Interrupt', Icons.filter_3),
-      _drawerItem(context, 'Deployed By Starting Interrupt',
+      _drawerItem(context, 'Pulled By Starting Interrupt',
           Icons.subdirectory_arrow_right_rounded),
       _drawerItem(context, 'Main Deck', Icons.filter_4),
       _drawerItem(context, 'Starting Effect', Icons.filter_5),
@@ -422,9 +444,25 @@ class _RootPageState extends State<RootPage> {
 
   _step1Callback(String side) {
     setState(() {
+      this._allCards = _allCards.bySide(side);
       _currentDeck().side = side;
       _nextStep();
     });
+  }
+
+  _step2Callback() {
+    _nextStep();
+  }
+
+  _step3Callback() {
+    print('executing step3 callback');
+    if (_futureStacks.isEmpty) {
+      _nextStep();
+    } else {
+      setState(() {
+        _currentStack = _futureStacks.removeAt(0);
+      });
+    }
   }
 
   _setupStep(int s) {
@@ -437,7 +475,7 @@ class _RootPageState extends State<RootPage> {
       case 2: // Pick an Objective or Starting Location
         List<SwArchetype> allPossibleArchetypes =
             _allArchetypes.where((a) => a.side == side).toList();
-        SwStack objectives = _allCards.bySide(side).byType('Objective');
+        SwStack objectives = _allCards.byType('Objective');
         SwStack startingLocations = new SwStack.fromCards(
           side,
           allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
@@ -448,11 +486,41 @@ class _RootPageState extends State<RootPage> {
           this._currentStack = objectives.concat(startingLocations);
           this._currentStack.title = 'Objectives & Starting Locations';
         });
+
+        _currentDeck().addListener(_step2Callback);
+
         break;
 
-      // Step 3 should be Obj deploys
+      case 3: // Pulled by Objective
+        _currentDeck().removeListener(_step2Callback);
 
-      case 3: // Pick a Starting Interrupt
+        SwCard startingCard = _currentDeck().startingCard();
+
+        if (startingCard.type == 'Objective') {
+          Map<String, dynamic> pulled =
+              pullByObjective(startingCard, _allCards);
+          setState(() {
+            _currentDeckAddStack(pulled['mandatory']);
+            _futureStacks.addAll(pulled['optionals']);
+          });
+        }
+
+        if (startingCard.type == 'Objective' && _futureStacks.isNotEmpty) {
+          setState(() {
+            _currentStack.clear();
+            _currentStack.title = _futureStacks[0].title;
+            _currentStack.addStack(_futureStacks.removeAt(0));
+          });
+          _currentDeck().addListener(_step3Callback);
+        } else {
+          _nextStep(); // Objective is only pulling mandatory cards or is a Location
+        }
+
+        break;
+
+      case 4: // Pick a Starting Interrupt
+        _currentDeck().removeListener(_step3Callback);
+
         SwStack startingInterrupts = _allCards
             .bySide(_currentSide())
             .byType('Interrupt')
@@ -464,9 +532,8 @@ class _RootPageState extends State<RootPage> {
         });
         break;
 
-      case 4: // Cards deployed by Starting Interrupts
+      case 6: // Cards deployed by Starting Interrupts
+        break;
     }
   }
-  // _loadStep2a(SwCard objective) {} // show all cards possible to deploy with objective
-  // step 2a might just be step 2 but with your Obj set, see a diff view?
 }

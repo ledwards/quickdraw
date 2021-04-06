@@ -1,31 +1,45 @@
 import 'models/sw_card.dart';
 import 'models/sw_stack.dart';
 
-Map<String, SwStack> pullByObjective(SwCard objective, SwStack library) {
+Map<String, dynamic> pullByObjective(SwCard objective, SwStack library) {
   SwStack mandatory = new SwStack(objective.side, [], "");
-  SwStack optional =
-      new SwStack(objective.side, [], "Pulled by ${objective.title}");
+  List<SwStack> optionals = [];
 
   switch (objective.title) {
     case 'A Stunning Move':
-      SwStack mandatory = library.findAllByName([
+      mandatory = library.findAllByNames([
         'Coruscant: 500 Republica',
         'Insidious Prisoner',
-        'Coruscant: Private Platform'
+        'Coruscant: Private Platform (Docking Bay)',
       ]);
-
       break;
+
     case 'Bring Him Before Me':
-      SwStack mandatory = library.findAllByName([
+      mandatory = library.findAllByNames([
         'Death Star II: Throne Room',
         'Insignificant Rebellion',
-        'Your Destiny'
+        'Your Destiny',
       ]);
+      break;
+
+    case 'Hunt Down And Destroy The Jedi':
+      mandatory = library.findAllByNames([
+        'Executor: Holotheatre',
+        'Visage Of The Emperor',
+      ]);
+
+      optionals.add(new SwStack(
+          objective.side,
+          [library.findByName('Executor: Meditation Chamber')],
+          '(Optional) Meditation Chamber'));
+
+      optionals.add(new SwStack(objective.side,
+          [library.findByName('Epic Duel')], '(Optional) Epic Duel'));
       break;
   }
 
   return {
     "mandatory": mandatory,
-    "optional": optional,
+    "optionals": optionals,
   };
 }

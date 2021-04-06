@@ -10,13 +10,15 @@ class SwStack with ChangeNotifier {
 
   int get length => cards.length;
   operator [](int index) => cards[index];
+  List<SwCard> sublist(int start, int end) => cards.sublist(start, end);
 
-  insert(int index, SwCard card) => cards.insert(index, card);
   add(SwCard card) => cards.add(card);
-
   addCards(List<SwCard> cards) => cards.addAll(cards);
+  addStack(SwStack stack) => cards.addAll(stack.cards);
+  insert(int index, SwCard card) => cards.insert(index, card);
   SwCard removeAt(int index) => cards.removeAt(index);
   SwCard firstWhere(Function fn) => cards.firstWhere(fn);
+
   clear() => cards.clear();
 
   SwStack subset(List<SwCard> cards) {
@@ -55,7 +57,7 @@ class SwStack with ChangeNotifier {
     return cards.firstWhere((e) => e.title.toLowerCase() == q.toLowerCase());
   }
 
-  SwStack findAllByName(List<String> qs) {
+  SwStack findAllByNames(List<String> qs) {
     List<SwCard> foundCards = qs
         .map((q) {
           return cards.firstWhere(
