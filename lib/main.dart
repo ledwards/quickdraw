@@ -420,7 +420,6 @@ class _RootPageState extends State<RootPage> {
                       : pi / 2), // according to side
           child: Image.network(
             _currentStack[index].imageUrl,
-            fit: BoxFit.fitHeight,
             alignment: Alignment.center,
           )),
       color: Colors.transparent,
