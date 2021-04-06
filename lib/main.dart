@@ -448,7 +448,6 @@ class _RootPageState extends State<RootPage> {
         });
 
         _currentDeck().addListener(_step2Callback);
-
         break;
 
       case 3: // Pulled by Objective
@@ -475,16 +474,13 @@ class _RootPageState extends State<RootPage> {
         } else {
           _nextStep(); // Objective is only pulling mandatory cards or is a Location
         }
-
         break;
 
       case 4: // Pick a Starting Interrupt
         _currentDeck().removeListener(_step3Callback);
 
-        SwStack startingInterrupts = _allCards
-            .bySide(_currentSide())
-            .byType('Interrupt')
-            .matchesSubType('Starting');
+        SwStack startingInterrupts =
+            _allCards.byType('Interrupt').matchesSubType('Starting');
 
         setState(() {
           this._currentStack = startingInterrupts;
@@ -492,7 +488,16 @@ class _RootPageState extends State<RootPage> {
         });
         break;
 
-      case 6: // Cards deployed by Starting Interrupts
+      case 5: // Pulled by Starting Interrupts
+        break;
+
+      case 6: // Main Deck
+        break;
+
+      case 7: // Starting Effect
+        break;
+
+      case 8: // Defensive Shields
         break;
     }
   }
