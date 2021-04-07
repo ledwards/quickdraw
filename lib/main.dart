@@ -7,15 +7,15 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:provider/provider.dart';
 
-import 'wizard.dart';
+import 'controllers/wizard.dart';
 import 'models/sw_card.dart';
 import 'models/sw_decklist.dart';
 import 'models/sw_stack.dart';
 import 'models/sw_deck.dart';
 import 'models/sw_archetype.dart';
 
-import 'objectives.dart';
-import 'starting_interrupts.dart';
+import 'rules/objectives.dart';
+import 'rules/starting_interrupts.dart';
 
 void main() {
   runApp(
@@ -192,6 +192,9 @@ class _RootPageState extends State<RootPage> {
         appBar: AppBar(
           title: Text('Loading...'),
         ),
+        body: Center(
+            child: Image.network(
+                'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif')),
       );
     } else {
       // Wizard Entry
@@ -254,10 +257,10 @@ class _RootPageState extends State<RootPage> {
               swipeDown: true,
               orientation: AmassOrientation.TOP,
               totalNum: _currentStack.length,
-              stackNum: 12,
+              stackNum: 6,
               swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-              maxHeight: MediaQuery.of(context).size.width * 0.9,
+              maxWidth: MediaQuery.of(context).size.width,
+              maxHeight: MediaQuery.of(context).size.width,
               minWidth: MediaQuery.of(context).size.width * 0.8,
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: _cardBuilder,

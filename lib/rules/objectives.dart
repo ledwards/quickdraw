@@ -1,5 +1,5 @@
-import 'models/sw_card.dart';
-import 'models/sw_stack.dart';
+import '../models/sw_card.dart';
+import '../models/sw_stack.dart';
 
 Map<String, dynamic> pullByObjective(SwCard objective, SwStack library) {
   SwStack mandatory = new SwStack(objective.side, [], "");
