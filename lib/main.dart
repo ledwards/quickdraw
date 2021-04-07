@@ -1,21 +1,22 @@
 import 'dart:convert' show json;
-import 'dart:math' show pi;
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:provider/provider.dart';
 
-import 'controllers/wizard.dart';
 import 'models/sw_card.dart';
 import 'models/sw_decklist.dart';
 import 'models/sw_stack.dart';
 import 'models/sw_deck.dart';
 import 'models/sw_archetype.dart';
 
+import 'controllers/wizard.dart';
+
 import 'rules/objectives.dart';
 import 'rules/starting_interrupts.dart';
+
+import 'widgets/swipeableStack.dart';
 
 void main() {
   runApp(
@@ -24,7 +25,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => Wizard()),
         ChangeNotifierProvider(create: (_) => SwDeck(null, 'New Deck')),
         ChangeNotifierProvider(
-            create: (_) => SwStack(null, [], 'Choose a Side')),
+            create: (_) => SwStack(null, [], 'Choose A Side')),
       ],
       child: MyApp(),
     ),
@@ -89,15 +90,17 @@ class _RootPageState extends State<RootPage> {
 
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
-        SwStack.fromCards(side, loadedCards, "Default"),
+        SwStack.fromCards(side, loadedCards, 'All Cards'),
       ];
     });
 
+    // TODO: Audit this to make sure the flow is as simple as possible. (async?)
     setState(() {
       this._allCards = new SwStack.fromCards(side, loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
-      this._currentStack = results[1];
+      this._currentStack =
+          new SwStack.fromCards(side, results[1], 'Choose A Side');
       this._maybeStack = new SwStack(side, [], 'Maybe Cards');
     });
 
@@ -202,7 +205,7 @@ class _RootPageState extends State<RootPage> {
         case 1: // Side
           w = Scaffold(
             appBar: AppBar(
-              title: Text(context.watch<SwStack>().title),
+              title: Text(_currentStack.title),
               backgroundColor: Colors.grey.shade900,
             ),
             drawer: _drawerWidget(context),
@@ -237,70 +240,12 @@ class _RootPageState extends State<RootPage> {
               backgroundColor: Colors.grey.shade900,
             ),
             drawer: _drawerWidget(context),
-            body: _swipeableStack(context),
+            body: SwipeableStack(stack: _currentStack, deck: _currentDeck()),
           );
           break;
       }
     }
     return w;
-  }
-
-  Widget _swipeableStack(context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Center(
-          child: Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: TinderSwapCard(
-              swipeUp: true,
-              swipeDown: true,
-              orientation: AmassOrientation.TOP,
-              totalNum: _currentStack.length,
-              stackNum: 6,
-              swipeEdge: 4.0,
-              maxWidth: MediaQuery.of(context).size.width,
-              maxHeight: MediaQuery.of(context).size.width,
-              minWidth: MediaQuery.of(context).size.width * 0.8,
-              minHeight: MediaQuery.of(context).size.width * 0.8,
-              cardBuilder: _cardBuilder,
-              cardController: CardController(),
-              swipeCompleteCallback:
-                  (CardSwipeOrientation orientation, int index) {
-                setState(() {
-                  SwCard swipedCard = this._currentStack.removeAt(index);
-                  switch (orientation) {
-                    case CardSwipeOrientation.LEFT:
-                      break;
-                    case CardSwipeOrientation.RIGHT:
-                      _currentStack.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.UP:
-                      _currentDeck().add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.DOWN:
-                      _maybeStack.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.RECOVER:
-                      _currentStack.insert(index, swipedCard);
-                      break;
-                  }
-                });
-              },
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Center(
-            child: Text(
-              "Stack: (${_currentStack.length}), Deck: (${_currentDeck().length})",
-              style: Theme.of(context).textTheme.headline6,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _drawerItem(context, String title, IconData icon) {
@@ -349,28 +294,6 @@ class _RootPageState extends State<RootPage> {
         padding: EdgeInsets.zero,
         children: _drawerWidgets(context),
       ),
-    );
-  }
-
-  Widget _cardBuilder(context, index) {
-    return Card(
-      child: Transform(
-          alignment: Alignment.center,
-          transform: _currentStack[0].subType != 'Site'
-              ? (_currentStack[index].subType == 'Site') // all vertical
-                  ? Matrix4.rotationZ(-pi / 2)
-                  : Matrix4.rotationZ(0)
-              : (_currentStack[index].subType == 'Site') // all horizontal
-                  ? Matrix4.rotationZ(0)
-                  : Matrix4.rotationZ(_currentSide() == 'Light'
-                      ? -pi / 2
-                      : pi / 2), // according to side
-          child: Image.network(
-            _currentStack[index].imageUrl,
-            alignment: Alignment.center,
-          )),
-      color: Colors.transparent,
-      shadowColor: Colors.transparent,
     );
   }
 
