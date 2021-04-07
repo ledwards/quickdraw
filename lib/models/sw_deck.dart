@@ -16,6 +16,7 @@ class SwDeck with ChangeNotifier {
   operator [](int index) => cards[index];
 
   SwCard startingCard() => cards[0];
+  SwCard startingInterrupt() => cards.matchesSubType('Starting')[0];
   SwCard lastCard() => cards[length - 1];
   List<SwCard> sublist(start, end) => cards.sublist(start, end);
 

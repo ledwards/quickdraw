@@ -6,14 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:provider/provider.dart';
-import 'package:swccg_builder/objectives.dart';
 
+import 'wizard.dart';
 import 'models/sw_card.dart';
 import 'models/sw_decklist.dart';
 import 'models/sw_stack.dart';
 import 'models/sw_deck.dart';
 import 'models/sw_archetype.dart';
-import 'wizard.dart';
+
+import 'objectives.dart';
 import 'starting_interrupts.dart';
 
 void main() {
@@ -117,7 +118,7 @@ class _RootPageState extends State<RootPage> {
 
       for (SwCard card in newCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-            duration: Duration(seconds: 1),
+            duration: Duration(milliseconds: 500),
             content: new Text(
               "Added ${card.title}",
               textAlign: TextAlign.center,
@@ -425,6 +426,20 @@ class _RootPageState extends State<RootPage> {
     }
   }
 
+  _step4Callback() {
+    _nextStep();
+  }
+
+  _step5Callback() {
+    if (_futureStacks.isEmpty) {
+      _nextStep();
+    } else {
+      setState(() {
+        _currentStack = _futureStacks.removeAt(0);
+      });
+    }
+  }
+
   _setupStep(int s) {
     String side = _currentSide();
 
@@ -486,9 +501,35 @@ class _RootPageState extends State<RootPage> {
           this._currentStack = startingInterrupts;
           this._currentStack.title = 'Starting Interrupts';
         });
+        _currentDeck().addListener(_step4Callback);
         break;
 
       case 5: // Pulled by Starting Interrupts
+        _currentDeck().removeListener(_step4Callback);
+
+        SwCard startingInterrupt = _currentDeck().startingInterrupt();
+
+        if (startingInterrupt != null) {
+          Map<String, dynamic> pulled =
+              pullByStartingInterrupt(startingInterrupt, _allCards);
+          setState(() {
+            _currentDeckAddStack(pulled['mandatory']);
+            _futureStacks.addAll(pulled['optionals']);
+          });
+        } else {
+          _nextStep();
+        }
+
+        if (startingInterrupt != null && _futureStacks.isNotEmpty) {
+          setState(() {
+            _currentStack.clear();
+            _currentStack.title = _futureStacks[0].title;
+            _currentStack.addStack(_futureStacks.removeAt(0));
+          });
+          _currentDeck().addListener(_step5Callback);
+        } else {
+          _nextStep(); // Starting Interrupt is only pulling mandatory cards
+        }
         break;
 
       case 6: // Main Deck

@@ -38,7 +38,10 @@ class SwStack with ChangeNotifier {
   }
 
   SwStack matchesSubType(String q) {
-    return this.subset(this.cards.where((c) => c.subType.contains(q)).toList());
+    return this.subset(this
+        .cards
+        .where((c) => c.subType != null && c.subType.contains(q))
+        .toList());
   }
 
   SwStack matchesGametext(String q) {
