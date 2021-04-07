@@ -29,13 +29,12 @@ Map<String, dynamic> pullByStartingInterrupt(
 
     case 'Any Methods Necessary':
       SwStack prisons = library.hasCharacteristic('prison');
-      SwStack despair = library.findAllByNames(
-          ['Despair (V)', 'Despair']); // TODO: only if you use Prison (V)?
       SwStack bountyHunters = library.hasCharacteristic('bounty hunter');
-      // TODO: matching weapons
-      // TODO: matching ship
 
-      optionals = [prisons, despair, bountyHunters];
+      prisons.title = '(Choose) Prison';
+      bountyHunters.title = '(Choose) Bounty Hunter';
+
+      optionals = [prisons, bountyHunters];
       break;
   }
 

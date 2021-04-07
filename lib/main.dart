@@ -118,7 +118,7 @@ class _RootPageState extends State<RootPage> {
 
       for (SwCard card in newCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-            duration: Duration(milliseconds: 500),
+            duration: Duration(milliseconds: 750),
             content: new Text(
               "Added ${card.title}",
               textAlign: TextAlign.center,
@@ -431,6 +431,32 @@ class _RootPageState extends State<RootPage> {
   }
 
   _step5Callback() {
+    SwCard startingInterrupt = _currentDeck().startingInterrupt();
+    SwCard lastCard = _currentDeck().lastCard();
+
+    // handle Starting Interrupts whose choices have logic
+    // TODO: refactor into starting_interrupts.dart
+    switch (startingInterrupt.title) {
+      case 'Any Methods Necessary':
+        if (lastCard.type == 'Character') {
+          print('Chose a BH');
+          if (lastCard.matchingWeapon != null) {
+            _futureStacks.add(SwStack.fromCardNames(_currentSide(),
+                lastCard.matchingWeapon, _allCards, 'Matching Weapon'));
+          }
+          if (lastCard.matchingStarship != null) {
+            _futureStacks.add(SwStack.fromCardNames(_currentSide(),
+                lastCard.matchingStarship, _allCards, 'Matching Starship'));
+          }
+        } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
+          SwStack despairs =
+              _allCards.findAllByNames(['Despair (V)', 'Despair']);
+          despairs.title = '(Optional) Pulled by Security Tower (V)';
+          _futureStacks.insert(0, despairs);
+        }
+        break;
+    }
+
     if (_futureStacks.isEmpty) {
       _nextStep();
     } else {
@@ -440,13 +466,17 @@ class _RootPageState extends State<RootPage> {
     }
   }
 
+  _step6Callback() {
+    // maybe only move to next step on some button press?
+  }
+
   _setupStep(int s) {
     String side = _currentSide();
     _currentDeck().removeListener(_step2Callback);
     _currentDeck().removeListener(_step3Callback);
     _currentDeck().removeListener(_step4Callback);
     _currentDeck().removeListener(_step5Callback);
-    // _currentDeck().removeListener(_step6Callback);
+    _currentDeck().removeListener(_step6Callback);
     // _currentDeck().removeListener(_step7Callback);
 
     switch (s) {

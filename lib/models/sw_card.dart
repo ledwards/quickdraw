@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class SwCard {
   SwCard(
       this.id,
@@ -6,9 +8,9 @@ class SwCard {
       this.imageUrl,
       this.gametext,
       this.lore,
-      this.icons,
       this.lightSideIcons,
       this.darkSideIcons,
+      this.icons,
       this.characteristics,
       this.matchingStarship,
       this.matchingWeapon);
@@ -21,29 +23,30 @@ class SwCard {
   String subType;
   String gametext;
   String lore;
-  List icons;
   int lightSideIcons;
   int darkSideIcons;
-  List characteristics;
-  List matchingStarship;
-  List matchingWeapon;
+  List<String> icons;
+  List<String> characteristics;
+  List<String> matchingStarship;
+  List<String> matchingWeapon;
 
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         side = json['side'],
-        title = SwCard.normalizeTitle(json['front']['title']),
+        title = normalizeTitle(json['front']['title']),
         type = json['front']['type'],
         subType = json['front']['subType'],
         gametext = json['front']['gametext'],
         lore = json['front']['lore'],
-        icons = json['front']['icons'],
         lightSideIcons = json['front']['lightSideIcons'],
         darkSideIcons = json['front']['darkSideIcons'],
-        characteristics = json['front']['characteristics'],
-        matchingStarship = json['front']['matching'],
-        matchingWeapon = json['front']['matchingWeapon'],
+        icons = castListString(json['front']['icons']),
+        characteristics = castListString(json['front']['characteristics']),
+        matchingStarship = castListString(json['matching']),
+        matchingWeapon = castListString(json['matchingWeapon']),
         imageUrl = json['front']['imageUrl'];
 
+  // NOTE: This does not put it back into the format with front/back keys
   Map<String, dynamic> toJson() => {
         'id': id,
         'side': side,
@@ -52,9 +55,9 @@ class SwCard {
         'subType': subType,
         'gametext': gametext,
         'lore': lore,
-        'icons': icons,
         'lightSideIcons': lightSideIcons,
         'darkSideIcons': darkSideIcons,
+        'icons': icons,
         'characteristics': characteristics,
         'matching': matchingStarship,
         'matchingWeapon': matchingWeapon,
@@ -68,6 +71,12 @@ class SwCard {
     String vSuffix = backTitle.endsWith('(V)') ? ' (V)' : '';
 
     return (frontTitle + vSuffix).replaceAll('•', '').replaceAll('<>', '');
+  }
+
+  static List<String> castListString(dynamic data) {
+    return data != null
+        ? (data as List).map((e) => e.toString()).toList()
+        : null;
   }
 
   static List<SwCard> listFromJson(List list) {
