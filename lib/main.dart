@@ -442,6 +442,12 @@ class _RootPageState extends State<RootPage> {
 
   _setupStep(int s) {
     String side = _currentSide();
+    _currentDeck().removeListener(_step2Callback);
+    _currentDeck().removeListener(_step3Callback);
+    _currentDeck().removeListener(_step4Callback);
+    _currentDeck().removeListener(_step5Callback);
+    // _currentDeck().removeListener(_step6Callback);
+    // _currentDeck().removeListener(_step7Callback);
 
     switch (s) {
       case 1: // Pick a Side
@@ -466,8 +472,6 @@ class _RootPageState extends State<RootPage> {
         break;
 
       case 3: // Pulled by Objective
-        _currentDeck().removeListener(_step2Callback);
-
         SwCard startingCard = _currentDeck().startingCard();
 
         if (startingCard.type == 'Objective') {
@@ -492,8 +496,6 @@ class _RootPageState extends State<RootPage> {
         break;
 
       case 4: // Pick a Starting Interrupt
-        _currentDeck().removeListener(_step3Callback);
-
         SwStack startingInterrupts =
             _allCards.byType('Interrupt').matchesSubType('Starting');
 
@@ -505,8 +507,6 @@ class _RootPageState extends State<RootPage> {
         break;
 
       case 5: // Pulled by Starting Interrupts
-        _currentDeck().removeListener(_step4Callback);
-
         SwCard startingInterrupt = _currentDeck().startingInterrupt();
 
         if (startingInterrupt != null) {
