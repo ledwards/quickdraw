@@ -118,12 +118,12 @@ class SwStack with ChangeNotifier {
         title = s.title;
 
   SwStack.fromCards(side, List<SwCard> cards, String title)
-      : side = cards[0].side,
+      : side = cards.isNotEmpty ? cards[0].side : null,
         cards = cards,
         title = title;
 
   SwStack.fromCardNames(List<String> names, SwStack library, String title)
-      : side = library.side,
+      : side = library.isNotEmpty() ? library.side : null,
         cards = names
             .map((name) {
               return library.cards.firstWhere(

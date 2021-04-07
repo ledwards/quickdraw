@@ -74,11 +74,8 @@ class _RootPageState extends State<RootPage> {
 
   // Mutators
   void _nextStep() => context.read<Wizard>().next();
-  void _currentDeckAdd(SwCard card) => context.read<SwDeck>().add(card);
   void _currentDeckAddStack(SwStack stack) =>
       context.read<SwDeck>().addStack(stack);
-  void _currentDeckRemoveListener(Function f) =>
-      context.read<SwDeck>().removeListener(f);
 
   _setup() async {
     String side = _currentSide();
@@ -118,7 +115,7 @@ class _RootPageState extends State<RootPage> {
 
       for (SwCard card in newCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-            duration: Duration(milliseconds: 750),
+            duration: Duration(milliseconds: 500),
             content: new Text(
               "Added ${card.title}",
               textAlign: TextAlign.center,
@@ -203,7 +200,7 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             appBar: AppBar(
               title: Text(context.watch<SwStack>().title),
-              backgroundColor: Colors.transparent,
+              backgroundColor: Colors.grey.shade900,
             ),
             drawer: _drawerWidget(context),
             body: Center(
@@ -233,8 +230,8 @@ class _RootPageState extends State<RootPage> {
           w = Scaffold(
             key: UniqueKey(),
             appBar: AppBar(
-              title: Text("${_currentDeck().title} (${_currentDeck().length})"),
-              backgroundColor: Colors.transparent,
+              title: Text(_currentStack.title),
+              backgroundColor: Colors.grey.shade900,
             ),
             drawer: _drawerWidget(context),
             body: _swipeableStack(context),
@@ -249,15 +246,6 @@ class _RootPageState extends State<RootPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Center(
-            child: Text(
-              "${_currentStack.title} (${_currentStack.length})",
-              style: Theme.of(context).textTheme.headline6,
-            ),
-          ),
-        ),
         Center(
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
@@ -296,6 +284,15 @@ class _RootPageState extends State<RootPage> {
                   }
                 });
               },
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Center(
+            child: Text(
+              "Stack: (${_currentStack.length}), Deck: (${_currentDeck().length})",
+              style: Theme.of(context).textTheme.headline6,
             ),
           ),
         ),
@@ -436,7 +433,7 @@ class _RootPageState extends State<RootPage> {
         } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
           SwStack despairs =
               _allCards.findAllByNames(['Despair (V)', 'Despair']);
-          despairs.title = '(Optional) Pulled by Security Tower (V)';
+          despairs.title = '(Optional) Despair';
           _futureStacks.insert(0, despairs);
         }
         break;
@@ -516,7 +513,7 @@ class _RootPageState extends State<RootPage> {
 
         setState(() {
           this._currentStack = startingInterrupts;
-          this._currentStack.title = 'Starting Interrupts';
+          this._currentStack.title = 'Starting Interrupt';
         });
         _currentDeck().addListener(_step4Callback);
         break;
