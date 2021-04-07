@@ -10,62 +10,72 @@ class SwStack with ChangeNotifier {
 
   int get length => cards.length;
   operator [](int index) => cards[index];
-  List<SwCard> sublist(int start, int end) => cards.sublist(start, end);
 
   add(SwCard card) => cards.add(card);
+  insert(int index, SwCard card) => cards.insert(index, card);
   addCards(List<SwCard> cards) => cards.addAll(cards);
   addStack(SwStack stack) => cards.addAll(stack.cards);
-  insert(int index, SwCard card) => cards.insert(index, card);
   SwCard removeAt(int index) => cards.removeAt(index);
   SwCard firstWhere(Function fn) => cards.firstWhere(fn);
+  SwStack uniq() => subset(cards.toSet().toList());
+
+  List<SwCard> sublist(int start, int end) => cards.sublist(start, end);
+
+  bool isEmpty() => cards.isEmpty;
+  bool isNotEmpty() => cards.isNotEmpty;
 
   clear() => cards.clear();
+
+  SwStack concat(SwStack that) {
+    return new SwStack(this.side, this.cards + that.cards, this.title);
+  }
 
   SwStack subset(List<SwCard> cards) {
     return new SwStack.fromCards(this.side, cards, this.title);
   }
 
-  SwStack bySide(String q) {
-    return this.subset(this.cards.where((c) => c.side == q).toList());
+  SwStack bySide(String query) {
+    return this.subset(this.cards.where((c) => c.side == query).toList());
   }
 
-  SwStack byType(String q) {
-    return this.subset(this.cards.where((c) => c.type == q).toList());
+  SwStack byType(String query) {
+    return this.subset(this.cards.where((c) => c.type == query).toList());
   }
 
-  SwStack bySubType(String q) {
-    return this.subset(this.cards.where((c) => c.subType == q).toList());
+  SwStack bySubType(String query) {
+    return this.subset(this.cards.where((c) => c.subType == query).toList());
   }
 
-  SwStack matchesSubType(String q) {
+  SwStack matchesSubType(String query) {
     return this.subset(this
         .cards
-        .where((c) => c.subType != null && c.subType.contains(q))
+        .where((c) => c.subType != null && c.subType.contains(query))
         .toList());
   }
 
-  SwStack matchesGametext(String q) {
+  SwStack matchesGametext(String query) {
     return this
-        .subset(this.cards.where((c) => c.gametext.contains(q)).toList());
+        .subset(this.cards.where((c) => c.gametext.contains(query)).toList());
   }
 
-  SwStack hasCharacteristic(String q) {
+  SwStack hasCharacteristic(String query) {
     List<SwCard> matches = cards.where((e) {
-      return e.characteristics != null && e.characteristics.contains(q);
+      return e.characteristics != null && e.characteristics.contains(query);
     }).toList();
     return this.subset(matches);
   }
 
-  SwCard findByName(String q) {
-    return cards.firstWhere((e) => e.title.toLowerCase() == q.toLowerCase());
+  SwCard findByName(String query) {
+    return cards
+        .firstWhere((e) => e.title.toLowerCase() == query.toLowerCase());
   }
 
-  SwStack findAllByNames(List<String> qs) {
-    List<SwCard> foundCards = qs
-        .map((q) {
+  SwStack findAllByNames(List<String> queries) {
+    List<SwCard> foundCards = queries
+        .map((query) {
           return cards.firstWhere(
-              (e) => e.title.toLowerCase() == q.toLowerCase(), orElse: () {
-            print("findAllByName: Failed to find $q");
+              (e) => e.title.toLowerCase() == query.toLowerCase(), orElse: () {
+            print("findAllByName: Failed to find $query");
             return null;
           });
         })
@@ -75,8 +85,31 @@ class SwStack with ChangeNotifier {
     return new SwStack(this.side, foundCards, 'Found all by name');
   }
 
-  SwStack concat(SwStack that) {
-    return new SwStack(this.side, this.cards + that.cards, this.title);
+  SwStack matchingStarships(SwCard character) {
+    String persona = character.title.split(' ')[0]; // I think this works?
+    SwStack matchFromStarship =
+        this.byType('Starship').matchesGametext(persona);
+    SwStack matchFromCharacter = this
+        .subset(this
+            .cards
+            .where((element) => character.gametext.contains(element.title))
+            .toList())
+        .byType('Starship');
+    return (matchFromStarship.concat(matchFromCharacter).uniq());
+  }
+
+  SwStack matchingWeapons(SwCard character) {
+    String persona = character.title.split(' ')[0]; // I think this works?
+    SwStack matchFromWeapon =
+        this.byType('Weapon').bySubType('Character').matchesGametext(persona);
+    SwStack matchFromCharacter = this
+        .subset(this
+            .cards
+            .where((element) => character.gametext.contains(element.title))
+            .toList())
+        .byType('Weapon')
+        .bySubType('Character');
+    return (matchFromWeapon.concat(matchFromCharacter).uniq());
   }
 
   SwStack.from(SwStack s)

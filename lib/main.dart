@@ -274,22 +274,6 @@ class _RootPageState extends State<RootPage> {
               minHeight: MediaQuery.of(context).size.width * 0.8,
               cardBuilder: _cardBuilder,
               cardController: CardController(),
-              swipeUpdateCallback:
-                  (DragUpdateDetails details, Alignment align) {
-                if (align.x.abs() > align.y.abs()) {
-                  if (align.x < 0) {
-                    print("left swipe");
-                  } else if (align.x > 0) {
-                    print("right swipe");
-                  }
-                } else if (align.x.abs() < align.y.abs()) {
-                  if (align.y < 0) {
-                    print("up swipe");
-                  } else if (align.y > 0) {
-                    print("down swipe");
-                  }
-                }
-              },
               swipeCompleteCallback:
                   (CardSwipeOrientation orientation, int index) {
                 setState(() {
@@ -439,14 +423,15 @@ class _RootPageState extends State<RootPage> {
     switch (startingInterrupt.title) {
       case 'Any Methods Necessary':
         if (lastCard.type == 'Character') {
-          print('Chose a BH');
-          if (lastCard.matchingWeapon != null) {
-            _futureStacks.add(SwStack.fromCardNames(_currentSide(),
-                lastCard.matchingWeapon, _allCards, 'Matching Weapon'));
+          if (_allCards.matchingWeapons(lastCard).isNotEmpty()) {
+            SwStack matchingWeapons = _allCards.matchingWeapons(lastCard);
+            matchingWeapons.title = '(Optional) Matching Weapon';
+            _futureStacks.add(matchingWeapons);
           }
-          if (lastCard.matchingStarship != null) {
-            _futureStacks.add(SwStack.fromCardNames(_currentSide(),
-                lastCard.matchingStarship, _allCards, 'Matching Starship'));
+          if (_allCards.matchingStarships(lastCard).isNotEmpty()) {
+            SwStack matchingStarships = _allCards.matchingStarships(lastCard);
+            matchingStarships.title = '(Optional) Matching Starship';
+            _futureStacks.add(matchingStarships);
           }
         } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
           SwStack despairs =
