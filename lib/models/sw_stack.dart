@@ -117,20 +117,19 @@ class SwStack with ChangeNotifier {
         cards = s.cards,
         title = s.title;
 
-  SwStack.fromCards(String side, List<SwCard> cards, String title)
-      : side = side,
+  SwStack.fromCards(side, List<SwCard> cards, String title)
+      : side = cards[0].side,
         cards = cards,
         title = title;
 
-  SwStack.fromCardNames(
-      String side, List<String> names, SwStack cardLibrary, String title)
-      : side = side,
+  SwStack.fromCardNames(List<String> names, SwStack library, String title)
+      : side = library.side,
         cards = names
             .map((name) {
-              return cardLibrary.cards.firstWhere(
+              return library.cards.firstWhere(
                   (c) => (SwCard.normalizeTitle(c.title) ==
                           SwCard.normalizeTitle(name) &&
-                      c.side == side), orElse: () {
+                      c.side == library.side), orElse: () {
                 print("Could not find card when creating Stack");
                 print(name);
                 return null;

@@ -2,8 +2,6 @@ import 'sw_card.dart';
 import 'sw_stack.dart';
 
 class SwDecklist {
-  SwDecklist(this.side, this.title, this.archetypeName, this.cardNames);
-
   String side;
   String title;
   String archetypeName;
