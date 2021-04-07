@@ -1,4 +1,4 @@
-package com.example.swccg_builder
+package com.example.quickdraw
 
 import io.flutter.embedding.android.FlutterActivity
 

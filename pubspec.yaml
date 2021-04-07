@@ -1,5 +1,5 @@
-name: swccg_builder
-description: SW:CCG deckbuilder app
+name: quickdraw
+description: "QuickDraw: The Fast SWCCG Deckbuilder"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
