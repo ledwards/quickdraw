@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'QuickDrawer.dart';
 
-class CardBack extends StatelessWidget {
-  CardBack(this.side, this.callback);
+class CardBackPicker extends StatelessWidget {
+  CardBackPicker(this.callback);
 
-  final String side;
   final Function callback;
 
   @override
   Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          children: ['Dark', 'Light'].map((side) => _cardBack(side)).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _cardBack(side) {
     return Expanded(
       child: new GestureDetector(
         onTap: () => callback(side),

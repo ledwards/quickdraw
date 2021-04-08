@@ -18,7 +18,7 @@ import 'rules/StartingInterrupts.dart';
 
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
-import 'widgets/CardBack.dart';
+import 'widgets/CardBackPicker.dart';
 
 void main() {
   runApp(
@@ -189,54 +189,33 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget w;
+    Widget body;
+    String title = _currentStack == null ? 'Loading...' : _currentStack.title;
 
-    // switch should be inside body
     if (_currentStack == null) {
-      w = new Scaffold(
-        key: UniqueKey(),
-        appBar: AppBar(
-          title: Text('Loading...'),
-        ),
-        body: Center(
-            child: Image.network(
-                'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif')),
-      );
+      body = Center(
+          child: Image.network(
+              'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
     } else {
       switch (context.watch<Wizard>().step) {
         case 1: // Side
-          w = Scaffold(
-            appBar: AppBar(
-              title: Text(_currentStack.title),
-            ),
-            drawer: QuickDrawer(),
-            body: Center(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                child: Column(
-                  children: ['Dark', 'Light']
-                      .map((side) => CardBack(side, _step1Callback))
-                      .toList(),
-                ),
-              ),
-            ),
-          );
+          body = CardBackPicker(_step1Callback);
           break;
 
         default: // Objective or Starting Location
           // TODO: If stack ends up empty, refresh it
-          w = Scaffold(
-            key: UniqueKey(),
-            appBar: AppBar(
-              title: Text(_currentStack.title),
-            ),
-            drawer: QuickDrawer(),
-            body: SwipeableStack(stack: _currentStack, deck: _currentDeck()),
-          );
+          body = SwipeableStack(stack: _currentStack, deck: _currentDeck());
           break;
       }
     }
-    return w;
+
+    return Scaffold(
+        key: UniqueKey(),
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        drawer: QuickDrawer(),
+        body: body);
   }
 
   _step1Callback(String side) {
