@@ -1,8 +1,6 @@
-import 'dart:convert' show json;
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'models/SwCard.dart';
@@ -11,6 +9,7 @@ import 'models/SwStack.dart';
 import 'models/SwDeck.dart';
 import 'models/SwArchetype.dart';
 
+import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
 
@@ -88,16 +87,17 @@ class _RootPageState extends State<RootPage> {
   }
 
   _setup() async {
+    Loader loader = Loader(context);
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
 
     List results =
-        await Future.wait([_loadCards(), _loadDecklists()]).then((res) {
+        await Future.wait([loader.cards(), loader.decklists()]).then((res) {
       loadedCards = res[0];
       loadedDecklists = res[1];
 
       return [
-        _loadArchetypes(loadedDecklists, loadedCards),
+        loader.archetypes(loadedDecklists, loadedCards),
         SwStack(loadedCards, 'All Cards'),
       ];
     });
@@ -116,57 +116,6 @@ class _RootPageState extends State<RootPage> {
     _setupForStep(1);
   }
 
-  Future<List<SwCard>> _loadCards() async {
-    List<SwCard> cards = [];
-
-    for (String f in ['data/cards/Light.json', 'data/cards/Dark.json']) {
-      await rootBundle.loadString(f).then((data) {
-        final cardsData = json.decode(data);
-        cards.addAll(SwCard.listFromJson(cardsData['cards']));
-      });
-    }
-    return cards;
-  }
-
-  Future<List<SwDecklist>> _loadDecklists() async {
-    List<SwDecklist> decklists = [];
-
-    final manifestContent =
-        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-
-    final filenames = manifestMap.keys
-        .where((key) => key.contains('data/decklists/'))
-        .toList();
-
-    for (String f in filenames) {
-      await rootBundle.loadString(f).then((String data) {
-        final deckTitle = json.decode(data).keys.toList()[0];
-        final deckJson = json.decode(data).values.toList()[0];
-        decklists.add(SwDecklist.fromJson(deckJson, deckTitle));
-      });
-    }
-    return decklists;
-  }
-
-  List<SwArchetype> _loadArchetypes(
-      List<SwDecklist> decklists, List<SwCard> library) {
-    List<SwArchetype> archetypes = [];
-
-    for (SwDecklist d in decklists) {
-      SwArchetype archetype = archetypes
-          .firstWhere((a) => a.title == d.archetypeName, orElse: () => null);
-
-      if (archetype == null) {
-        SwArchetype newArchetype = new SwArchetype.fromDecklist(d, library);
-        archetypes.add(newArchetype);
-      } else {
-        archetype.decklists.add(d);
-      }
-    }
-    return archetypes;
-  }
-
   _attachListeners() {
     _wizard.addListener(() {
       int step = _wizard.step;
@@ -177,16 +126,17 @@ class _RootPageState extends State<RootPage> {
 
     _currentDeck.addListener(() {
       int length = _currentDeck.length;
-      List<SwCard> newCards = _currentDeck.sublist(_wizard.deckCursor, length);
+      List<SwCard> justAddedCards =
+          _currentDeck.sublist(_wizard.deckCursor, length);
       _wizard.deckCursor = length;
 
-      for (SwCard card in newCards) {
+      for (SwCard card in justAddedCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-            duration: Duration(milliseconds: 500),
+            duration: Duration(milliseconds: 750),
             content: new Text(
               "Added ${card.title}",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 18,
               ),
               textAlign: TextAlign.center,
             )));

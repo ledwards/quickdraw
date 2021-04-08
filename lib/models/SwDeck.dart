@@ -3,7 +3,7 @@ import 'SwCard.dart';
 import 'SwStack.dart';
 
 class SwDeck with ChangeNotifier {
-  SwDeck(title)
+  SwDeck(String title)
       : cards = SwStack([], title),
         side = null,
         title = title;
