@@ -1,12 +1,15 @@
 import 'package:flutter/widgets.dart';
+import 'WizardStep.dart';
 
 class Wizard with ChangeNotifier {
   Wizard()
       : _step = 1,
-        cursor = 0;
+        cursor = 0,
+        steps = {};
 
   int _step;
   int cursor;
+  Map<int, WizardStep> steps;
 
   int get step => _step;
 
