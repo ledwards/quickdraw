@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'sw_card.dart';
+import 'SwCard.dart';
 
 class SwStack with ChangeNotifier {
   SwStack(this.side, this.cards, this.title);

@@ -2,9 +2,9 @@ import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 
-import '../models/sw_card.dart';
-import '../models/sw_stack.dart';
-import '../models/sw_deck.dart';
+import '../models/SwCard.dart';
+import '../models/SwStack.dart';
+import '../models/SwDeck.dart';
 
 class SwipeableStack extends StatefulWidget {
   const SwipeableStack({

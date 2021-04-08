@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'sw_card.dart';
-import 'sw_stack.dart';
+import 'SwCard.dart';
+import 'SwStack.dart';
 
 class SwDeck with ChangeNotifier {
   SwDeck(side, title)

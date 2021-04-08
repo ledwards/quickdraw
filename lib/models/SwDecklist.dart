@@ -1,5 +1,5 @@
-import 'sw_card.dart';
-import 'sw_stack.dart';
+import 'SwCard.dart';
+import 'SwStack.dart';
 
 class SwDecklist {
   String side;

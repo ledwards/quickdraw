@@ -1,5 +1,5 @@
-import '../models/sw_card.dart';
-import '../models/sw_stack.dart';
+import '../models/SwCard.dart';
+import '../models/SwStack.dart';
 
 Map<String, dynamic> pullByStartingInterrupt(
     SwCard startingInterrupt, SwStack library) {

@@ -1,5 +1,5 @@
-import 'sw_card.dart';
-import 'sw_decklist.dart';
+import 'SwCard.dart';
+import 'SwDecklist.dart';
 
 class SwArchetype {
   SwArchetype(this.side, this.title, this.startingCard, this.decklists);

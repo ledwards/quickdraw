@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
-import 'models/sw_card.dart';
-import 'models/sw_decklist.dart';
-import 'models/sw_stack.dart';
-import 'models/sw_deck.dart';
-import 'models/sw_archetype.dart';
+import 'models/SwCard.dart';
+import 'models/SwDecklist.dart';
+import 'models/SwStack.dart';
+import 'models/SwDeck.dart';
+import 'models/SwArchetype.dart';
 
-import 'controllers/wizard.dart';
+import 'controllers/Wizard.dart';
 
-import 'rules/objectives.dart';
-import 'rules/starting_interrupts.dart';
+import 'rules/Objectives.dart';
+import 'rules/StartingInterrupts.dart';
 
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
