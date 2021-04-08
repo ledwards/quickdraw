@@ -202,7 +202,7 @@ class _RootPageState extends State<RootPage> {
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
     } else if (context.watch<Wizard>().step == 1) {
       // Pick A Side
-      body = CardBackPicker(_step1Callback);
+      body = CardBackPicker(_callbackForStep(1));
     } else {
       // Stack-Based  Screens
       drawer = QuickDrawer();
@@ -218,20 +218,18 @@ class _RootPageState extends State<RootPage> {
         body: body);
   }
 
-  _step1Callback(String side) {
-    setState(() {
-      this._allCards = _allCards.bySide(side);
-      _currentDeck().side = side;
-      _nextStep();
-    });
-  }
-
   Function _callbackForStep(int step) {
     Function callback;
 
     switch (step) {
       case 1:
-        callback = () {};
+        callback = (side) {
+          setState(() {
+            this._allCards = _allCards.bySide(side);
+            _currentDeck().side = side;
+            _nextStep();
+          });
+        };
         break;
 
       case 2:
