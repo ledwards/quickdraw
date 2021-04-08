@@ -65,14 +65,14 @@ class _RootPageState extends State<RootPage> {
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
-  SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
+  String get _currentSide => _wizard.currentSide;
+  SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
   SwStack get _currentStack => _wizard.currentStack;
   set _currentStack(SwStack s) => _wizard.currentStack = s;
   List<SwStack> get _futureStacks => _wizard.futureStacks;
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
-  String get _currentSide => _wizard.currentSide;
 
   void nextStep() => context.read<Wizard>().next();
   void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
