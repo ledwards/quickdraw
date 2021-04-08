@@ -70,20 +70,19 @@ class _RootPageState extends State<RootPage> {
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
-  SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
-  Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
-  String _currentSide() => _currentDeck().side;
+  SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
+  Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
 
-  Function _callbackForStep(int i) => _wizard().steps[i].callback;
-  Function _setupForStep(int i) => _wizard().steps[i].setup();
+  Function _callbackForStep(int i) => _wizard.steps[i].callback;
+  Function _setupForStep(int i) => _wizard.steps[i].setup();
   void _nextStep() => context.read<Wizard>().next();
   void _currentDeckAddStack(SwStack stack) =>
       context.read<SwDeck>().addStack(stack);
   void _clearCallbacks() =>
-      _currentDeck().removeListener(_wizard().currentCallback);
+      _currentDeck.removeListener(_wizard.currentCallback);
   void _addStepListener() {
-    _wizard().currentCallback = _callbackForStep(_wizard().step);
-    _currentDeck().addListener(_wizard().currentCallback);
+    _wizard.currentCallback = _callbackForStep(_wizard.step);
+    _currentDeck.addListener(_wizard.currentCallback);
   }
 
   @override
@@ -93,7 +92,7 @@ class _RootPageState extends State<RootPage> {
   }
 
   _setup() async {
-    String side = _currentSide();
+    String side = _currentDeck.side;
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
 
@@ -174,18 +173,17 @@ class _RootPageState extends State<RootPage> {
   }
 
   _attachListeners() {
-    _wizard().addListener(() {
-      int step = _wizard().step;
+    _wizard.addListener(() {
+      int step = _wizard.step;
       print("Step: $step");
       _clearCallbacks();
       _setupForStep(step);
     });
 
-    _currentDeck().addListener(() {
-      int length = _currentDeck().length;
-      List<SwCard> newCards =
-          _currentDeck().sublist(_wizard().deckCursor, length);
-      _wizard().deckCursor = length;
+    _currentDeck.addListener(() {
+      int length = _currentDeck.length;
+      List<SwCard> newCards = _currentDeck.sublist(_wizard.deckCursor, length);
+      _wizard.deckCursor = length;
 
       for (SwCard card in newCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
@@ -219,7 +217,7 @@ class _RootPageState extends State<RootPage> {
     } else {
       // Stack  Screen
       drawer = QuickDrawer();
-      body = SwipeableStack(stack: _currentStack, deck: _currentDeck());
+      body = SwipeableStack(stack: _currentStack, deck: _currentDeck);
     }
 
     return Scaffold(
@@ -239,12 +237,12 @@ class _RootPageState extends State<RootPage> {
         print("Picked $side Side");
         setState(() {
           _allCards = _allCards.bySide(side);
-          _currentDeck().side = side;
+          _currentDeck.side = side;
           _nextStep();
         });
       }),
       2: WizardStep(() {
-        String side = _currentSide();
+        String side = _currentDeck.side;
         print(side);
         List<SwArchetype> allPossibleArchetypes =
             _allArchetypes.where((a) => a.side == side).toList();
@@ -264,7 +262,7 @@ class _RootPageState extends State<RootPage> {
         _nextStep();
       }),
       3: WizardStep(() {
-        SwCard startingCard = _currentDeck().startingCard();
+        SwCard startingCard = _currentDeck.startingCard();
 
         if (startingCard.type == 'Objective') {
           Map<String, dynamic> pulled =
@@ -307,7 +305,7 @@ class _RootPageState extends State<RootPage> {
         _nextStep();
       }),
       5: WizardStep(() {
-        SwCard startingInterrupt = _currentDeck().startingInterrupt();
+        SwCard startingInterrupt = _currentDeck.startingInterrupt();
 
         if (startingInterrupt != null) {
           Map<String, dynamic> pulled =
@@ -331,8 +329,8 @@ class _RootPageState extends State<RootPage> {
           _nextStep(); // Starting Interrupt is only pulling mandatory cards
         }
       }, () {
-        SwCard startingInterrupt = _currentDeck().startingInterrupt();
-        SwCard lastCard = _currentDeck().lastCard();
+        SwCard startingInterrupt = _currentDeck.startingInterrupt();
+        SwCard lastCard = _currentDeck.lastCard();
 
         _handleSpecialPuller(startingInterrupt, lastCard);
 
@@ -362,7 +360,7 @@ class _RootPageState extends State<RootPage> {
     };
 
     setState(() {
-      _wizard().steps = _steps;
+      _wizard.steps = _steps;
     });
   }
 

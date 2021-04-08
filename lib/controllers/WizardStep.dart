@@ -3,6 +3,6 @@ class WizardStep {
       : setup = setup,
         callback = callback;
 
-  Function setup;
-  Function callback;
+  final Function setup;
+  final Function callback;
 }
