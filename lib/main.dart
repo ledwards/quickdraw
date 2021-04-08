@@ -70,16 +70,11 @@ class _RootPageState extends State<RootPage> {
   SwStack get _currentStack => _wizard.currentStack;
   set _currentStack(SwStack s) => _wizard.currentStack = s;
   List<SwStack> get _futureStacks => _wizard.futureStacks;
-  Function _callbackForStep(int i) => _wizard.steps[i].callback;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
+  Function _callbackForStep(int i) => _wizard.steps[i].callback;
 
   void nextStep() => context.read<Wizard>().nextStep();
   void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
-  // void addStepListener() {
-  //   _wizard.currentCallback = _callbackForStep(_wizard.step);
-  //   _currentDeck.addListener(_wizard.currentCallback);
-  // }
-
   void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
 
   @override
@@ -124,7 +119,7 @@ class _RootPageState extends State<RootPage> {
       int step = _wizard.step;
       print("Step: $step");
       clearCallbacks();
-      _setupForStep(step);
+      setState(() => _setupForStep(step));
     });
 
     _currentDeck.addListener(() {
@@ -203,10 +198,8 @@ class _RootPageState extends State<RootPage> {
           'Starting Locations',
         ).bySide(_currentSide).byType('Location');
 
-        setState(() {
-          _currentStack = objectives.concat(startingLocations);
-          _currentStack.title = 'Objectives & Starting Locations';
-        });
+        _currentStack = objectives.concat(startingLocations);
+        _currentStack.title = 'Objectives & Starting Locations';
         addStepListener();
       }, () {
         nextStep();
@@ -217,18 +210,14 @@ class _RootPageState extends State<RootPage> {
         if (startingCard.type == 'Objective') {
           Map<String, dynamic> pulled =
               pullByObjective(startingCard, _allCards);
-          setState(() {
-            _currentDeck.addStack(pulled['mandatory']);
-            _futureStacks.addAll(pulled['optionals']);
-          });
+          _currentDeck.addStack(pulled['mandatory']);
+          _futureStacks.addAll(pulled['optionals']);
         }
 
         if (startingCard.type == 'Objective' && _futureStacks.isNotEmpty) {
-          setState(() {
-            _currentStack.clear();
-            _currentStack.title = _futureStacks[0].title;
-            _currentStack.addStack(_futureStacks.removeAt(0));
-          });
+          _currentStack.clear();
+          _currentStack.title = _futureStacks[0].title;
+          _currentStack.addStack(_futureStacks.removeAt(0));
           addStepListener();
         } else {
           nextStep(); // Objective is only pulling mandatory cards or is a Location
@@ -246,10 +235,8 @@ class _RootPageState extends State<RootPage> {
         SwStack startingInterrupts =
             _allCards.byType('Interrupt').matchesSubType('Starting');
 
-        setState(() {
-          _currentStack = startingInterrupts;
-          _currentStack.title = 'Starting Interrupt';
-        });
+        _currentStack = startingInterrupts;
+        _currentStack.title = 'Starting Interrupt';
         addStepListener();
       }, () {
         nextStep();
@@ -260,20 +247,16 @@ class _RootPageState extends State<RootPage> {
         if (startingInterrupt != null) {
           Map<String, dynamic> pulled =
               pullByStartingInterrupt(startingInterrupt, _allCards);
-          setState(() {
-            _currentDeck.addStack(pulled['mandatory']);
-            _futureStacks.addAll(pulled['optionals']);
-          });
+          _currentDeck.addStack(pulled['mandatory']);
+          _futureStacks.addAll(pulled['optionals']);
         } else {
           nextStep();
         }
 
         if (startingInterrupt != null && _futureStacks.isNotEmpty) {
-          setState(() {
-            _currentStack.clear();
-            _currentStack.title = _futureStacks[0].title;
-            _currentStack.addStack(_futureStacks.removeAt(0));
-          });
+          _currentStack.clear();
+          _currentStack.title = _futureStacks[0].title;
+          _currentStack.addStack(_futureStacks.removeAt(0));
           addStepListener();
         } else {
           nextStep(); // Starting Interrupt is only pulling mandatory cards

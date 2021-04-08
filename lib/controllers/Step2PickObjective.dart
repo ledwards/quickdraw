@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'Wizard.dart';
 import 'WizardStep.dart';
 import '../models/SwStack.dart';
