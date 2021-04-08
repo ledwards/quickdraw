@@ -86,7 +86,8 @@ class SwStack with ChangeNotifier {
   }
 
   SwStack matchingStarships(SwCard character) {
-    String persona = character.title.split(' ')[0]; // I think this works?
+    String persona =
+        character.title.split(' ')[0]; // This works for most personas
     SwStack matchFromStarship =
         this.byType('Starship').matchesGametext(persona);
     SwStack matchFromCharacter = this
@@ -99,7 +100,8 @@ class SwStack with ChangeNotifier {
   }
 
   SwStack matchingWeapons(SwCard character) {
-    String persona = character.title.split(' ')[0]; // I think this works?
+    String persona =
+        character.title.split(' ')[0]; // This works for most personas
     SwStack matchFromWeapon =
         this.byType('Weapon').bySubType('Character').matchesGametext(persona);
     SwStack matchFromCharacter = this
@@ -112,10 +114,11 @@ class SwStack with ChangeNotifier {
     return (matchFromWeapon.concat(matchFromCharacter).uniq());
   }
 
-  SwStack.from(SwStack s)
+  // TODO: Use maps for all these options
+  SwStack.fromStack(SwStack s, String title)
       : side = s.side,
         cards = s.cards,
-        title = s.title;
+        title = title != null ? title : s.title;
 
   SwStack.fromCards(side, List<SwCard> cards, String title)
       : side = cards.isNotEmpty ? cards[0].side : null,

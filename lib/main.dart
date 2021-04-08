@@ -62,7 +62,8 @@ class _RootPageState extends State<RootPage> {
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
 
-  // TODO: currentStack gets a notifier
+  // TODO: Part of Wizard?
+  Function _currentCallback;
   SwStack _currentStack;
   List<SwStack> _futureStacks = [];
 
@@ -73,12 +74,17 @@ class _RootPageState extends State<RootPage> {
   SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
   String _currentSide() => _currentDeck().side;
   Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
-  int _currentStep() => _wizard().step;
 
   // Mutators
   void _nextStep() => context.read<Wizard>().next();
   void _currentDeckAddStack(SwStack stack) =>
       context.read<SwDeck>().addStack(stack);
+
+  @override
+  void initState() {
+    _setup();
+    super.initState();
+  }
 
   _setup() async {
     String side = _currentSide();
@@ -96,26 +102,25 @@ class _RootPageState extends State<RootPage> {
       ];
     });
 
-    // TODO: Audit this to make sure the flow is as simple as possible. (async?)
+    // TODO: Is async necessary?
     setState(() {
       this._allCards = new SwStack.fromCards(side, loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
-      this._currentStack =
-          new SwStack.fromCards(side, results[1].cards, 'Choose A Side');
+      this._currentStack = new SwStack.fromStack(results[1], 'Choose A Side');
       this._maybeStack = new SwStack(side, [], 'Maybe Cards');
     });
 
+    // whenever Wizard step changes
     _wizard().addListener(() {
       int step = _wizard().step;
       print("Step: $step");
-      _setupStep(step);
+      _setupForStep(step);
     });
 
     _currentDeck().addListener(() {
-      int cursor = _wizard().cursor;
       int length = _currentDeck().length;
-      List<SwCard> newCards = _currentDeck().sublist(cursor, length);
+      List<SwCard> newCards = _currentDeck().sublist(_wizard().cursor, length);
       _wizard().cursor = length;
 
       for (SwCard card in newCards) {
@@ -123,9 +128,12 @@ class _RootPageState extends State<RootPage> {
             duration: Duration(milliseconds: 500),
             content: new Text(
               "Added ${card.title}",
+              style: TextStyle(
+                fontSize: 18,
+              ),
               textAlign: TextAlign.center,
             )));
-        print("Added a card to deck: ${card.title}");
+        print("Added: ${card.title}");
       }
     });
   }
@@ -182,31 +190,23 @@ class _RootPageState extends State<RootPage> {
   }
 
   @override
-  void initState() {
-    _setup();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Widget body;
     String title = _currentStack == null ? 'Loading...' : _currentStack.title;
+    Widget drawer;
+    Widget body;
 
     if (_currentStack == null) {
+      // Loading
       body = Center(
           child: Image.network(
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
+    } else if (context.watch<Wizard>().step == 1) {
+      // Pick A Side
+      body = CardBackPicker(_step1Callback);
     } else {
-      switch (context.watch<Wizard>().step) {
-        case 1: // Side
-          body = CardBackPicker(_step1Callback);
-          break;
-
-        default: // Objective or Starting Location
-          // TODO: If stack ends up empty, refresh it
-          body = SwipeableStack(stack: _currentStack, deck: _currentDeck());
-          break;
-      }
+      // Stack-Based  Screens
+      drawer = QuickDrawer();
+      body = SwipeableStack(stack: _currentStack, deck: _currentDeck());
     }
 
     return Scaffold(
@@ -214,7 +214,7 @@ class _RootPageState extends State<RootPage> {
         appBar: AppBar(
           title: Text(title),
         ),
-        drawer: QuickDrawer(),
+        drawer: drawer,
         body: body);
   }
 
@@ -226,73 +226,89 @@ class _RootPageState extends State<RootPage> {
     });
   }
 
-  _step2Callback() {
-    _nextStep();
-  }
+  Function _callbackForStep(int step) {
+    Function callback;
 
-  _step3Callback() {
-    if (_futureStacks.isEmpty) {
-      _nextStep();
-    } else {
-      setState(() {
-        _currentStack = _futureStacks.removeAt(0);
-      });
-    }
-  }
+    switch (step) {
+      case 1:
+        callback = () {};
+        break;
 
-  _step4Callback() {
-    _nextStep();
-  }
+      case 2:
+        callback = () {
+          _nextStep();
+        };
+        break;
 
-  _step5Callback() {
-    SwCard startingInterrupt = _currentDeck().startingInterrupt();
-    SwCard lastCard = _currentDeck().lastCard();
-
-    // handle Starting Interrupts whose choices have logic
-    // TODO: refactor into starting_interrupts.dart
-    switch (startingInterrupt.title) {
-      case 'Any Methods Necessary':
-        if (lastCard.type == 'Character') {
-          if (_allCards.matchingWeapons(lastCard).isNotEmpty()) {
-            SwStack matchingWeapons = _allCards.matchingWeapons(lastCard);
-            matchingWeapons.title = '(Optional) Matching Weapon';
-            _futureStacks.add(matchingWeapons);
+      case 3:
+        callback = () {
+          if (_futureStacks.isEmpty) {
+            _nextStep();
+          } else {
+            setState(() {
+              _currentStack = _futureStacks.removeAt(0);
+            });
           }
-          if (_allCards.matchingStarships(lastCard).isNotEmpty()) {
-            SwStack matchingStarships = _allCards.matchingStarships(lastCard);
-            matchingStarships.title = '(Optional) Matching Starship';
-            _futureStacks.add(matchingStarships);
+        };
+        break;
+
+      case 4:
+        callback = () {
+          _nextStep();
+        };
+        break;
+
+      case 5:
+        callback = () {
+          SwCard startingInterrupt = _currentDeck().startingInterrupt();
+          SwCard lastCard = _currentDeck().lastCard();
+
+          // handle Starting Interrupts whose choices have logic
+          // TODO: refactor into starting_interrupts.dart
+          switch (startingInterrupt.title) {
+            case 'Any Methods Necessary':
+              if (lastCard.type == 'Character') {
+                if (_allCards.matchingWeapons(lastCard).isNotEmpty()) {
+                  SwStack matchingWeapons = _allCards.matchingWeapons(lastCard);
+                  matchingWeapons.title = '(Optional) Matching Weapon';
+                  _futureStacks.add(matchingWeapons);
+                }
+                if (_allCards.matchingStarships(lastCard).isNotEmpty()) {
+                  SwStack matchingStarships =
+                      _allCards.matchingStarships(lastCard);
+                  matchingStarships.title = '(Optional) Matching Starship';
+                  _futureStacks.add(matchingStarships);
+                }
+              } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
+                SwStack despairs =
+                    _allCards.findAllByNames(['Despair (V)', 'Despair']);
+                despairs.title = '(Optional) Despair';
+                _futureStacks.insert(0, despairs);
+              }
+              break;
           }
-        } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
-          SwStack despairs =
-              _allCards.findAllByNames(['Despair (V)', 'Despair']);
-          despairs.title = '(Optional) Despair';
-          _futureStacks.insert(0, despairs);
-        }
+
+          if (_futureStacks.isEmpty) {
+            _nextStep();
+          } else {
+            setState(() {
+              _currentStack = _futureStacks.removeAt(0);
+            });
+          }
+        };
+        break;
+
+      case 6:
+        callback = () {};
         break;
     }
 
-    if (_futureStacks.isEmpty) {
-      _nextStep();
-    } else {
-      setState(() {
-        _currentStack = _futureStacks.removeAt(0);
-      });
-    }
+    return callback;
   }
 
-  _step6Callback() {
-    // maybe only move to next step on some button press?
-  }
-
-  _setupStep(int s) {
+  _setupForStep(int s) {
     String side = _currentSide();
-    _currentDeck().removeListener(_step2Callback);
-    _currentDeck().removeListener(_step3Callback);
-    _currentDeck().removeListener(_step4Callback);
-    _currentDeck().removeListener(_step5Callback);
-    _currentDeck().removeListener(_step6Callback);
-    // _currentDeck().removeListener(_step7Callback);
+    _clearCallbacks();
 
     switch (s) {
       case 1: // Pick a Side
@@ -313,7 +329,8 @@ class _RootPageState extends State<RootPage> {
           this._currentStack.title = 'Objectives & Starting Locations';
         });
 
-        _currentDeck().addListener(_step2Callback);
+        _currentCallback = _callbackForStep(2);
+        _currentDeck().addListener(_currentCallback);
         break;
 
       case 3: // Pulled by Objective
@@ -334,7 +351,8 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _currentDeck().addListener(_step3Callback);
+          _currentCallback = _callbackForStep(3);
+          _currentDeck().addListener(_currentCallback);
         } else {
           _nextStep(); // Objective is only pulling mandatory cards or is a Location
         }
@@ -348,7 +366,8 @@ class _RootPageState extends State<RootPage> {
           this._currentStack = startingInterrupts;
           this._currentStack.title = 'Starting Interrupt';
         });
-        _currentDeck().addListener(_step4Callback);
+        _currentCallback = _callbackForStep(4);
+        _currentDeck().addListener(_currentCallback);
         break;
 
       case 5: // Pulled by Starting Interrupts
@@ -371,7 +390,8 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _currentDeck().addListener(_step5Callback);
+          _currentCallback = _callbackForStep(5);
+          _currentDeck().addListener(_currentCallback);
         } else {
           _nextStep(); // Starting Interrupt is only pulling mandatory cards
         }
@@ -386,5 +406,9 @@ class _RootPageState extends State<RootPage> {
       case 8: // Defensive Shields
         break;
     }
+  }
+
+  _clearCallbacks() {
+    _currentDeck().removeListener(_currentCallback);
   }
 }
