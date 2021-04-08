@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SW:CCG Builder',
+      title: 'Quick Draw',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
@@ -116,6 +116,7 @@ class _RootPageState extends State<RootPage> {
     _setupForStep(1);
   }
 
+  // TODO: Do I need listeners here, or just do these things when the values are set?
   _attachListeners() {
     _wizard.addListener(() {
       int step = _wizard.step;
