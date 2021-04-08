@@ -4,12 +4,14 @@ import 'WizardStep.dart';
 class Wizard with ChangeNotifier {
   Wizard()
       : _step = 1,
-        cursor = 0,
-        steps = {};
+        deckCursor = 0,
+        steps = {},
+        currentCallback = null;
 
   int _step;
-  int cursor;
+  int deckCursor;
   Map<int, WizardStep> steps;
+  Function currentCallback;
 
   int get step => _step;
 

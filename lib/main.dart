@@ -64,8 +64,6 @@ class _RootPageState extends State<RootPage> {
   List<SwArchetype> _allArchetypes = [];
 
   // TODO: Part of Wizard?
-  Map<int, WizardStep> _wizardSteps;
-  Function _currentCallback;
   SwStack _currentStack;
   List<SwStack> _futureStacks = [];
 
@@ -73,14 +71,20 @@ class _RootPageState extends State<RootPage> {
   SwStack _maybeStack;
 
   SwDeck _currentDeck() => Provider.of<SwDeck>(context, listen: false);
-  String _currentSide() => _currentDeck().side;
   Wizard _wizard() => Provider.of<Wizard>(context, listen: false);
+  String _currentSide() => _currentDeck().side;
 
+  Function _callbackForStep(int i) => _wizard().steps[i].callback;
+  Function _setupForStep(int i) => _wizard().steps[i].setup();
   void _nextStep() => context.read<Wizard>().next();
   void _currentDeckAddStack(SwStack stack) =>
       context.read<SwDeck>().addStack(stack);
-  Function _callbackForStep(int i) => _wizardSteps[i].callback;
-  Function _setupForStep(int i) => _wizardSteps[i].setup();
+  void _clearCallbacks() =>
+      _currentDeck().removeListener(_wizard().currentCallback);
+  void _addStepListener() {
+    _wizard().currentCallback = _callbackForStep(_wizard().step);
+    _currentDeck().addListener(_wizard().currentCallback);
+  }
 
   @override
   void initState() {
@@ -179,8 +183,9 @@ class _RootPageState extends State<RootPage> {
 
     _currentDeck().addListener(() {
       int length = _currentDeck().length;
-      List<SwCard> newCards = _currentDeck().sublist(_wizard().cursor, length);
-      _wizard().cursor = length;
+      List<SwCard> newCards =
+          _currentDeck().sublist(_wizard().deckCursor, length);
+      _wizard().deckCursor = length;
 
       for (SwCard card in newCards) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
@@ -195,10 +200,6 @@ class _RootPageState extends State<RootPage> {
         print("Added: ${card.title}");
       }
     });
-  }
-
-  _clearCallbacks() {
-    _currentDeck().removeListener(_currentCallback);
   }
 
   @override
@@ -258,9 +259,7 @@ class _RootPageState extends State<RootPage> {
           _currentStack = objectives.concat(startingLocations);
           _currentStack.title = 'Objectives & Starting Locations';
         });
-
-        _currentCallback = _callbackForStep(2);
-        _currentDeck().addListener(_currentCallback);
+        _addStepListener();
       }, () {
         _nextStep();
       }),
@@ -282,8 +281,7 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _currentCallback = _callbackForStep(3);
-          _currentDeck().addListener(_currentCallback);
+          _addStepListener();
         } else {
           _nextStep(); // Objective is only pulling mandatory cards or is a Location
         }
@@ -304,8 +302,7 @@ class _RootPageState extends State<RootPage> {
           _currentStack = startingInterrupts;
           _currentStack.title = 'Starting Interrupt';
         });
-        _currentCallback = _callbackForStep(4);
-        _currentDeck().addListener(_currentCallback);
+        _addStepListener();
       }, () {
         _nextStep();
       }),
@@ -329,8 +326,7 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _currentCallback = _callbackForStep(5);
-          _currentDeck().addListener(_currentCallback);
+          _addStepListener();
         } else {
           _nextStep(); // Starting Interrupt is only pulling mandatory cards
         }
@@ -366,7 +362,7 @@ class _RootPageState extends State<RootPage> {
     };
 
     setState(() {
-      _wizardSteps = _steps;
+      _wizard().steps = _steps;
     });
   }
 
