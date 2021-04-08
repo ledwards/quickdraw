@@ -27,6 +27,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => Wizard()),
         ChangeNotifierProvider(create: (_) => SwDeck('New Deck')),
+        ChangeNotifierProvider(create: (_) => SwStack([], 'New Deck')),
       ],
       child: MyApp(),
     ),
@@ -100,17 +101,17 @@ class _RootPageState extends State<RootPage> {
 
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
-        SwStack.fromCards(loadedCards, 'All Cards'),
+        SwStack(loadedCards, 'All Cards'),
       ];
     });
 
     // TODO: Is async necessary?
     setState(() {
-      this._allCards = new SwStack.fromCards(loadedCards, 'All Cards');
+      this._allCards = new SwStack(loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
       this._currentStack = new SwStack.fromStack(results[1], 'Choose A Side');
-      this._maybeStack = new SwStack(null, [], 'Maybe Cards');
+      this._maybeStack = new SwStack([], 'Maybe Cards');
     });
 
     _buildSteps();
@@ -244,7 +245,7 @@ class _RootPageState extends State<RootPage> {
         List<SwArchetype> allPossibleArchetypes =
             _allArchetypes.where((a) => a.side == side).toList();
         SwStack objectives = _allCards.byType('Objective');
-        SwStack startingLocations = new SwStack.fromCards(
+        SwStack startingLocations = new SwStack(
           allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
           'Starting Locations',
         ).bySide(side).byType('Location');

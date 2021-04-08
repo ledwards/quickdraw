@@ -2,7 +2,7 @@ import '../models/SwCard.dart';
 import '../models/SwStack.dart';
 
 Map<String, dynamic> pullByObjective(SwCard objective, SwStack library) {
-  SwStack mandatory = new SwStack(objective.side, [], "");
+  SwStack mandatory = new SwStack([], "");
   List<SwStack> optionals = [];
 
   switch (objective.title) {
@@ -29,11 +29,10 @@ Map<String, dynamic> pullByObjective(SwCard objective, SwStack library) {
       ]);
 
       optionals.add(new SwStack(
-          objective.side,
           [library.findByName('Executor: Meditation Chamber')],
           '(Optional) Meditation Chamber'));
 
-      optionals.add(new SwStack(objective.side,
+      optionals.add(new SwStack(
           [library.findByName('Epic Duel')], '(Optional) Epic Duel'));
       break;
   }

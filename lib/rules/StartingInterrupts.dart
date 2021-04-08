@@ -3,7 +3,7 @@ import '../models/SwStack.dart';
 
 Map<String, dynamic> pullByStartingInterrupt(
     SwCard startingInterrupt, SwStack library) {
-  SwStack mandatory = new SwStack(startingInterrupt.side, [], "");
+  SwStack mandatory = new SwStack([], "");
   List<SwStack> optionals = [];
 
   switch (startingInterrupt.title) {

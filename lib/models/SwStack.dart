@@ -2,12 +2,10 @@ import 'package:flutter/widgets.dart';
 import 'SwCard.dart';
 
 class SwStack with ChangeNotifier {
-  SwStack(this.side, this.cards, this.title);
-
-  String side;
   List<SwCard> cards;
   String title;
 
+  String get side => cards.isEmpty ? null : cards[0].side;
   int get length => cards.length;
   operator [](int index) => cards[index];
 
@@ -27,11 +25,11 @@ class SwStack with ChangeNotifier {
   clear() => cards.clear();
 
   SwStack concat(SwStack that) {
-    return new SwStack(this.side, this.cards + that.cards, this.title);
+    return new SwStack(this.cards + that.cards, this.title);
   }
 
   SwStack subset(List<SwCard> cards) {
-    return new SwStack.fromCards(cards, this.title);
+    return new SwStack(cards, this.title);
   }
 
   SwStack bySide(String query) {
@@ -82,7 +80,7 @@ class SwStack with ChangeNotifier {
         .whereType<SwCard>()
         .toList();
 
-    return new SwStack(this.side, foundCards, 'Found all by name');
+    return new SwStack(foundCards, 'Found all by name');
   }
 
   SwStack matchingStarships(SwCard character) {
@@ -115,18 +113,15 @@ class SwStack with ChangeNotifier {
   }
 
   SwStack.fromStack(SwStack s, String title)
-      : side = s.side,
-        cards = s.cards,
+      : cards = s.cards,
         title = title != null ? title : s.title;
 
-  SwStack.fromCards(List<SwCard> cards, String title)
-      : side = cards.isNotEmpty ? cards[0].side : null,
-        cards = cards,
+  SwStack(List<SwCard> cards, String title)
+      : cards = cards,
         title = title;
 
   SwStack.fromCardNames(List<String> names, SwStack library, String title)
-      : side = library.isNotEmpty() ? library.side : null,
-        cards = names
+      : cards = names
             .map((name) {
               return library.cards.firstWhere(
                   (c) => (SwCard.normalizeTitle(c.title) ==
