@@ -26,9 +26,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Wizard()),
-        ChangeNotifierProvider(create: (_) => SwDeck(null, 'New Deck')),
-        ChangeNotifierProvider(
-            create: (_) => SwStack(null, [], 'Choose A Side')),
+        ChangeNotifierProvider(create: (_) => SwDeck('New Deck')),
       ],
       child: MyApp(),
     ),
@@ -75,12 +73,11 @@ class _RootPageState extends State<RootPage> {
 
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
-  void _nextStep() => context.read<Wizard>().next();
-  void _currentDeckAddStack(SwStack stack) =>
+  void nextStep() => context.read<Wizard>().next();
+  void currentDeckAddStack(SwStack stack) =>
       context.read<SwDeck>().addStack(stack);
-  void _clearCallbacks() =>
-      _currentDeck.removeListener(_wizard.currentCallback);
-  void _addStepListener() {
+  void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
+  void addStepListener() {
     _wizard.currentCallback = _callbackForStep(_wizard.step);
     _currentDeck.addListener(_wizard.currentCallback);
   }
@@ -103,17 +100,17 @@ class _RootPageState extends State<RootPage> {
 
       return [
         _loadArchetypes(loadedDecklists, loadedCards),
-        SwStack.fromCards(side, loadedCards, 'All Cards'),
+        SwStack.fromCards(loadedCards, 'All Cards'),
       ];
     });
 
     // TODO: Is async necessary?
     setState(() {
-      this._allCards = new SwStack.fromCards(side, loadedCards, 'All Cards');
+      this._allCards = new SwStack.fromCards(loadedCards, 'All Cards');
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
       this._currentStack = new SwStack.fromStack(results[1], 'Choose A Side');
-      this._maybeStack = new SwStack(side, [], 'Maybe Cards');
+      this._maybeStack = new SwStack(null, [], 'Maybe Cards');
     });
 
     _buildSteps();
@@ -176,7 +173,7 @@ class _RootPageState extends State<RootPage> {
     _wizard.addListener(() {
       int step = _wizard.step;
       print("Step: $step");
-      _clearCallbacks();
+      clearCallbacks();
       _setupForStep(step);
     });
 
@@ -211,7 +208,7 @@ class _RootPageState extends State<RootPage> {
       body = Center(
           child: Image.network(
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
-    } else if (context.watch<Wizard>().step == 1) {
+    } else if (_wizard.step == 1) {
       // Pick A Side
       body = CardBackPicker(_callbackForStep(1));
     } else {
@@ -238,7 +235,7 @@ class _RootPageState extends State<RootPage> {
         setState(() {
           _allCards = _allCards.bySide(side);
           _currentDeck.side = side;
-          _nextStep();
+          nextStep();
         });
       }),
       2: WizardStep(() {
@@ -248,7 +245,6 @@ class _RootPageState extends State<RootPage> {
             _allArchetypes.where((a) => a.side == side).toList();
         SwStack objectives = _allCards.byType('Objective');
         SwStack startingLocations = new SwStack.fromCards(
-          side,
           allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
           'Starting Locations',
         ).bySide(side).byType('Location');
@@ -257,9 +253,9 @@ class _RootPageState extends State<RootPage> {
           _currentStack = objectives.concat(startingLocations);
           _currentStack.title = 'Objectives & Starting Locations';
         });
-        _addStepListener();
+        addStepListener();
       }, () {
-        _nextStep();
+        nextStep();
       }),
       3: WizardStep(() {
         SwCard startingCard = _currentDeck.startingCard();
@@ -268,7 +264,7 @@ class _RootPageState extends State<RootPage> {
           Map<String, dynamic> pulled =
               pullByObjective(startingCard, _allCards);
           setState(() {
-            _currentDeckAddStack(pulled['mandatory']);
+            currentDeckAddStack(pulled['mandatory']);
             _futureStacks.addAll(pulled['optionals']);
           });
         }
@@ -279,13 +275,13 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _addStepListener();
+          addStepListener();
         } else {
-          _nextStep(); // Objective is only pulling mandatory cards or is a Location
+          nextStep(); // Objective is only pulling mandatory cards or is a Location
         }
       }, () {
         if (_futureStacks.isEmpty) {
-          _nextStep();
+          nextStep();
         } else {
           setState(() {
             _currentStack = _futureStacks.removeAt(0);
@@ -300,9 +296,9 @@ class _RootPageState extends State<RootPage> {
           _currentStack = startingInterrupts;
           _currentStack.title = 'Starting Interrupt';
         });
-        _addStepListener();
+        addStepListener();
       }, () {
-        _nextStep();
+        nextStep();
       }),
       5: WizardStep(() {
         SwCard startingInterrupt = _currentDeck.startingInterrupt();
@@ -311,11 +307,11 @@ class _RootPageState extends State<RootPage> {
           Map<String, dynamic> pulled =
               pullByStartingInterrupt(startingInterrupt, _allCards);
           setState(() {
-            _currentDeckAddStack(pulled['mandatory']);
+            currentDeckAddStack(pulled['mandatory']);
             _futureStacks.addAll(pulled['optionals']);
           });
         } else {
-          _nextStep();
+          nextStep();
         }
 
         if (startingInterrupt != null && _futureStacks.isNotEmpty) {
@@ -324,9 +320,9 @@ class _RootPageState extends State<RootPage> {
             _currentStack.title = _futureStacks[0].title;
             _currentStack.addStack(_futureStacks.removeAt(0));
           });
-          _addStepListener();
+          addStepListener();
         } else {
-          _nextStep(); // Starting Interrupt is only pulling mandatory cards
+          nextStep(); // Starting Interrupt is only pulling mandatory cards
         }
       }, () {
         SwCard startingInterrupt = _currentDeck.startingInterrupt();
@@ -335,7 +331,7 @@ class _RootPageState extends State<RootPage> {
         _handleSpecialPuller(startingInterrupt, lastCard);
 
         if (_futureStacks.isEmpty) {
-          _nextStep();
+          nextStep();
         } else {
           setState(() {
             _currentStack = _futureStacks.removeAt(0);

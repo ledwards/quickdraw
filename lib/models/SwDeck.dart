@@ -3,9 +3,9 @@ import 'SwCard.dart';
 import 'SwStack.dart';
 
 class SwDeck with ChangeNotifier {
-  SwDeck(side, title)
-      : side = side,
-        cards = SwStack(side, [], title),
+  SwDeck(title)
+      : cards = SwStack(null, [], title),
+        side = null,
         title = title;
 
   String side;

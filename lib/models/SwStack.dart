@@ -31,7 +31,7 @@ class SwStack with ChangeNotifier {
   }
 
   SwStack subset(List<SwCard> cards) {
-    return new SwStack.fromCards(this.side, cards, this.title);
+    return new SwStack.fromCards(cards, this.title);
   }
 
   SwStack bySide(String query) {
@@ -114,13 +114,12 @@ class SwStack with ChangeNotifier {
     return (matchFromWeapon.concat(matchFromCharacter).uniq());
   }
 
-  // TODO: Use maps for all these options
   SwStack.fromStack(SwStack s, String title)
       : side = s.side,
         cards = s.cards,
         title = title != null ? title : s.title;
 
-  SwStack.fromCards(side, List<SwCard> cards, String title)
+  SwStack.fromCards(List<SwCard> cards, String title)
       : side = cards.isNotEmpty ? cards[0].side : null,
         cards = cards,
         title = title;
