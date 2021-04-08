@@ -16,7 +16,8 @@ import 'controllers/wizard.dart';
 import 'rules/objectives.dart';
 import 'rules/starting_interrupts.dart';
 
-import 'widgets/swipeableStack.dart';
+import 'widgets/SwipeableStack.dart';
+import 'widgets/QuickDrawer.dart';
 
 void main() {
   runApp(
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SW:CCG Builder',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
       home: RootPage(),
     );
@@ -100,7 +101,7 @@ class _RootPageState extends State<RootPage> {
       this._allDecklists = loadedDecklists;
       this._allArchetypes = results[0];
       this._currentStack =
-          new SwStack.fromCards(side, results[1], 'Choose A Side');
+          new SwStack.fromCards(side, results[1].cards, 'Choose A Side');
       this._maybeStack = new SwStack(side, [], 'Maybe Cards');
     });
 
@@ -189,6 +190,7 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     Widget w;
 
+    // switch should be inside body
     if (_currentStack == null) {
       w = new Scaffold(
         key: UniqueKey(),
@@ -200,15 +202,13 @@ class _RootPageState extends State<RootPage> {
                 'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif')),
       );
     } else {
-      // Wizard Entry
       switch (context.watch<Wizard>().step) {
         case 1: // Side
           w = Scaffold(
             appBar: AppBar(
               title: Text(_currentStack.title),
-              backgroundColor: Colors.grey.shade900,
             ),
-            drawer: _drawerWidget(context),
+            drawer: QuickDrawer(),
             body: Center(
               child: Container(
                 height: MediaQuery.of(context).size.height,
@@ -237,64 +237,14 @@ class _RootPageState extends State<RootPage> {
             key: UniqueKey(),
             appBar: AppBar(
               title: Text(_currentStack.title),
-              backgroundColor: Colors.grey.shade900,
             ),
-            drawer: _drawerWidget(context),
+            drawer: QuickDrawer(),
             body: SwipeableStack(stack: _currentStack, deck: _currentDeck()),
           );
           break;
       }
     }
     return w;
-  }
-
-  Widget _drawerItem(context, String title, IconData icon) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      onTap: () {
-        // need a callback, or simply call _stepX() method
-        Navigator.pop(context); // close the drawer
-      },
-    );
-  }
-
-  List<Widget> _drawerWidgets(context) {
-    // TODO: Refresh any state to initial state if you go back to an earlier step
-    return [
-      DrawerHeader(
-        decoration: BoxDecoration(
-          color: Colors.blue,
-        ),
-        child: Text(
-          'Create Deck',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-          ),
-        ),
-      ),
-      _drawerItem(context, 'Side', Icons.filter_1),
-      _drawerItem(context, 'Objective', Icons.filter_2),
-      _drawerItem(context, 'Pulled by Objective',
-          Icons.subdirectory_arrow_right_rounded),
-      _drawerItem(context, 'Starting Interrupt', Icons.filter_3),
-      _drawerItem(context, 'Pulled By Starting Interrupt',
-          Icons.subdirectory_arrow_right_rounded),
-      _drawerItem(context, 'Main Deck', Icons.filter_4),
-      _drawerItem(context, 'Starting Effect', Icons.filter_5),
-      _drawerItem(
-          context, 'Defensive Shields', Icons.subdirectory_arrow_right_rounded),
-    ];
-  }
-
-  Widget _drawerWidget(context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: _drawerWidgets(context),
-      ),
-    );
   }
 
   Widget _cardBackWidget(context, String side, Function callback) {
