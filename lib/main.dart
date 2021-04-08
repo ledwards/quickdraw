@@ -18,6 +18,7 @@ import 'rules/StartingInterrupts.dart';
 
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
+import 'widgets/CardBack.dart';
 
 void main() {
   runApp(
@@ -213,18 +214,9 @@ class _RootPageState extends State<RootPage> {
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 child: Column(
-                  children: [
-                    _cardBackWidget(
-                      context,
-                      'Dark',
-                      _step1Callback,
-                    ),
-                    _cardBackWidget(
-                      context,
-                      'Light',
-                      _step1Callback,
-                    ),
-                  ],
+                  children: ['Dark', 'Light']
+                      .map((side) => CardBack(side, _step1Callback))
+                      .toList(),
                 ),
               ),
             ),
@@ -245,20 +237,6 @@ class _RootPageState extends State<RootPage> {
       }
     }
     return w;
-  }
-
-  Widget _cardBackWidget(context, String side, Function callback) {
-    return Expanded(
-      child: new GestureDetector(
-        onTap: () => callback(side),
-        child: Container(
-          padding: EdgeInsets.all(5),
-          child: Image(
-              image: AssetImage(
-                  "assets/images/${side == 'Dark' ? 'ds' : 'ls'}-back.jpg")),
-        ),
-      ),
-    );
   }
 
   _step1Callback(String side) {
