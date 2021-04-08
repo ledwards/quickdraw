@@ -73,12 +73,14 @@ class _RootPageState extends State<RootPage> {
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
 
-  void nextStep() => context.read<Wizard>().next();
+  void nextStep() => context.read<Wizard>().nextStep();
   void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
-  void addStepListener() {
-    _wizard.currentCallback = _callbackForStep(_wizard.step);
-    _currentDeck.addListener(_wizard.currentCallback);
-  }
+  // void addStepListener() {
+  //   _wizard.currentCallback = _callbackForStep(_wizard.step);
+  //   _currentDeck.addListener(_wizard.currentCallback);
+  // }
+
+  void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
 
   @override
   void initState() {
@@ -177,7 +179,7 @@ class _RootPageState extends State<RootPage> {
 
   _buildSteps() {
     Map<int, WizardStep> _steps = {
-      1: WizardStep(() {
+      1: WizardStep(_wizard, () {
         print('Step: 1');
       }, (side) {
         print("Picked $side Side");
@@ -187,8 +189,12 @@ class _RootPageState extends State<RootPage> {
           nextStep();
         });
       }),
-      2: WizardStep(() {
-        print(_currentSide);
+      // 2: pickObjectiveStep(_wizard, {
+      // 'library': _allCards,
+      // 'archetypes': _allArchetypes,
+      // 'deck': _currentDeck
+      // });
+      2: WizardStep(_wizard, () {
         List<SwArchetype> allPossibleArchetypes =
             _allArchetypes.where((a) => a.side == _currentSide).toList();
         SwStack objectives = _allCards.byType('Objective');
@@ -205,7 +211,7 @@ class _RootPageState extends State<RootPage> {
       }, () {
         nextStep();
       }),
-      3: WizardStep(() {
+      3: WizardStep(_wizard, () {
         SwCard startingCard = _currentDeck.startingCard();
 
         if (startingCard.type == 'Objective') {
@@ -236,7 +242,7 @@ class _RootPageState extends State<RootPage> {
           });
         }
       }),
-      4: WizardStep(() {
+      4: WizardStep(_wizard, () {
         SwStack startingInterrupts =
             _allCards.byType('Interrupt').matchesSubType('Starting');
 
@@ -248,7 +254,7 @@ class _RootPageState extends State<RootPage> {
       }, () {
         nextStep();
       }),
-      5: WizardStep(() {
+      5: WizardStep(_wizard, () {
         SwCard startingInterrupt = _currentDeck.startingInterrupt();
 
         if (startingInterrupt != null) {
@@ -286,17 +292,17 @@ class _RootPageState extends State<RootPage> {
           });
         }
       }),
-      6: WizardStep(() {
+      6: WizardStep(_wizard, () {
         return null;
       }, () {
         return null;
       }),
-      7: WizardStep(() {
+      7: WizardStep(_wizard, () {
         return null;
       }, () {
         return null;
       }),
-      8: WizardStep(() {
+      8: WizardStep(_wizard, () {
         return null;
       }, () {
         return null;
