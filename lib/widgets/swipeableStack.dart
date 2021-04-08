@@ -66,7 +66,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
                       _deck.add(swipedCard);
                       break;
                     case CardSwipeOrientation.DOWN:
-                      // TODO: need a maybe stack
+                      // TODO: need a maybe stack: this widget should take the future List/Map of SwStacks
                       // _maybeStack.add(swipedCard);
                       break;
                     case CardSwipeOrientation.RECOVER:

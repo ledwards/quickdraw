@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'QuickDrawer.dart';
 
 class CardBackPicker extends StatelessWidget {
   CardBackPicker(this.callback);

@@ -62,21 +62,19 @@ class _RootPageState extends State<RootPage> {
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
 
-  // TODO: Part of Wizard?
-  SwStack _currentStack;
-  List<SwStack> _futureStacks = [];
-
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
 
   SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
-
+  SwStack get _currentStack => _wizard.currentStack;
+  set _currentStack(SwStack s) => _wizard.currentStack = s;
+  List<SwStack> get _futureStacks => _wizard.futureStacks;
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
+  String get _currentSide => _wizard.currentSide;
+
   void nextStep() => context.read<Wizard>().next();
-  void currentDeckAddStack(SwStack stack) =>
-      context.read<SwDeck>().addStack(stack);
   void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
   void addStepListener() {
     _wizard.currentCallback = _callbackForStep(_wizard.step);
@@ -90,7 +88,6 @@ class _RootPageState extends State<RootPage> {
   }
 
   _setup() async {
-    String side = _currentDeck.side;
     List<SwCard> loadedCards;
     List<SwDecklist> loadedDecklists;
 
@@ -235,20 +232,19 @@ class _RootPageState extends State<RootPage> {
         print("Picked $side Side");
         setState(() {
           _allCards = _allCards.bySide(side);
-          _currentDeck.side = side;
+          _wizard.currentSide = side;
           nextStep();
         });
       }),
       2: WizardStep(() {
-        String side = _currentDeck.side;
-        print(side);
+        print(_currentSide);
         List<SwArchetype> allPossibleArchetypes =
-            _allArchetypes.where((a) => a.side == side).toList();
+            _allArchetypes.where((a) => a.side == _currentSide).toList();
         SwStack objectives = _allCards.byType('Objective');
         SwStack startingLocations = new SwStack(
           allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
           'Starting Locations',
-        ).bySide(side).byType('Location');
+        ).bySide(_currentSide).byType('Location');
 
         setState(() {
           _currentStack = objectives.concat(startingLocations);
@@ -265,7 +261,7 @@ class _RootPageState extends State<RootPage> {
           Map<String, dynamic> pulled =
               pullByObjective(startingCard, _allCards);
           setState(() {
-            currentDeckAddStack(pulled['mandatory']);
+            _currentDeck.addStack(pulled['mandatory']);
             _futureStacks.addAll(pulled['optionals']);
           });
         }
@@ -308,7 +304,7 @@ class _RootPageState extends State<RootPage> {
           Map<String, dynamic> pulled =
               pullByStartingInterrupt(startingInterrupt, _allCards);
           setState(() {
-            currentDeckAddStack(pulled['mandatory']);
+            _currentDeck.addStack(pulled['mandatory']);
             _futureStacks.addAll(pulled['optionals']);
           });
         } else {
