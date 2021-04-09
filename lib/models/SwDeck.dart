@@ -5,13 +5,14 @@ import 'SwStack.dart';
 class SwDeck with ChangeNotifier {
   SwDeck(String title)
       : cards = SwStack([], title),
-        side = null,
+        _side = null,
         title = title;
 
-  String side;
+  String _side;
   String title;
   SwStack cards; // TODO: multiple stacks for each step
 
+  String get side => _side;
   int get length => cards.length;
   operator [](int index) => cards[index];
 
@@ -19,6 +20,11 @@ class SwDeck with ChangeNotifier {
   SwCard startingInterrupt() => cards.matchesSubType('Starting')[0];
   SwCard lastCard() => cards[length - 1];
   List<SwCard> sublist(start, end) => cards.sublist(start, end);
+
+  set side(String value) {
+    _side = value;
+    notifyListeners();
+  }
 
   add(SwCard c) {
     cards.add(c);

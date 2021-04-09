@@ -12,6 +12,7 @@ import 'models/SwArchetype.dart';
 import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
+import 'controllers/WizardStep2PickObjective.dart';
 
 import 'rules/Objectives.dart';
 import 'rules/StartingInterrupts.dart';
@@ -26,7 +27,6 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => Wizard()),
         ChangeNotifierProvider(create: (_) => SwDeck('New Deck')),
-        ChangeNotifierProvider(create: (_) => SwStack([], 'New Deck')),
       ],
       child: MyApp(),
     ),
@@ -57,7 +57,7 @@ class RootPage extends StatefulWidget {
 
 class _RootPageState extends State<RootPage> {
   // TODO: Belongs in a Metagame or Library class?
-  SwStack _allCards;
+  SwStack _allCards = SwStack([], 'All Cards');
   List<SwDecklist> _allDecklists = [];
   List<SwArchetype> _allArchetypes = [];
 
@@ -65,10 +65,11 @@ class _RootPageState extends State<RootPage> {
   SwStack _maybeStack;
 
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
-  String get _currentSide => _wizard.currentSide;
   SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
   SwStack get _currentStack => _wizard.currentStack;
-  set _currentStack(SwStack s) => _wizard.currentStack = s;
+  set _currentStack(SwStack s) => _wizard.currentStack == null
+      ? _wizard.currentStack = s
+      : _wizard.currentStack.refresh(s);
   List<SwStack> get _futureStacks => _wizard.futureStacks;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
@@ -109,8 +110,8 @@ class _RootPageState extends State<RootPage> {
     });
 
     _buildSteps();
-    _attachListeners();
     _setupForStep(1);
+    _attachListeners();
   }
 
   // TODO: Do I need listeners here, or just do these things when the values are set?
@@ -149,7 +150,7 @@ class _RootPageState extends State<RootPage> {
     Widget drawer;
     Widget body;
 
-    if (_currentStack == null) {
+    if (_currentStack == null || _wizard.isEmpty) {
       // Loading
       body = Center(
           child: Image.network(
@@ -178,31 +179,16 @@ class _RootPageState extends State<RootPage> {
         print('Step: 1');
       }, (side) {
         print("Picked $side Side");
-        setState(() {
-          _allCards = _allCards.bySide(side);
-          _wizard.currentSide = side;
-          nextStep();
-        });
-      }),
-      // 2: pickObjectiveStep(_wizard, {
-      // 'library': _allCards,
-      // 'archetypes': _allArchetypes,
-      // 'deck': _currentDeck
-      // });
-      2: WizardStep(_wizard, () {
-        List<SwArchetype> allPossibleArchetypes =
-            _allArchetypes.where((a) => a.side == _currentSide).toList();
-        SwStack objectives = _allCards.byType('Objective');
-        SwStack startingLocations = new SwStack(
-          allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
-          'Starting Locations',
-        ).bySide(_currentSide).byType('Location');
-
-        _currentStack = objectives.concat(startingLocations);
-        _currentStack.title = 'Objectives & Starting Locations';
-        addStepListener();
-      }, () {
+        // TODO: You can move setState into the body = CardBackPicker line if you try hard
+        // // But this probably doesn't belong in this Map, it doesn't work the same way
+        _wizard.side = side;
+        _allCards.refresh(_allCards.bySide(side));
         nextStep();
+      }),
+      2: pickObjectiveStep(_wizard, {
+        'library': _allCards,
+        'archetypes': _allArchetypes,
+        'deck': _currentDeck
       }),
       3: WizardStep(_wizard, () {
         SwCard startingCard = _currentDeck.startingCard();

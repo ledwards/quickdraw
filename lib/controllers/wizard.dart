@@ -10,7 +10,7 @@ class Wizard with ChangeNotifier {
         currentCallback = null,
         currentStack = null,
         futureStacks = [],
-        currentSide = null;
+        side = null;
 
   int _step; // TODO: distinguish between step = WizardStep obj and stepNumber
   Map<int, WizardStep> steps;
@@ -18,10 +18,11 @@ class Wizard with ChangeNotifier {
   Function currentCallback;
   SwStack currentStack;
   List<SwStack> futureStacks;
-  String currentSide;
+  String side;
 
   int get step => _step;
   WizardStep get currentWizardStep => steps[step];
+  bool get isEmpty => steps.isEmpty;
 
   set step(int value) {
     _step = value;

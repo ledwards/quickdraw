@@ -1,7 +1,6 @@
-import 'package:flutter/widgets.dart';
 import 'SwCard.dart';
 
-class SwStack with ChangeNotifier {
+class SwStack {
   List<SwCard> cards;
   String title;
 
@@ -23,6 +22,12 @@ class SwStack with ChangeNotifier {
   bool isNotEmpty() => cards.isNotEmpty;
 
   clear() => cards.clear();
+
+  void refresh(SwStack newStack) {
+    clear();
+    title = newStack.title;
+    addStack(newStack);
+  }
 
   SwStack concat(SwStack that) {
     return new SwStack(this.cards + that.cards, this.title);
@@ -136,8 +141,4 @@ class SwStack with ChangeNotifier {
             .toList()
             .cast<SwCard>(),
         title = title;
-
-  void onChange() {
-    notifyListeners();
-  }
 }
