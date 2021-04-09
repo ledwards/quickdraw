@@ -13,6 +13,7 @@ import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
 import 'controllers/WizardStep2PickObjective.dart';
+import 'controllers/WizardStep4PickStartingInterrupt.dart';
 
 import 'rules/Objectives.dart';
 import 'rules/StartingInterrupts.dart';
@@ -73,7 +74,7 @@ class _RootPageState extends State<RootPage> {
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
 
   void nextStep() => context.read<Wizard>().nextStep();
-  void clearCallbacks() => _currentDeck.removeListener(_wizard.currentCallback);
+  void clearCallbacks() => _wizard.clearCallbacks(_currentDeck);
   void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
 
   @override
@@ -215,16 +216,8 @@ class _RootPageState extends State<RootPage> {
           });
         }
       }),
-      4: WizardStep(_wizard, () {
-        SwStack startingInterrupts =
-            _allCards.byType('Interrupt').matchesSubType('Starting');
-
-        _currentStack = startingInterrupts;
-        _currentStack.title = 'Starting Interrupt';
-        addStepListener();
-      }, () {
-        nextStep();
-      }),
+      4: pickStartingInterrupt(
+          _wizard, {'library': _allCards, 'deck': _currentDeck}),
       5: WizardStep(_wizard, () {
         SwCard startingInterrupt = _currentDeck.startingInterrupt();
 

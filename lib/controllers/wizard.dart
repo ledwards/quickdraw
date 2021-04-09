@@ -37,4 +37,11 @@ class Wizard with ChangeNotifier {
     currentCallback = currentWizardStep.callback;
     target.addListener(currentCallback);
   }
+
+  void clearCallbacks(Listenable target) {
+    for (WizardStep ws in steps.values.skip(1)) {
+      // TODO: move step 1 out of this list
+      target.removeListener(ws.callback);
+    }
+  }
 }
