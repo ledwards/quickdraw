@@ -6,7 +6,7 @@ import '../models/SwDeck.dart';
 
 WizardStep pickObjectiveStep(Wizard wizard, Map<String, dynamic> data) {
   return WizardStep(wizard, () {
-    print('in step2');
+    print('Setting up step 3');
     List<SwArchetype> archetypes = data['archetypes'];
     SwStack library = data['library'];
     SwDeck deck = data['deck'];

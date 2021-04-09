@@ -5,7 +5,7 @@ import '../models/SwDeck.dart';
 
 WizardStep pickStartingInterrupt(Wizard wizard, Map<String, dynamic> data) {
   return WizardStep(wizard, () {
-    print('in step4');
+    print('Setting up step 4');
     SwStack library = data['library'];
     SwDeck deck = data['deck'];
 

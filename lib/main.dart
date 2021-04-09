@@ -13,9 +13,11 @@ import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
 import 'controllers/WizardStep2PickObjective.dart';
+import 'controllers/WizardStep3PulledByObjective.dart';
 import 'controllers/WizardStep4PickStartingInterrupt.dart';
+import 'controllers/WizardStep5PulledByStartingInterrupt.dart';
+// import 'controllers/WizardStep6MainDeck.dart';
 
-import 'rules/Objectives.dart';
 import 'rules/StartingInterrupts.dart';
 
 import 'widgets/SwipeableStack.dart';
@@ -123,23 +125,25 @@ class _RootPageState extends State<RootPage> {
     });
 
     _currentDeck.addListener(() {
-      int length = _currentDeck.length;
-      List<SwCard> justAddedCards =
-          _currentDeck.sublist(_wizard.deckCursor, length);
-      _wizard.deckCursor = length;
+      setState(() {
+        int length = _currentDeck.length;
+        List<SwCard> justAddedCards =
+            _currentDeck.sublist(_wizard.deckCursor, length);
+        _wizard.deckCursor = length;
 
-      for (SwCard card in justAddedCards) {
-        ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-            duration: Duration(milliseconds: 750),
-            content: new Text(
-              "Added ${card.title}",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.center,
-            )));
-        print("Added: ${card.title}");
-      }
+        for (SwCard card in justAddedCards) {
+          ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
+              duration: Duration(milliseconds: 600),
+              content: new Text(
+                "Added ${card.title}",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.center,
+              )));
+          print("Added: ${card.title}");
+        }
+      });
     });
   }
 
@@ -178,8 +182,6 @@ class _RootPageState extends State<RootPage> {
         print('Step: 1');
       }, (side) {
         print("Picked $side Side");
-        // TODO: You can move setState into the body = CardBackPicker line if you try hard
-        // // But this probably doesn't belong in this Map, it doesn't work the same way
         _wizard.side = side;
         _allCards.refresh(_allCards.bySide(side));
         nextStep();
@@ -189,68 +191,17 @@ class _RootPageState extends State<RootPage> {
         'archetypes': _allArchetypes,
         'deck': _currentDeck
       }),
-      3: WizardStep(_wizard, () {
-        SwCard startingCard = _currentDeck.startingCard();
-
-        if (startingCard.type == 'Objective') {
-          Map<String, dynamic> pulled =
-              pullByObjective(startingCard, _allCards);
-          _currentDeck.addStack(pulled['mandatory']);
-          _futureStacks.addAll(pulled['optionals']);
-        }
-
-        if (startingCard.type == 'Objective' && _futureStacks.isNotEmpty) {
-          _currentStack.clear();
-          _currentStack.title = _futureStacks[0].title;
-          _currentStack.addStack(_futureStacks.removeAt(0));
-          addStepListener();
-        } else {
-          nextStep(); // Objective is only pulling mandatory cards or is a Location
-        }
-      }, () {
-        if (_futureStacks.isEmpty) {
-          nextStep();
-        } else {
-          setState(() {
-            _currentStack = _futureStacks.removeAt(0);
-          });
-        }
+      3: pulledByObjective(_wizard, {
+        'library': _allCards,
+        'futureStacks': _futureStacks,
+        'deck': _currentDeck
       }),
       4: pickStartingInterrupt(
           _wizard, {'library': _allCards, 'deck': _currentDeck}),
-      5: WizardStep(_wizard, () {
-        SwCard startingInterrupt = _currentDeck.startingInterrupt();
-
-        if (startingInterrupt != null) {
-          Map<String, dynamic> pulled =
-              pullByStartingInterrupt(startingInterrupt, _allCards);
-          _currentDeck.addStack(pulled['mandatory']);
-          _futureStacks.addAll(pulled['optionals']);
-        } else {
-          nextStep();
-        }
-
-        if (startingInterrupt != null && _futureStacks.isNotEmpty) {
-          _currentStack.clear();
-          _currentStack.title = _futureStacks[0].title;
-          _currentStack.addStack(_futureStacks.removeAt(0));
-          addStepListener();
-        } else {
-          nextStep(); // Starting Interrupt is only pulling mandatory cards
-        }
-      }, () {
-        SwCard startingInterrupt = _currentDeck.startingInterrupt();
-        SwCard lastCard = _currentDeck.lastCard();
-
-        _handleSpecialPuller(startingInterrupt, lastCard);
-
-        if (_futureStacks.isEmpty) {
-          nextStep();
-        } else {
-          setState(() {
-            _currentStack = _futureStacks.removeAt(0);
-          });
-        }
+      5: pulledByStartingInterrupt(_wizard, {
+        'library': _allCards,
+        'futureStacks': _futureStacks,
+        'deck': _currentDeck
       }),
       6: WizardStep(_wizard, () {
         return null;
@@ -272,29 +223,5 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       _wizard.steps = _steps;
     });
-  }
-
-  _handleSpecialPuller(SwCard startingInterrupt, SwCard lastCard) {
-    switch (startingInterrupt.title) {
-      case 'Any Methods Necessary':
-        if (lastCard.type == 'Character') {
-          if (_allCards.matchingWeapons(lastCard).isNotEmpty()) {
-            SwStack matchingWeapons = _allCards.matchingWeapons(lastCard);
-            matchingWeapons.title = '(Optional) Matching Weapon';
-            _futureStacks.add(matchingWeapons);
-          }
-          if (_allCards.matchingStarships(lastCard).isNotEmpty()) {
-            SwStack matchingStarships = _allCards.matchingStarships(lastCard);
-            matchingStarships.title = '(Optional) Matching Starship';
-            _futureStacks.add(matchingStarships);
-          }
-        } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
-          SwStack despairs =
-              _allCards.findAllByNames(['Despair (V)', 'Despair']);
-          despairs.title = '(Optional) Despair';
-          _futureStacks.insert(0, despairs);
-        }
-        break;
-    }
   }
 }

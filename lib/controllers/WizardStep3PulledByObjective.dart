@@ -1,27 +1,39 @@
 import 'Wizard.dart';
 import 'WizardStep.dart';
 import '../models/SwStack.dart';
-import '../models/SwArchetype.dart';
+import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
+import '../rules/Objectives.dart';
 
-WizardStep pickObjectiveStep(Wizard wizard, Map<String, dynamic> data) {
+WizardStep pulledByObjective(Wizard wizard, Map<String, dynamic> data) {
   return WizardStep(wizard, () {
-    List<SwArchetype> archetypes = data['archetypes'];
+    print('Setting up step 3');
+    List<SwStack> futureStacks = data['futureStacks'];
     SwStack library = data['library'];
     SwDeck deck = data['deck'];
 
-    List<SwArchetype> allPossibleArchetypes =
-        archetypes.where((a) => a.side == wizard.side).toList();
-    SwStack objectives = library.byType('Objective');
-    SwStack startingLocations = new SwStack(
-      allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
-      'Starting Locations',
-    ).bySide(wizard.side).byType('Location');
+    SwCard startingCard = deck.startingCard();
 
-    wizard.currentStack = objectives.concat(startingLocations);
+    if (startingCard.type == 'Objective') {
+      Map<String, dynamic> pulled = pullByObjective(startingCard, library);
+      deck.addStack(pulled['mandatory']);
+      futureStacks.addAll(pulled['optionals']);
+    }
 
-    wizard.addCurrentStepListener(deck);
+    if (startingCard.type == 'Objective' && futureStacks.isNotEmpty) {
+      wizard.currentStack.clear();
+      wizard.currentStack.title = futureStacks[0].title;
+      wizard.currentStack.addStack(futureStacks.removeAt(0));
+      wizard.addCurrentStepListener(deck);
+    } else {
+      wizard
+          .nextStep(); // Objective is only pulling mandatory cards or is a Location
+    }
   }, () {
-    wizard.nextStep();
+    if (wizard.futureStacks.isEmpty) {
+      wizard.nextStep();
+    } else {
+      wizard.currentStack = wizard.futureStacks.removeAt(0);
+    }
   });
 }
