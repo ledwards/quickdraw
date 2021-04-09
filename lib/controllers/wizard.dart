@@ -8,7 +8,7 @@ class Wizard with ChangeNotifier {
         steps = {},
         deckCursor = 0,
         currentCallback = null,
-        currentStack = null,
+        currentStack = SwStack([], 'Pick a Side'),
         futureStacks = [],
         side = null;
 

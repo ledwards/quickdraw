@@ -67,9 +67,7 @@ class _RootPageState extends State<RootPage> {
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
   SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
   SwStack get _currentStack => _wizard.currentStack;
-  set _currentStack(SwStack s) => _wizard.currentStack == null
-      ? _wizard.currentStack = s
-      : _wizard.currentStack.refresh(s);
+  set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
   List<SwStack> get _futureStacks => _wizard.futureStacks;
   Function _setupForStep(int i) => _wizard.steps[i].setup();
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
