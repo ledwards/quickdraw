@@ -6,7 +6,6 @@ handleMultistagePuller(
     SwCard startingInterrupt, Metagame meta, Map<String, dynamic> data) {
   SwCard lastCard = data['lastCard'];
   List<SwStack> futureStacks = data['futureStacks'];
-
   SwStack library = meta.library;
 
   switch (startingInterrupt.title) {

@@ -5,6 +5,7 @@ import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
 import '../rules/StartingInterrupts.dart';
 import '../rules/Metagame.dart';
+import '../rules/MultistagePullers.dart';
 
 WizardStep pulledByStartingInterrupt(
     Wizard wizard, Metagame meta, SwDeck deck) {
@@ -32,42 +33,18 @@ WizardStep pulledByStartingInterrupt(
       wizard.nextStep(); // Starting Interrupt is only pulling mandatory cards
     }
   }, () {
+    SwCard startingInterrupt = deck.startingInterrupt();
     List<SwStack> futureStacks = wizard.futureStacks;
 
-    _handleSpecialPuller(wizard, meta, deck);
+    handleMultistagePuller(startingInterrupt, meta, {
+      'lastCard': deck.lastCard(),
+      'futureStacks': wizard.futureStacks,
+    });
+
     if (futureStacks.isEmpty) {
       wizard.nextStep();
     } else {
       wizard.currentStack = futureStacks.removeAt(0);
     }
   });
-}
-
-_handleSpecialPuller(Wizard wizard, Metagame meta, SwDeck deck) {
-  SwStack library = meta.library;
-  List<SwStack> futureStacks = wizard.futureStacks;
-
-  SwCard startingInterrupt = deck.startingInterrupt();
-  SwCard lastCard = deck.lastCard();
-
-  switch (startingInterrupt.title) {
-    case 'Any Methods Necessary':
-      if (lastCard.type == 'Character') {
-        if (library.matchingWeapons(lastCard).isNotEmpty()) {
-          SwStack matchingWeapons = library.matchingWeapons(lastCard);
-          matchingWeapons.title = '(Optional) Matching Weapon';
-          futureStacks.add(matchingWeapons);
-        }
-        if (library.matchingStarships(lastCard).isNotEmpty()) {
-          SwStack matchingStarships = library.matchingStarships(lastCard);
-          matchingStarships.title = '(Optional) Matching Starship';
-          futureStacks.add(matchingStarships);
-        }
-      } else if (lastCard.title == 'Cloud City: Security Tower (V)') {
-        SwStack despairs = library.findAllByNames(['Despair (V)', 'Despair']);
-        despairs.title = '(Optional) Despair';
-        futureStacks.insert(0, despairs);
-      }
-      break;
-  }
 }
