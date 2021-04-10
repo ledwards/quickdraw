@@ -12,13 +12,11 @@ import 'models/SwArchetype.dart';
 import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
-import 'controllers/WizardStep2PickObjective.dart';
+import 'controllers/WizardStep2ChooseObjective.dart';
 import 'controllers/WizardStep3PulledByObjective.dart';
-import 'controllers/WizardStep4PickStartingInterrupt.dart';
+import 'controllers/WizardStep4ChooseStartingInterrupt.dart';
 import 'controllers/WizardStep5PulledByStartingInterrupt.dart';
 // import 'controllers/WizardStep6MainDeck.dart';
-
-import 'rules/StartingInterrupts.dart';
 
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
@@ -69,13 +67,16 @@ class _RootPageState extends State<RootPage> {
 
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
   SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
+
   SwStack get _currentStack => _wizard.currentStack;
   set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
   List<SwStack> get _futureStacks => _wizard.futureStacks;
+  String get _currentSide => _currentDeck.side;
+  set _currentSide(String value) => _currentDeck.side = value;
+
   Function _setupForStep(int i) => _wizard.steps[i].setup();
   Function _callbackForStep(int i) => _wizard.steps[i].callback;
-
-  void nextStep() => context.read<Wizard>().nextStep();
+  void nextStep() => _wizard.nextStep();
   void clearCallbacks() => _wizard.clearCallbacks(_currentDeck);
   void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
 
@@ -159,7 +160,7 @@ class _RootPageState extends State<RootPage> {
           child: Image.network(
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
     } else if (_wizard.step == 1) {
-      // Pick A Side
+      // Choose A Side
       body = CardBackPicker(_callbackForStep(1));
     } else {
       // Stack  Screen
@@ -182,7 +183,7 @@ class _RootPageState extends State<RootPage> {
         print('Step: 1');
       }, (side) {
         print("Picked $side Side");
-        _wizard.side = side;
+        _currentSide = side;
         _allCards.refresh(_allCards.bySide(side));
         nextStep();
       }),

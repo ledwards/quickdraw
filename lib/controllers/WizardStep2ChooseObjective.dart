@@ -12,12 +12,12 @@ WizardStep pickObjectiveStep(Wizard wizard, Map<String, dynamic> data) {
     SwDeck deck = data['deck'];
 
     List<SwArchetype> allPossibleArchetypes =
-        archetypes.where((a) => a.side == wizard.side).toList();
+        archetypes.where((a) => a.side == deck.side).toList();
     SwStack objectives = library.byType('Objective');
     SwStack startingLocations = new SwStack(
       allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
       'Starting Locations',
-    ).bySide(wizard.side).byType('Location');
+    ).bySide(deck.side).byType('Location');
 
     wizard.currentStack = objectives.concat(startingLocations);
 

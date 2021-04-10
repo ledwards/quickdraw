@@ -9,8 +9,7 @@ class Wizard with ChangeNotifier {
         deckCursor = 0,
         currentCallback = null,
         currentStack = SwStack([], 'Pick a Side'),
-        futureStacks = [],
-        side = null;
+        futureStacks = [];
 
   int _step; // TODO: distinguish between step = WizardStep obj and stepNumber
   Map<int, WizardStep> steps;
@@ -18,7 +17,6 @@ class Wizard with ChangeNotifier {
   Function currentCallback;
   SwStack currentStack;
   List<SwStack> futureStacks;
-  String side;
 
   int get step => _step;
   WizardStep get currentWizardStep => steps[step];
@@ -40,7 +38,6 @@ class Wizard with ChangeNotifier {
 
   void clearCallbacks(Listenable target) {
     for (WizardStep ws in steps.values.skip(1)) {
-      // TODO: move step 1 out of this list
       target.removeListener(ws.callback);
     }
   }
