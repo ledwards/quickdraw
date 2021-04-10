@@ -52,19 +52,16 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
-  SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
+  Wizard get wizard => Provider.of<Wizard>(context, listen: false);
+  SwDeck get currentDeck => Provider.of<SwDeck>(context, listen: false);
   Metagame meta = Metagame(null);
+  SwStack get currentStack => wizard.currentStack;
+  set currentStack(SwStack s) => wizard.currentStack.refresh(s);
 
-  Function _setupForStep(int i) => _wizard.steps[i].setup();
-  void nextStep() => _wizard.nextStep();
-  void clearCallbacks() => _wizard.clearCallbacks(_currentDeck);
-  void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
-
-  // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
-  SwStack get _currentStack => _wizard.currentStack;
-  set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
-  SwStack _maybeStack;
+  Function _setupForStep(int i) => wizard.steps[i].setup();
+  void nextStep() => wizard.nextStep();
+  void clearCallbacks() => wizard.clearCallbacks(currentDeck);
+  void addStepListener() => wizard.addCurrentStepListener(currentDeck);
 
   @override
   void initState() {
@@ -90,11 +87,10 @@ class _RootPageState extends State<RootPage> {
 
     // TODO: Is async necessary?
     setState(() {
-      meta.allCards = new SwStack(loadedCards, 'All Cards');
+      meta.allCards = SwStack(loadedCards, 'All Cards');
       meta.allDecklists = loadedDecklists;
       meta.allArchetypes = results[0];
-      this._currentStack = new SwStack.fromStack(results[1], 'Choose A Side');
-      this._maybeStack = new SwStack([], 'Maybe Cards');
+      currentStack = SwStack.fromStack(results[1], 'Choose A Side');
     });
 
     _stepOne().setup();
@@ -102,19 +98,19 @@ class _RootPageState extends State<RootPage> {
   }
 
   _attachListeners() {
-    _wizard.addListener(() {
-      int step = _wizard.stepNumber;
+    wizard.addListener(() {
+      int step = wizard.stepNumber;
       clearCallbacks();
       setState(() => _setupForStep(step));
     });
 
-    _currentDeck.addListener(() {
-      setState(() {
-        int length = _currentDeck.length;
-        List<SwCard> justAddedCards =
-            _currentDeck.sublist(_wizard.deckCursor, length);
-        _wizard.deckCursor = length;
+    currentDeck.addListener(() {
+      int length = currentDeck.length;
+      List<SwCard> justAddedCards =
+          currentDeck.sublist(wizard.deckCursor, length);
+      wizard.deckCursor = length;
 
+      setState(() {
         for (SwCard card in justAddedCards) {
           _showCardAddedNotif(card);
           print("Added: ${card.title}");
@@ -137,23 +133,24 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    String title = _currentStack == null ? 'Loading...' : _currentStack.title;
+    String title = currentStack == null ? 'Loading...' : currentStack.title;
     Widget drawer;
     Widget body;
 
-    if (_currentStack == null) {
-      // Loading
-      body = Center(
+    if (currentStack == null) {
+      body = Center(child: Image.network(
           // TODO: Max the screen size out with this
-          child: Image.network(
-              'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
-    } else if (_wizard.stepNumber == 1) {
-      // Choose A Side
+          'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
+    } else if (wizard.stepNumber == 1) {
       body = CardBackPicker(_stepOne().callback);
     } else {
-      // Stack  Screen
       drawer = QuickDrawer();
-      body = SwipeableStack(stack: _currentStack, deck: _currentDeck);
+      body = SwipeableStack(
+        stack: currentStack,
+        deck: currentDeck,
+        maybe: wizard.sideStacks['maybe'],
+        trash: wizard.sideStacks['trash'],
+      );
     }
 
     return Scaffold(
@@ -166,13 +163,13 @@ class _RootPageState extends State<RootPage> {
   }
 
   WizardStep _stepOne() {
-    return WizardStep(_wizard, () {
+    return WizardStep(wizard, () {
       print('Step: 1');
     }, (side) {
       print("Picked $side Side");
       setState(() {
-        _currentDeck.side = side;
-        _wizard.setup(side, meta, _currentDeck);
+        currentDeck.side = side;
+        wizard.setup(side, meta, currentDeck);
       });
     });
   }

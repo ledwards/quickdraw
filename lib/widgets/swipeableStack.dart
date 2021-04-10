@@ -11,24 +11,32 @@ class SwipeableStack extends StatefulWidget {
     Key key,
     @required this.deck,
     @required this.stack,
+    @required this.maybe,
+    @required this.trash,
   }) : super(key: key);
 
-  final SwStack stack;
   final SwDeck deck;
+  final SwStack stack;
+  final SwStack maybe;
+  final SwStack trash;
 
   @override
   _SwipeableStackState createState() => _SwipeableStackState();
 }
 
 class _SwipeableStackState extends State<SwipeableStack> {
-  SwStack _stack;
   SwDeck _deck;
+  SwStack _stack;
+  SwStack _maybe;
+  SwStack _trash;
 
   @override
   void initState() {
     super.initState();
-    _stack = widget.stack;
     _deck = widget.deck;
+    _stack = widget.stack;
+    _maybe = widget.maybe;
+    _trash = widget.trash;
   }
 
   @override
@@ -58,16 +66,16 @@ class _SwipeableStackState extends State<SwipeableStack> {
                   SwCard swipedCard = this._stack.removeAt(index);
                   switch (orientation) {
                     case CardSwipeOrientation.LEFT:
+                      _trash.add(swipedCard);
                       break;
                     case CardSwipeOrientation.RIGHT:
-                      _stack.add(swipedCard);
-                      break;
-                    case CardSwipeOrientation.UP:
                       _deck.add(swipedCard);
                       break;
+                    case CardSwipeOrientation.UP:
+                      _maybe.add(swipedCard);
+                      break;
                     case CardSwipeOrientation.DOWN:
-                      // TODO: need a maybe stack: this widget should take the future List/Map of SwStacks
-                      // _maybeStack.add(swipedCard);
+                      _stack.add(swipedCard);
                       break;
                     case CardSwipeOrientation.RECOVER:
                       _stack.insert(index, swipedCard);
@@ -82,7 +90,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Center(
             child: Text(
-              "Stack: (${_stack.length}), Deck: (${_deck.length})",
+              "Stack: (${_stack.length}) Deck: (${_deck.length})\n\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
               style: Theme.of(context).textTheme.headline6,
             ),
           ),

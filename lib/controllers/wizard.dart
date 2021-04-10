@@ -11,21 +11,25 @@ import 'WizardStep5PulledByStartingInterrupt.dart';
 
 class Wizard with ChangeNotifier {
   Wizard()
-      : _stepNumber = 1,
+      : meta = Metagame(null),
+        _stepNumber = 1,
         steps = {},
         deckCursor = 0,
-        currentCallback = null,
         currentStack = SwStack([], 'Pick a Side'),
         futureStacks = [],
-        meta = Metagame(null);
+        sideStacks = {
+          'maybe': SwStack([], '"Maybe" Cards'),
+          'trash': SwStack([], 'Trash'),
+        };
 
+  Metagame meta;
   int _stepNumber;
   Map<int, WizardStep> steps;
   int deckCursor;
   Function currentCallback;
   SwStack currentStack;
   List<SwStack> futureStacks;
-  Metagame meta;
+  Map<String, SwStack> sideStacks;
 
   WizardStep get currentStep => steps[stepNumber];
   int get stepNumber => _stepNumber;

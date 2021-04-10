@@ -10,7 +10,7 @@ class SwDeck with ChangeNotifier {
 
   String _side;
   String title;
-  SwStack cards; // TODO: multiple stacks for each step
+  SwStack cards; // TODO: DeckCards which hold state of when added
 
   String get side => _side;
   int get length => cards.length;
