@@ -105,7 +105,6 @@ class _RootPageState extends State<RootPage> {
   _attachListeners() {
     _wizard.addListener(() {
       int step = _wizard.stepNumber;
-      print("Step: $step");
       clearCallbacks();
       setState(() => _setupForStep(step));
     });

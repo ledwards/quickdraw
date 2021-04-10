@@ -17,7 +17,7 @@ class Wizard with ChangeNotifier {
         currentCallback = null,
         currentStack = SwStack([], 'Pick a Side'),
         futureStacks = [],
-        meta = null;
+        meta = Metagame(null);
 
   int _stepNumber;
   Map<int, WizardStep> steps;
@@ -37,13 +37,12 @@ class Wizard with ChangeNotifier {
   }
 
   void nextStep() {
-    print('next steppin');
     stepNumber += 1;
   }
 
   void setup(String side, Metagame metagame, SwDeck deck) {
-    meta.side = side;
     meta = metagame;
+    meta.side = side;
     buildSteps(deck);
     nextStep();
   }
@@ -60,8 +59,6 @@ class Wizard with ChangeNotifier {
   }
 
   void buildSteps(SwDeck deck) {
-    print('wizard#buildSteps:');
-    print(meta.allCards.length);
     steps = {
       2: pickObjectiveStep(this, meta, deck),
       3: pulledByObjective(this, meta, deck),

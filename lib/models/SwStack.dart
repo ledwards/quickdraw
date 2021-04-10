@@ -132,8 +132,7 @@ class SwStack {
                   (c) => (SwCard.normalizeTitle(c.title) ==
                           SwCard.normalizeTitle(name) &&
                       c.side == library.side), orElse: () {
-                print("Could not find card when creating Stack");
-                print(name);
+                print("Could not find $name when creating Stack");
                 return null;
               });
             })
