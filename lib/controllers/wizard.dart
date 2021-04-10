@@ -4,35 +4,35 @@ import '../models/SwStack.dart';
 
 class Wizard with ChangeNotifier {
   Wizard()
-      : _step = 1,
+      : _stepNumber = 1,
         steps = {},
         deckCursor = 0,
         currentCallback = null,
         currentStack = SwStack([], 'Pick a Side'),
         futureStacks = [];
 
-  int _step; // TODO: distinguish between step = WizardStep obj and stepNumber
+  int _stepNumber; // TODO: distinguish between step = WizardStep obj and stepNumber
   Map<int, WizardStep> steps;
   int deckCursor;
   Function currentCallback;
   SwStack currentStack;
   List<SwStack> futureStacks;
 
-  int get step => _step;
-  WizardStep get currentWizardStep => steps[step];
+  WizardStep get currentStep => steps[stepNumber];
+  int get stepNumber => _stepNumber;
   bool get isEmpty => steps.isEmpty;
 
-  set step(int value) {
-    _step = value;
+  set stepNumber(int value) {
+    _stepNumber = value;
     notifyListeners();
   }
 
   void nextStep() {
-    step += 1;
+    stepNumber += 1;
   }
 
   void addCurrentStepListener(Listenable target) {
-    currentCallback = currentWizardStep.callback;
+    currentCallback = currentStep.callback;
     target.addListener(currentCallback);
   }
 

@@ -71,11 +71,9 @@ class _RootPageState extends State<RootPage> {
   SwStack get _currentStack => _wizard.currentStack;
   set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
   List<SwStack> get _futureStacks => _wizard.futureStacks;
-  String get _currentSide => _currentDeck.side;
   set _currentSide(String value) => _currentDeck.side = value;
 
   Function _setupForStep(int i) => _wizard.steps[i].setup();
-  Function _callbackForStep(int i) => _wizard.steps[i].callback;
   void nextStep() => _wizard.nextStep();
   void clearCallbacks() => _wizard.clearCallbacks(_currentDeck);
   void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
@@ -119,7 +117,7 @@ class _RootPageState extends State<RootPage> {
   // TODO: Do I need listeners here, or just do these things when the values are set?
   _attachListeners() {
     _wizard.addListener(() {
-      int step = _wizard.step;
+      int step = _wizard.stepNumber;
       print("Step: $step");
       clearCallbacks();
       setState(() => _setupForStep(step));
@@ -159,7 +157,7 @@ class _RootPageState extends State<RootPage> {
       body = Center(
           child: Image.network(
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
-    } else if (_wizard.step == 1) {
+    } else if (_wizard.stepNumber == 1) {
       // Choose A Side
       body = CardBackPicker(_stepOne().callback);
     } else {
