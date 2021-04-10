@@ -37,7 +37,7 @@ class Wizard with ChangeNotifier {
   }
 
   void clearCallbacks(Listenable target) {
-    for (WizardStep ws in steps.values.skip(1)) {
+    for (WizardStep ws in steps.values) {
       target.removeListener(ws.callback);
     }
   }

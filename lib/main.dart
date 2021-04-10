@@ -112,7 +112,7 @@ class _RootPageState extends State<RootPage> {
     });
 
     _buildSteps();
-    _setupForStep(1);
+    _stepOne().setup();
     _attachListeners();
   }
 
@@ -161,7 +161,7 @@ class _RootPageState extends State<RootPage> {
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
     } else if (_wizard.step == 1) {
       // Choose A Side
-      body = CardBackPicker(_callbackForStep(1));
+      body = CardBackPicker(_stepOne().callback);
     } else {
       // Stack  Screen
       drawer = QuickDrawer();
@@ -177,16 +177,19 @@ class _RootPageState extends State<RootPage> {
         body: body);
   }
 
+  WizardStep _stepOne() {
+    return WizardStep(_wizard, () {
+      print('Step: 1');
+    }, (side) {
+      print("Picked $side Side");
+      _currentSide = side;
+      _allCards.refresh(_allCards.bySide(side));
+      nextStep();
+    });
+  }
+
   _buildSteps() {
     Map<int, WizardStep> _steps = {
-      1: WizardStep(_wizard, () {
-        print('Step: 1');
-      }, (side) {
-        print("Picked $side Side");
-        _currentSide = side;
-        _allCards.refresh(_allCards.bySide(side));
-        nextStep();
-      }),
       2: pickObjectiveStep(_wizard, {
         'library': _allCards,
         'archetypes': _allArchetypes,
