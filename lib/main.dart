@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
 
 class RootPage extends StatefulWidget {
   RootPage({Key key}) : super(key: key);
-
   @override
   _RootPageState createState() => _RootPageState();
 }
@@ -117,19 +116,23 @@ class _RootPageState extends State<RootPage> {
         _wizard.deckCursor = length;
 
         for (SwCard card in justAddedCards) {
-          ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-              duration: Duration(milliseconds: 600),
-              content: new Text(
-                "Added ${card.title}",
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-                textAlign: TextAlign.center,
-              )));
+          _showCardAddedNotif(card);
           print("Added: ${card.title}");
         }
       });
     });
+  }
+
+  _showCardAddedNotif(card) {
+    ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
+        duration: Duration(milliseconds: 600),
+        content: new Text(
+          "Added ${card.title}",
+          style: TextStyle(
+            fontSize: 18,
+          ),
+          textAlign: TextAlign.center,
+        )));
   }
 
   @override
