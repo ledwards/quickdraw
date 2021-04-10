@@ -4,13 +4,13 @@ import '../models/SwStack.dart';
 import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
 import '../rules/Objectives.dart';
+import '../rules/Metagame.dart';
 
-WizardStep pulledByObjective(Wizard wizard, Map<String, dynamic> data) {
+WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
   return WizardStep(wizard, () {
     print('Setting up step 3');
-    List<SwStack> futureStacks = data['futureStacks'];
-    SwStack library = data['library'];
-    SwDeck deck = data['deck'];
+    List<SwStack> futureStacks = wizard.futureStacks;
+    SwStack library = meta.library;
 
     SwCard startingCard = deck.startingCard();
 

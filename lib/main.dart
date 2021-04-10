@@ -22,6 +22,8 @@ import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
 import 'widgets/CardBackPicker.dart';
 
+import 'rules/Metagame.dart';
+
 void main() {
   runApp(
     MultiProvider(
@@ -57,10 +59,7 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  // TODO: Belongs in a Metagame or Library class?
-  SwStack _allCards = SwStack([], 'All Cards');
-  List<SwDecklist> _allDecklists = [];
-  List<SwArchetype> _allArchetypes = [];
+  Metagame meta;
 
   // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
   SwStack _maybeStack;
@@ -70,8 +69,13 @@ class _RootPageState extends State<RootPage> {
 
   SwStack get _currentStack => _wizard.currentStack;
   set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
-  List<SwStack> get _futureStacks => _wizard.futureStacks;
-  set _currentSide(String value) => _currentDeck.side = value;
+  set _currentSide(String value) {
+    print(meta.library.length);
+    meta.side = value;
+    print(meta.library.length);
+
+    _currentDeck.side = value;
+  }
 
   Function _setupForStep(int i) => _wizard.steps[i].setup();
   void nextStep() => _wizard.nextStep();
@@ -102,14 +106,14 @@ class _RootPageState extends State<RootPage> {
 
     // TODO: Is async necessary?
     setState(() {
-      this._allCards = new SwStack(loadedCards, 'All Cards');
-      this._allDecklists = loadedDecklists;
-      this._allArchetypes = results[0];
+      meta = Metagame(null);
+      meta.allCards = new SwStack(loadedCards, 'All Cards');
+      meta.allDecklists = loadedDecklists;
+      meta.allArchetypes = results[0];
       this._currentStack = new SwStack.fromStack(results[1], 'Choose A Side');
       this._maybeStack = new SwStack([], 'Maybe Cards');
     });
 
-    _buildSteps();
     _stepOne().setup();
     _attachListeners();
   }
@@ -152,7 +156,7 @@ class _RootPageState extends State<RootPage> {
     Widget drawer;
     Widget body;
 
-    if (_currentStack == null || _wizard.isEmpty) {
+    if (_currentStack == null) {
       // Loading
       body = Center(
           child: Image.network(
@@ -180,31 +184,20 @@ class _RootPageState extends State<RootPage> {
       print('Step: 1');
     }, (side) {
       print("Picked $side Side");
-      _currentSide = side;
-      _allCards.refresh(_allCards.bySide(side));
-      nextStep();
+      setState(() {
+        _currentSide = side;
+        _buildSteps();
+        nextStep();
+      });
     });
   }
 
   _buildSteps() {
     Map<int, WizardStep> _steps = {
-      2: pickObjectiveStep(_wizard, {
-        'library': _allCards,
-        'archetypes': _allArchetypes,
-        'deck': _currentDeck
-      }),
-      3: pulledByObjective(_wizard, {
-        'library': _allCards,
-        'futureStacks': _futureStacks,
-        'deck': _currentDeck
-      }),
-      4: pickStartingInterrupt(
-          _wizard, {'library': _allCards, 'deck': _currentDeck}),
-      5: pulledByStartingInterrupt(_wizard, {
-        'library': _allCards,
-        'futureStacks': _futureStacks,
-        'deck': _currentDeck
-      }),
+      2: pickObjectiveStep(_wizard, meta, _currentDeck),
+      3: pulledByObjective(_wizard, meta, _currentDeck),
+      4: pickStartingInterrupt(_wizard, meta, _currentDeck),
+      5: pulledByStartingInterrupt(_wizard, meta, _currentDeck),
       6: WizardStep(_wizard, () {
         return null;
       }, () {

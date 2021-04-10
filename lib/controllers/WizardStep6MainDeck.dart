@@ -3,12 +3,12 @@ import 'WizardStep.dart';
 import '../models/SwStack.dart';
 import '../models/SwArchetype.dart';
 import '../models/SwDeck.dart';
+import '../rules/Metagame.dart';
 
-WizardStep pickObjectiveStep(Wizard wizard, Map<String, dynamic> data) {
+WizardStep pickObjectiveStep(Wizard wizard, Metagame meta, SwDeck deck) {
   return WizardStep(wizard, () {
-    List<SwArchetype> archetypes = data['archetypes'];
-    SwStack library = data['library'];
-    SwDeck deck = data['deck'];
+    List<SwArchetype> archetypes = meta.archetypes;
+    SwStack library = meta.library;
 
     List<SwArchetype> allPossibleArchetypes =
         archetypes.where((a) => a.side == deck.side).toList();

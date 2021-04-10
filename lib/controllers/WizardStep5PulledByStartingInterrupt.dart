@@ -4,13 +4,14 @@ import '../models/SwStack.dart';
 import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
 import '../rules/StartingInterrupts.dart';
+import '../rules/Metagame.dart';
 
-WizardStep pulledByStartingInterrupt(Wizard wizard, Map<String, dynamic> data) {
+WizardStep pulledByStartingInterrupt(
+    Wizard wizard, Metagame meta, SwDeck deck) {
   return WizardStep(wizard, () {
     print('Setting up step 5');
-    List<SwStack> futureStacks = data['futureStacks'];
-    SwStack library = data['library'];
-    SwDeck deck = data['deck'];
+    List<SwStack> futureStacks = wizard.futureStacks;
+    SwStack library = meta.library;
 
     SwCard startingInterrupt = deck.startingInterrupt();
     if (startingInterrupt != null) {
@@ -31,10 +32,9 @@ WizardStep pulledByStartingInterrupt(Wizard wizard, Map<String, dynamic> data) {
       wizard.nextStep(); // Starting Interrupt is only pulling mandatory cards
     }
   }, () {
-    SwDeck deck = data['deck'];
-    List<SwStack> futureStacks = data['futureStacks'];
+    List<SwStack> futureStacks = wizard.futureStacks;
 
-    _handleSpecialPuller(data);
+    _handleSpecialPuller(wizard, meta, deck);
     if (futureStacks.isEmpty) {
       wizard.nextStep();
     } else {
@@ -43,10 +43,9 @@ WizardStep pulledByStartingInterrupt(Wizard wizard, Map<String, dynamic> data) {
   });
 }
 
-_handleSpecialPuller(Map<String, dynamic> data) {
-  SwStack library = data['library'];
-  List<SwStack> futureStacks = data['futureStacks'];
-  SwDeck deck = data['deck'];
+_handleSpecialPuller(Wizard wizard, Metagame meta, SwDeck deck) {
+  SwStack library = meta.library;
+  List<SwStack> futureStacks = wizard.futureStacks;
 
   SwCard startingInterrupt = deck.startingInterrupt();
   SwCard lastCard = deck.lastCard();
