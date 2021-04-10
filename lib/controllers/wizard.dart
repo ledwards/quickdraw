@@ -1,6 +1,13 @@
 import 'package:flutter/widgets.dart';
-import 'WizardStep.dart';
 import '../models/SwStack.dart';
+import '../models/SwDeck.dart';
+import '../rules/Metagame.dart';
+import 'WizardStep.dart';
+import 'WizardStep2ChooseObjective.dart';
+import 'WizardStep3PulledByObjective.dart';
+import 'WizardStep4ChooseStartingInterrupt.dart';
+import 'WizardStep5PulledByStartingInterrupt.dart';
+// import 'WizardStep6MainDeck.dart';
 
 class Wizard with ChangeNotifier {
   Wizard()
@@ -9,14 +16,16 @@ class Wizard with ChangeNotifier {
         deckCursor = 0,
         currentCallback = null,
         currentStack = SwStack([], 'Pick a Side'),
-        futureStacks = [];
+        futureStacks = [],
+        meta = null;
 
-  int _stepNumber; // TODO: distinguish between step = WizardStep obj and stepNumber
+  int _stepNumber;
   Map<int, WizardStep> steps;
   int deckCursor;
   Function currentCallback;
   SwStack currentStack;
   List<SwStack> futureStacks;
+  Metagame meta;
 
   WizardStep get currentStep => steps[stepNumber];
   int get stepNumber => _stepNumber;
@@ -28,7 +37,15 @@ class Wizard with ChangeNotifier {
   }
 
   void nextStep() {
+    print('next steppin');
     stepNumber += 1;
+  }
+
+  void setup(String side, Metagame metagame, SwDeck deck) {
+    meta.side = side;
+    meta = metagame;
+    buildSteps(deck);
+    nextStep();
   }
 
   void addCurrentStepListener(Listenable target) {
@@ -40,5 +57,31 @@ class Wizard with ChangeNotifier {
     for (WizardStep ws in steps.values) {
       target.removeListener(ws.callback);
     }
+  }
+
+  void buildSteps(SwDeck deck) {
+    print('wizard#buildSteps:');
+    print(meta.allCards.length);
+    steps = {
+      2: pickObjectiveStep(this, meta, deck),
+      3: pulledByObjective(this, meta, deck),
+      4: pickStartingInterrupt(this, meta, deck),
+      5: pulledByStartingInterrupt(this, meta, deck),
+      6: WizardStep(this, () {
+        return null;
+      }, () {
+        return null;
+      }),
+      7: WizardStep(this, () {
+        return null;
+      }, () {
+        return null;
+      }),
+      8: WizardStep(this, () {
+        return null;
+      }, () {
+        return null;
+      }),
+    };
   }
 }

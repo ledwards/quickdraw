@@ -7,16 +7,10 @@ import 'models/SwCard.dart';
 import 'models/SwDecklist.dart';
 import 'models/SwStack.dart';
 import 'models/SwDeck.dart';
-import 'models/SwArchetype.dart';
 
 import 'controllers/Loader.dart';
 import 'controllers/Wizard.dart';
 import 'controllers/WizardStep.dart';
-import 'controllers/WizardStep2ChooseObjective.dart';
-import 'controllers/WizardStep3PulledByObjective.dart';
-import 'controllers/WizardStep4ChooseStartingInterrupt.dart';
-import 'controllers/WizardStep5PulledByStartingInterrupt.dart';
-// import 'controllers/WizardStep6MainDeck.dart';
 
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
@@ -59,28 +53,19 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  Metagame meta;
-
-  // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
-  SwStack _maybeStack;
-
   Wizard get _wizard => Provider.of<Wizard>(context, listen: false);
   SwDeck get _currentDeck => Provider.of<SwDeck>(context, listen: false);
-
-  SwStack get _currentStack => _wizard.currentStack;
-  set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
-  set _currentSide(String value) {
-    print(meta.library.length);
-    meta.side = value;
-    print(meta.library.length);
-
-    _currentDeck.side = value;
-  }
+  Metagame meta = Metagame(null);
 
   Function _setupForStep(int i) => _wizard.steps[i].setup();
   void nextStep() => _wizard.nextStep();
   void clearCallbacks() => _wizard.clearCallbacks(_currentDeck);
   void addStepListener() => _wizard.addCurrentStepListener(_currentDeck);
+
+  // TODO: a class to hold a HashMap of Stacks that are swapped in and out during deckbuilding
+  SwStack get _currentStack => _wizard.currentStack;
+  set _currentStack(SwStack s) => _wizard.currentStack.refresh(s);
+  SwStack _maybeStack;
 
   @override
   void initState() {
@@ -106,7 +91,6 @@ class _RootPageState extends State<RootPage> {
 
     // TODO: Is async necessary?
     setState(() {
-      meta = Metagame(null);
       meta.allCards = new SwStack(loadedCards, 'All Cards');
       meta.allDecklists = loadedDecklists;
       meta.allArchetypes = results[0];
@@ -118,7 +102,6 @@ class _RootPageState extends State<RootPage> {
     _attachListeners();
   }
 
-  // TODO: Do I need listeners here, or just do these things when the values are set?
   _attachListeners() {
     _wizard.addListener(() {
       int step = _wizard.stepNumber;
@@ -159,6 +142,7 @@ class _RootPageState extends State<RootPage> {
     if (_currentStack == null) {
       // Loading
       body = Center(
+          // TODO: Max the screen size out with this
           child: Image.network(
               'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
     } else if (_wizard.stepNumber == 1) {
@@ -185,38 +169,9 @@ class _RootPageState extends State<RootPage> {
     }, (side) {
       print("Picked $side Side");
       setState(() {
-        _currentSide = side;
-        _buildSteps();
-        nextStep();
+        _currentDeck.side = side;
+        _wizard.setup(side, meta, _currentDeck);
       });
-    });
-  }
-
-  _buildSteps() {
-    Map<int, WizardStep> _steps = {
-      2: pickObjectiveStep(_wizard, meta, _currentDeck),
-      3: pulledByObjective(_wizard, meta, _currentDeck),
-      4: pickStartingInterrupt(_wizard, meta, _currentDeck),
-      5: pulledByStartingInterrupt(_wizard, meta, _currentDeck),
-      6: WizardStep(_wizard, () {
-        return null;
-      }, () {
-        return null;
-      }),
-      7: WizardStep(_wizard, () {
-        return null;
-      }, () {
-        return null;
-      }),
-      8: WizardStep(_wizard, () {
-        return null;
-      }, () {
-        return null;
-      }),
-    };
-
-    setState(() {
-      _wizard.steps = _steps;
     });
   }
 }
