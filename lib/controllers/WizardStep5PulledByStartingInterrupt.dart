@@ -18,7 +18,7 @@ WizardStep pulledByStartingInterrupt(
     if (startingInterrupt != null) {
       Map<String, dynamic> pulled =
           pullByStartingInterrupt(startingInterrupt, library);
-      deck.addStack(pulled['mandatory']);
+      deck.addStack(pulled['mandatory'], wizard.stepNumber);
       futureStacks.addAll(pulled['optionals']);
     } else {
       wizard.nextStep();

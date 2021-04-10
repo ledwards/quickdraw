@@ -13,12 +13,14 @@ class SwipeableStack extends StatefulWidget {
     @required this.stack,
     @required this.maybe,
     @required this.trash,
+    @required this.step,
   }) : super(key: key);
 
   final SwDeck deck;
   final SwStack stack;
   final SwStack maybe;
   final SwStack trash;
+  final int step;
 
   @override
   _SwipeableStackState createState() => _SwipeableStackState();
@@ -29,6 +31,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
   SwStack _stack;
   SwStack _maybe;
   SwStack _trash;
+  int _step;
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
     _stack = widget.stack;
     _maybe = widget.maybe;
     _trash = widget.trash;
+    _step = widget.step;
   }
 
   @override
@@ -69,7 +73,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
                       _trash.add(swipedCard);
                       break;
                     case CardSwipeOrientation.RIGHT:
-                      _deck.add(swipedCard);
+                      _deck.add(swipedCard, _step);
                       break;
                     case CardSwipeOrientation.UP:
                       _maybe.add(swipedCard);
@@ -87,14 +91,22 @@ class _SwipeableStackState extends State<SwipeableStack> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Center(
-            child: Text(
-              "Stack: (${_stack.length}) Deck: (${_deck.length})\n\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
-              style: Theme.of(context).textTheme.headline6,
-            ),
-          ),
-        ),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    "${_deck.cardsForStep(_step).map((SwCard card) => card.title).join(', ')}\n",
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    "Stack: (${_stack.length}) Deck: (${_deck.length})\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
+                    style: Theme.of(context).textTheme.headline6,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )),
       ],
     );
   }

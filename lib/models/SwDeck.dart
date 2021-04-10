@@ -1,23 +1,28 @@
 import 'package:flutter/widgets.dart';
 import 'SwCard.dart';
 import 'SwStack.dart';
+import 'SwDeckCard.dart';
 
 class SwDeck with ChangeNotifier {
   SwDeck(String title)
-      : cards = SwStack([], title),
+      : _deckCards = [],
         _side = null,
         title = title;
 
   String _side;
   String title;
-  SwStack cards; // TODO: DeckCards which hold state of when added
+  List<SwDeckCard> _deckCards; // TODO: DeckCards which hold state of when added
 
+  List<SwCard> get cards =>
+      _deckCards.map((deckCard) => deckCard.card).toList();
   String get side => _side;
   int get length => cards.length;
   operator [](int index) => cards[index];
 
-  SwCard startingCard() => cards[0];
-  SwCard startingInterrupt() => cards.matchesSubType('Starting')[0];
+  SwCard startingCard() =>
+      _deckCards.firstWhere((deckCard) => deckCard.stepNumber == 2).card;
+  SwCard startingInterrupt() =>
+      _deckCards.firstWhere((deckCard) => deckCard.stepNumber == 4).card;
   SwCard lastCard() => cards[length - 1];
   List<SwCard> sublist(start, end) => cards.sublist(start, end);
 
@@ -26,13 +31,20 @@ class SwDeck with ChangeNotifier {
     notifyListeners();
   }
 
-  add(SwCard c) {
-    cards.add(c);
+  List<SwCard> cardsForStep(int step) {
+    return _deckCards
+        .where((deckCard) => deckCard.stepNumber == step)
+        .map((deckCard) => deckCard.card)
+        .toList();
+  }
+
+  add(SwCard card, int stepNumber) {
+    _deckCards.add(SwDeckCard(card, stepNumber));
     notifyListeners();
   }
 
-  addStack(SwStack s) {
-    cards.addStack(s);
+  addStack(SwStack stack, int stepNumber) {
+    _deckCards.addAll(stack.cards.map((card) => SwDeckCard(card, stepNumber)));
     notifyListeners();
   }
 }

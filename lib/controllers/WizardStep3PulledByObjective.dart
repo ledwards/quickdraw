@@ -16,7 +16,7 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
 
     if (startingCard.type == 'Objective') {
       Map<String, dynamic> pulled = pullByObjective(startingCard, library);
-      deck.addStack(pulled['mandatory']);
+      deck.addStack(pulled['mandatory'], wizard.stepNumber);
       futureStacks.addAll(pulled['optionals']);
     }
 

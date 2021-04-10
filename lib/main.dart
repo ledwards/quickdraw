@@ -150,6 +150,7 @@ class _RootPageState extends State<RootPage> {
         deck: currentDeck,
         maybe: wizard.sideStacks['maybe'],
         trash: wizard.sideStacks['trash'],
+        step: wizard.stepNumber,
       );
     }
 
