@@ -46,6 +46,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: UniqueKey(),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(
@@ -76,10 +77,10 @@ class _SwipeableStackState extends State<SwipeableStack> {
                       _deck.add(swipedCard, _step);
                       break;
                     case CardSwipeOrientation.UP:
-                      _maybe.add(swipedCard);
+                      _stack.add(swipedCard);
                       break;
                     case CardSwipeOrientation.DOWN:
-                      _stack.add(swipedCard);
+                      _maybe.add(swipedCard);
                       break;
                     case CardSwipeOrientation.RECOVER:
                       _stack.insert(index, swipedCard);
@@ -96,12 +97,12 @@ class _SwipeableStackState extends State<SwipeableStack> {
               child: Column(
                 children: [
                   Text(
-                    "${_deck.cardsForStep(_step).map((SwCard card) => card.title).join(', ')}\n",
+                    "Stack: (${_stack.length}) Deck: (${_deck.length})\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
+                    style: Theme.of(context).textTheme.headline6,
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    "Stack: (${_stack.length}) Deck: (${_deck.length})\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
-                    style: Theme.of(context).textTheme.headline6,
+                    "${_deck.cardsForStep(_step).map((SwCard card) => card.title).join(', ')}\n",
                     textAlign: TextAlign.center,
                   ),
                 ],

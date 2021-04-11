@@ -133,34 +133,21 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    String title = currentStack == null ? 'Loading...' : currentStack.title;
-    Widget drawer;
-    Widget body;
-
-    if (currentStack == null) {
-      body = Center(child: Image.network(
-          // TODO: Max the screen size out with this
-          'https://res.starwarsccg.org/cardlists/images/starwars/Virtual4-Light/large/quickdraw.gif'));
-    } else if (wizard.stepNumber == 1) {
-      body = CardBackPicker(_stepOne().callback);
-    } else {
-      drawer = QuickDrawer();
-      body = SwipeableStack(
-        stack: currentStack,
-        deck: currentDeck,
-        maybe: wizard.sideStacks['maybe'],
-        trash: wizard.sideStacks['trash'],
-        step: wizard.stepNumber,
-      );
-    }
-
     return Scaffold(
         key: UniqueKey(),
         appBar: AppBar(
-          title: Text(title),
+          title: Text(currentStack == null ? 'Loading...' : currentStack.title),
         ),
-        drawer: drawer,
-        body: body);
+        drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
+        body: wizard.stepNumber == 1
+            ? CardBackPicker(_stepOne().callback)
+            : SwipeableStack(
+                stack: currentStack,
+                deck: currentDeck,
+                maybe: wizard.sideStacks['maybe'],
+                trash: wizard.sideStacks['trash'],
+                step: wizard.stepNumber,
+              ));
   }
 
   WizardStep _stepOne() {
