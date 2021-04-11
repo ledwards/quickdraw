@@ -11,11 +11,9 @@ WizardStep pickObjectiveStep(Wizard wizard, Metagame meta, SwDeck deck) {
     List<SwArchetype> archetypes = meta.archetypes;
     SwStack library = meta.library;
 
-    List<SwArchetype> allPossibleArchetypes =
-        archetypes.where((a) => a.side == deck.side).toList();
     SwStack objectives = library.byType('Objective');
     SwStack startingLocations = new SwStack(
-      allPossibleArchetypes.map((a) => a.startingCard).toSet().toList(),
+      archetypes.map((a) => a.startingCard).toSet().toList(),
       'Starting Locations',
     ).bySide(deck.side).byType('Location');
 

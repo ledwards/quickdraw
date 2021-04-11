@@ -7,7 +7,7 @@ import 'WizardStep2ChooseObjective.dart';
 import 'WizardStep3PulledByObjective.dart';
 import 'WizardStep4ChooseStartingInterrupt.dart';
 import 'WizardStep5PulledByStartingInterrupt.dart';
-// import 'WizardStep6MainDeck.dart';
+import 'WizardStep6MainDeck.dart';
 
 class Wizard with ChangeNotifier {
   Wizard()
@@ -68,11 +68,7 @@ class Wizard with ChangeNotifier {
       3: pulledByObjective(this, meta, deck),
       4: pickStartingInterrupt(this, meta, deck),
       5: pulledByStartingInterrupt(this, meta, deck),
-      6: WizardStep(this, () {
-        return null;
-      }, () {
-        return null;
-      }),
+      6: buildMainDeck(this, meta, deck),
       7: WizardStep(this, () {
         return null;
       }, () {
