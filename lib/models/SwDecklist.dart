@@ -14,6 +14,7 @@ class SwDecklist {
     return library.findByName(this.startingCardName());
   }
 
+// TODO: Preserve the starting/not-starting info
   SwDecklist.fromJson(Map<String, dynamic> json, String title)
       : side = json['userinfo']['deckside'] == 'DS' ? 'Dark' : 'Light',
         title = title,

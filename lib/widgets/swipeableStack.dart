@@ -1,56 +1,74 @@
 import 'dart:math' show pi;
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import '../models/SwCard.dart';
 import '../models/SwStack.dart';
 import '../models/SwDeck.dart';
+import '../models/SwArchetype.dart';
+
+import '../controllers/Wizard.dart';
+
+import '../rules/Metagame.dart';
 
 class SwipeableStack extends StatefulWidget {
   const SwipeableStack({
     Key key,
-    @required this.deck,
-    @required this.stack,
-    @required this.maybe,
-    @required this.trash,
     @required this.step,
+    @required this.wizard,
+    @required this.deck,
+    @required this.meta,
   }) : super(key: key);
 
-  final SwDeck deck;
-  final SwStack stack;
-  final SwStack maybe;
-  final SwStack trash;
   final int step;
+  final Wizard wizard;
+  final SwDeck deck;
+  final Metagame meta;
 
   @override
   _SwipeableStackState createState() => _SwipeableStackState();
 }
 
 class _SwipeableStackState extends State<SwipeableStack> {
-  SwDeck _deck;
-  SwStack _stack;
-  SwStack _maybe;
-  SwStack _trash;
   int _step;
+  Wizard _wizard;
+  SwDeck _deck;
+  SwCard _card;
+  SwArchetype _archetype;
+  Metagame _meta;
+  SwStack get _stack => _wizard.currentStack;
+  SwStack get _maybe => _wizard.sideStacks['maybe'];
+  SwStack get _trash => _wizard.sideStacks['trash'];
+  var pct = NumberFormat("###.#", "en_US");
 
   @override
   void initState() {
     super.initState();
-    _deck = widget.deck;
-    _stack = widget.stack;
-    _maybe = widget.maybe;
-    _trash = widget.trash;
     _step = widget.step;
+    _wizard = widget.wizard;
+    _deck = widget.deck;
+    _meta = widget.meta;
   }
 
   @override
   Widget build(BuildContext context) {
+    _card = _stack[0];
+    _archetype = _deck.archetype;
+    // _stack.sortByInclusion(_archetype == null ? _meta : _archetype);
+
     return Column(
       key: UniqueKey(),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Center(
-          child: Container(
+        Text(
+          "\n\nStack (${_stack.length}) Deck (${_deck.length}) Maybe (${_maybe.length}) Trash (${_trash.length})",
+          style: Theme.of(context).textTheme.headline6,
+          textAlign: TextAlign.center,
+        ),
+        Container(
+            key: UniqueKey(),
             height: MediaQuery.of(context).size.height * 0.6,
             child: TinderSwapCard(
               swipeUp: true,
@@ -68,7 +86,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
               swipeCompleteCallback:
                   (CardSwipeOrientation orientation, int index) {
                 setState(() {
-                  SwCard swipedCard = this._stack.removeAt(index);
+                  SwCard swipedCard = _stack.removeAt(index);
                   switch (orientation) {
                     case CardSwipeOrientation.LEFT:
                       _trash.add(swipedCard);
@@ -88,26 +106,48 @@ class _SwipeableStackState extends State<SwipeableStack> {
                   }
                 });
               },
-            ),
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Center(
-              child: Column(
-                children: [
-                  Text(
-                    "Stack: (${_stack.length}) Deck: (${_deck.length})\nMaybe: (${_maybe.length}) Trash: (${_trash.length})",
-                    style: Theme.of(context).textTheme.headline6,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "${_deck.cardsForStep(_step).map((SwCard card) => card.title).join(', ')}\n",
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
             )),
+        // CarouselSlider(
+        //   options: CarouselOptions(
+        //     enlargeCenterPage: true,
+        //     height: 120.0,
+        //     viewportFraction: 0.375,
+        //     enableInfiniteScroll: false,
+        //     onPageChanged: null,
+        //   ),
+        //   items: _wizard.sideStacks.values.map((SwStack stack) {
+        //     return Builder(
+        //       builder: (BuildContext context) {
+        //         return Container(
+        //             width: MediaQuery.of(context).size.width,
+        //             margin: EdgeInsets.symmetric(horizontal: 5.0),
+        //             decoration: BoxDecoration(color: Colors.grey.shade900),
+        //             child: Padding(
+        //               padding: const EdgeInsets.all(18.0),
+        //               child: Text(
+        //                 "${stack.title} (${stack.length})",
+        //                 textAlign: TextAlign.center,
+        //                 style: TextStyle(fontSize: 18.0, color: Colors.white70),
+        //               ),
+        //             ));
+        //       },
+        //     );
+        //   }).toList(),
+        // ),
+        Text(
+          _card.title,
+          style: Theme.of(context).textTheme.headline5,
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          _deck.archetype == null
+              ? "\nPopularity: ${_meta.inclusion(_card)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card))}%)"
+              // : "\nInclusion: ${_archetype.inclusion(_card)}/${_archetype.decklists.length} (${pct.format(100 * _archetype.rateOfInclusion(_card))}%)\nFrequency: ${_archetype.frequency(_card)}/${_archetype.inclusion(_card)} (${pct.format(_archetype.averageFrequencyPerInclusion(_card))}x)\nOverall: ${_meta.inclusion(_card)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card))}%), ${_meta.frequency(_card)}/${_meta.inclusion(_card)} (${pct.format(_meta.averageFrequencyPerInclusion(_card))}x)",
+              : "\nIncluded in ${pct.format(100 * _archetype.rateOfInclusion(_card))}% of ${_archetype.title} decks, ${pct.format(100 * _meta.rateOfInclusion(_card))}% overall, \nan average of ${pct.format(_archetype.averageFrequencyPerInclusion(_card))}x for this archetype, or ${pct.format(_meta.averageFrequencyPerInclusion(_card))}x overall",
+          // TODO: NEXT! After you add a card, these work, but not before adding. Needs a render/refresh somehow
+          style: Theme.of(context).textTheme.bodyText1,
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }

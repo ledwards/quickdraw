@@ -6,13 +6,12 @@ import '../rules/Metagame.dart';
 
 WizardStep pickStartingInterrupt(Wizard wizard, Metagame meta, SwDeck deck) {
   return WizardStep(wizard, () {
-    print('Setting up step 4');
     SwStack library = meta.library;
 
     SwStack startingInterrupts =
         library.byType('Interrupt').matchesSubType('Starting');
-    wizard.currentStack = startingInterrupts;
     wizard.currentStack.title = 'Starting Interrupt';
+    wizard.refreshCurrentStack(startingInterrupts);
     wizard.addCurrentStepListener(deck);
   }, () {
     wizard.nextStep();

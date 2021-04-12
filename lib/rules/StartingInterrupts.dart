@@ -24,7 +24,10 @@ Map<String, dynamic> pullByStartingInterrupt(
         effects,
         effects,
         effects
-      ]; // Note: This is the same stack 3 times. Between picks, the stack persists.
+      ]; // TODO: This is the same stack 3 times. Between picks, the stack needs to persist. Use FutureStacks
+      // maybe when we move from one optional stack to the other, we remove trash and chosen cards, etc.
+      // but this is jarring, the stack should continue as-is
+      // so: maybe we indicate the effects stack is 3x, and force 3x picks before moving on
       break;
 
     case 'Any Methods Necessary':
@@ -35,6 +38,16 @@ Map<String, dynamic> pullByStartingInterrupt(
       bountyHunters.title = '(Choose) Bounty Hunter';
 
       optionals = [prisons, bountyHunters];
+      break;
+
+    case 'Slip Sliding Away (V)':
+    // TODO: SSA needs a battleground too..
+    case 'Prepared Defenses':
+    case 'Heading For The Medical Frigate':
+      SwStack effects = startableEffects(library);
+      effects.title = '(Choose) 3 Deployable Effects';
+
+      optionals = [effects, effects, effects];
       break;
   }
 
@@ -53,6 +66,7 @@ SwStack startableEffects(SwStack library) {
   SwStack effects1 = effects.matchesGametext('Deploy on table.');
   SwStack effects2 = effects.matchesGametext('Deploy on table if');
   SwStack effects3 = effects.matchesGametext('Deploy on your side of table.');
+  SwStack effects4 = effects.matchesGametext(', deploy on table.');
 
-  return effects1.concat(effects2).concat(effects3);
+  return effects1.concat(effects2).concat(effects3).concat(effects4);
 }

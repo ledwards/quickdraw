@@ -3,6 +3,7 @@ import 'SwCard.dart';
 class SwStack {
   List<SwCard> cards;
   String title;
+  dynamic sortRepo;
 
   String get side => cards.isEmpty ? null : cards[0].side;
   int get length => cards.length;
@@ -27,6 +28,19 @@ class SwStack {
     clear();
     title = newStack.title;
     addStack(newStack);
+    sort();
+  }
+
+  // TODO: 2 params, sort by inclusion/frequency/default, by archetype/meta(overall)
+  // TODO: frequency/inclusion can look at starting/main or not
+  // TODO: default sort by type (at first, just by type, in the future, an order of types (character, then weapon, etc.))
+  // TODO: Popularity in meta as tie-breaker for popularity in archetype
+  // TODO: reverse?
+
+  void sort() {
+    sortRepo == null
+        ? print("No current sortRepo set")
+        : sortByInclusion(sortRepo);
   }
 
   SwStack concat(SwStack that) {
@@ -115,6 +129,20 @@ class SwStack {
         .byType('Weapon')
         .bySubType('Character');
     return (matchFromWeapon.concat(matchFromCharacter).uniq());
+  }
+
+  // TODO: Should implement an interface?
+  void sortByInclusion(dynamic repo) {
+    sortRepo = repo;
+    cards.sort((SwCard a, SwCard b) =>
+        sortRepo.inclusion(b).compareTo(sortRepo.inclusion(a)));
+  }
+
+  // TODO: Should implement an interface?
+  void sortByFrequency(dynamic repo) {
+    sortRepo = repo;
+    cards.sort((SwCard a, SwCard b) =>
+        sortRepo.frequency(b).compareTo(sortRepo.frequency(a)));
   }
 
   SwStack.fromStack(SwStack s, String title)

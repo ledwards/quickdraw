@@ -18,7 +18,9 @@ class Wizard with ChangeNotifier {
         currentStack = SwStack([], 'Pick a Side'),
         futureStacks = [],
         sideStacks = {
+          'default': SwStack([], 'Popular'),
           'maybe': SwStack([], '"Maybe" Cards'),
+          'allCards': SwStack([], 'All Cards'),
           'trash': SwStack([], 'Trash'),
         };
 
@@ -32,11 +34,17 @@ class Wizard with ChangeNotifier {
   Map<String, SwStack> sideStacks;
 
   WizardStep get currentStep => steps[stepNumber];
-  int get stepNumber => _stepNumber;
   bool get isEmpty => steps.isEmpty;
 
+  int get stepNumber => _stepNumber;
   set stepNumber(int value) {
     _stepNumber = value;
+    currentStack.sort();
+    notifyListeners();
+  }
+
+  void refreshCurrentStack(SwStack stack) {
+    currentStack.refresh(stack);
     notifyListeners();
   }
 
@@ -45,9 +53,14 @@ class Wizard with ChangeNotifier {
   }
 
   void setup(String side, Metagame metagame, SwDeck deck) {
-    meta = metagame;
+    this.meta = metagame;
     meta.side = side;
     buildSteps(deck);
+    sideStacks['default'].addStack(meta.library);
+    sideStacks['allCards'].refresh(
+        meta.library); // TODO: Make a method for this: refreshStack(<SwStack>)
+    sideStacks['allCards'].sortByInclusion(meta);
+    currentStack.sortByInclusion(meta);
     nextStep();
   }
 

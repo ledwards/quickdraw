@@ -3,16 +3,36 @@ import 'WizardStep.dart';
 import '../models/SwStack.dart';
 import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
+import '../models/SwArchetype.dart';
 import '../rules/Objectives.dart';
 import '../rules/Metagame.dart';
 
 WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
   return WizardStep(wizard, () {
-    print('Setting up step 3');
     List<SwStack> futureStacks = wizard.futureStacks;
     SwStack library = meta.library;
 
     SwCard startingCard = deck.startingCard();
+
+// TESTING
+    // SwCard card = library.findByName("Darth Vader, Emperor's Enforcer");
+    // SwArchetype archetype = deck.archetype;
+
+    // print("Card: ${card.title}");
+    // print("Archetype: ${archetype.title}");
+    // print("Decklists: ${meta.decklists.length}");
+    // print("inclusion: ${meta.inclusion(card)}");
+    // print("frequency: ${meta.frequency(card)}");
+    // print("rate of inclusion: ${meta.rateOfInclusion(card)}");
+    // print("avg number per decklist: ${meta.averageFrequency(card)}");
+    // print("\n");
+    // print("Decklists in Archetype: ${archetype.decklists.length}");
+    // print("inclusionInArchetype: ${archetype.inclusion(card)}");
+    // print("frequencyInArchetype: ${archetype.frequency(card)}");
+    // print("rate of inclusion in archetype: ${archetype.rateOfInclusion(card)}");
+    // print(
+    //     "avg number per decklist in archetype: ${archetype.averageFrequency(card)}");
+// TESTING
 
     if (startingCard.type == 'Objective') {
       Map<String, dynamic> pulled = pullByObjective(startingCard, library);
@@ -21,9 +41,8 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
     }
 
     if (startingCard.type == 'Objective' && futureStacks.isNotEmpty) {
-      wizard.currentStack.clear();
       wizard.currentStack.title = futureStacks[0].title;
-      wizard.currentStack.addStack(futureStacks.removeAt(0));
+      wizard.refreshCurrentStack(futureStacks.removeAt(0));
       wizard.addCurrentStepListener(deck);
     } else {
       wizard
@@ -33,7 +52,7 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
     if (wizard.futureStacks.isEmpty) {
       wizard.nextStep();
     } else {
-      wizard.currentStack = wizard.futureStacks.removeAt(0);
+      wizard.refreshCurrentStack(wizard.futureStacks.removeAt(0));
     }
   });
 }

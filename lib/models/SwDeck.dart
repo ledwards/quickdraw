@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'SwCard.dart';
 import 'SwStack.dart';
+import 'SwArchetype.dart';
 import 'SwDeckCard.dart';
 
 class SwDeck with ChangeNotifier {
@@ -11,7 +12,8 @@ class SwDeck with ChangeNotifier {
 
   String _side;
   String title;
-  List<SwDeckCard> _deckCards; // TODO: DeckCards which hold state of when added
+  SwArchetype archetype;
+  List<SwDeckCard> _deckCards;
 
   List<SwCard> get cards =>
       _deckCards.map((deckCard) => deckCard.card).toList();

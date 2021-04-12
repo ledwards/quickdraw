@@ -56,7 +56,7 @@ class _RootPageState extends State<RootPage> {
   SwDeck get currentDeck => Provider.of<SwDeck>(context, listen: false);
   Metagame meta = Metagame(null);
   SwStack get currentStack => wizard.currentStack;
-  set currentStack(SwStack s) => wizard.currentStack.refresh(s);
+  set currentStack(SwStack s) => wizard.refreshCurrentStack(s);
 
   Function _setupForStep(int i) => wizard.steps[i].setup();
   void nextStep() => wizard.nextStep();
@@ -142,11 +142,10 @@ class _RootPageState extends State<RootPage> {
         body: wizard.stepNumber == 1
             ? CardBackPicker(_stepOne().callback)
             : SwipeableStack(
-                stack: currentStack,
-                deck: currentDeck,
-                maybe: wizard.sideStacks['maybe'],
-                trash: wizard.sideStacks['trash'],
                 step: wizard.stepNumber,
+                wizard: wizard,
+                deck: currentDeck,
+                meta: meta,
               ));
   }
 
