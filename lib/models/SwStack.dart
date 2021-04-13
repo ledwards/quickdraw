@@ -24,10 +24,10 @@ class SwStack {
 
   clear() => cards.clear();
 
-  void refresh(SwStack newStack) {
+  void refresh(SwStack stack) {
     clear();
-    title = newStack.title;
-    addStack(newStack);
+    title = stack.title;
+    addStack(stack);
     sort();
   }
 
@@ -38,9 +38,7 @@ class SwStack {
   // TODO: reverse?
 
   void sort() {
-    sortRepo == null
-        ? print("No current sortRepo set")
-        : sortByInclusion(sortRepo);
+    sortRepo == null ? null : sortByInclusion(sortRepo);
   }
 
   SwStack concat(SwStack that) {
@@ -146,7 +144,7 @@ class SwStack {
   }
 
   SwStack.fromStack(SwStack s, String title)
-      : cards = s.cards,
+      : cards = new List<SwCard>.from(s.cards),
         title = title != null ? title : s.title;
 
   SwStack(List<SwCard> cards, String title)

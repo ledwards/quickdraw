@@ -56,7 +56,6 @@ class _SwipeableStackState extends State<SwipeableStack> {
   Widget build(BuildContext context) {
     _card = _stack[0];
     _archetype = _deck.archetype;
-    // _stack.sortByInclusion(_archetype == null ? _meta : _archetype);
 
     return Column(
       key: UniqueKey(),
@@ -142,9 +141,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
         Text(
           _deck.archetype == null
               ? "\nPopularity: ${_meta.inclusion(_card)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card))}%)"
-              // : "\nInclusion: ${_archetype.inclusion(_card)}/${_archetype.decklists.length} (${pct.format(100 * _archetype.rateOfInclusion(_card))}%)\nFrequency: ${_archetype.frequency(_card)}/${_archetype.inclusion(_card)} (${pct.format(_archetype.averageFrequencyPerInclusion(_card))}x)\nOverall: ${_meta.inclusion(_card)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card))}%), ${_meta.frequency(_card)}/${_meta.inclusion(_card)} (${pct.format(_meta.averageFrequencyPerInclusion(_card))}x)",
               : "\nIncluded in ${pct.format(100 * _archetype.rateOfInclusion(_card))}% of ${_archetype.title} decks, ${pct.format(100 * _meta.rateOfInclusion(_card))}% overall, \nan average of ${pct.format(_archetype.averageFrequencyPerInclusion(_card))}x for this archetype, or ${pct.format(_meta.averageFrequencyPerInclusion(_card))}x overall",
-          // TODO: NEXT! After you add a card, these work, but not before adding. Needs a render/refresh somehow
           style: Theme.of(context).textTheme.bodyText1,
           textAlign: TextAlign.center,
         ),

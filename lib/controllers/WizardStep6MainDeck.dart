@@ -14,7 +14,7 @@ WizardStep buildMainDeck(Wizard wizard, Metagame meta, SwDeck deck) {
     wizard.sideStacks['allCards'].refresh(library);
     // TODO: Exclude Defensive Sheilds and outside of deck cards
 
-    wizard.refreshCurrentStack(library);
+    wizard.currentStack.refresh(library);
     wizard.currentStack.title = 'Main Deck';
 
     wizard.addCurrentStepListener(deck);

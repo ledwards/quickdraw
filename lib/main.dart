@@ -51,12 +51,12 @@ class RootPage extends StatefulWidget {
   _RootPageState createState() => _RootPageState();
 }
 
+// TODO: I think most of this belongs in the RootPage class?
 class _RootPageState extends State<RootPage> {
   Wizard get wizard => Provider.of<Wizard>(context, listen: false);
   SwDeck get currentDeck => Provider.of<SwDeck>(context, listen: false);
   Metagame meta = Metagame(null);
   SwStack get currentStack => wizard.currentStack;
-  set currentStack(SwStack s) => wizard.refreshCurrentStack(s);
 
   Function _setupForStep(int i) => wizard.steps[i].setup();
   void nextStep() => wizard.nextStep();
@@ -90,7 +90,7 @@ class _RootPageState extends State<RootPage> {
       meta.allCards = SwStack(loadedCards, 'All Cards');
       meta.allDecklists = loadedDecklists;
       meta.allArchetypes = results[0];
-      currentStack = SwStack.fromStack(results[1], 'Choose A Side');
+      currentStack.refresh(SwStack.fromStack(results[1], 'Choose A Side'));
     });
 
     _stepOne().setup();
@@ -99,9 +99,8 @@ class _RootPageState extends State<RootPage> {
 
   _attachListeners() {
     wizard.addListener(() {
-      int step = wizard.stepNumber;
       clearCallbacks();
-      setState(() => _setupForStep(step));
+      setState(() => _setupForStep(wizard.stepNumber));
     });
 
     currentDeck.addListener(() {
@@ -136,7 +135,7 @@ class _RootPageState extends State<RootPage> {
     return Scaffold(
         key: UniqueKey(),
         appBar: AppBar(
-          title: Text(currentStack == null ? 'Loading...' : currentStack.title),
+          title: Text(currentStack == null ? 'Loading!' : currentStack.title),
         ),
         drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
         body: wizard.stepNumber == 1

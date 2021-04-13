@@ -17,17 +17,9 @@ Map<String, dynamic> pullByStartingInterrupt(
       emps.title = '(Choose) Emperor';
 
       SwStack effects = startableEffects(library);
-      effects.title = '(Choose) 3 Deployable Effects';
+      effects.title = '(Choose) Deployable Effect (1 of 3)';
 
-      optionals = [
-        emps,
-        effects,
-        effects,
-        effects
-      ]; // TODO: This is the same stack 3 times. Between picks, the stack needs to persist. Use FutureStacks
-      // maybe when we move from one optional stack to the other, we remove trash and chosen cards, etc.
-      // but this is jarring, the stack should continue as-is
-      // so: maybe we indicate the effects stack is 3x, and force 3x picks before moving on
+      optionals = [emps, effects];
       break;
 
     case 'Any Methods Necessary':
@@ -45,9 +37,9 @@ Map<String, dynamic> pullByStartingInterrupt(
     case 'Prepared Defenses':
     case 'Heading For The Medical Frigate':
       SwStack effects = startableEffects(library);
-      effects.title = '(Choose) 3 Deployable Effects';
+      effects.title = '(Choose) Deployable Effect (1 of 3)';
 
-      optionals = [effects, effects, effects];
+      optionals = [effects];
       break;
   }
 

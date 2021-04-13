@@ -16,8 +16,9 @@ WizardStep pickObjectiveStep(Wizard wizard, Metagame meta, SwDeck deck) {
       'Starting Locations',
     ).bySide(deck.side).byType('Location');
 
-    wizard.currentStack = objectives.concat(startingLocations);
     wizard.currentStack.title = '(Choose) Objective or Location';
+    wizard.currentStack.sortByInclusion(meta);
+    wizard.currentStack.refresh(objectives.concat(startingLocations));
 
     wizard.addCurrentStepListener(deck);
   }, () {

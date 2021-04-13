@@ -15,7 +15,7 @@ class Wizard with ChangeNotifier {
         _stepNumber = 1,
         steps = {},
         deckCursor = 0,
-        currentStack = SwStack([], 'Pick a Side'),
+        currentStack = SwStack([], 'Loading...'),
         futureStacks = [],
         sideStacks = {
           'default': SwStack([], 'Popular'),
@@ -43,11 +43,6 @@ class Wizard with ChangeNotifier {
     notifyListeners();
   }
 
-  void refreshCurrentStack(SwStack stack) {
-    currentStack.refresh(stack);
-    notifyListeners();
-  }
-
   void nextStep() {
     stepNumber += 1;
   }
@@ -56,11 +51,6 @@ class Wizard with ChangeNotifier {
     this.meta = metagame;
     meta.side = side;
     buildSteps(deck);
-    sideStacks['default'].addStack(meta.library);
-    sideStacks['allCards'].refresh(
-        meta.library); // TODO: Make a method for this: refreshStack(<SwStack>)
-    sideStacks['allCards'].sortByInclusion(meta);
-    currentStack.sortByInclusion(meta);
     nextStep();
   }
 

@@ -3,7 +3,6 @@ import 'WizardStep.dart';
 import '../models/SwStack.dart';
 import '../models/SwCard.dart';
 import '../models/SwDeck.dart';
-import '../models/SwArchetype.dart';
 import '../rules/Objectives.dart';
 import '../rules/Metagame.dart';
 
@@ -13,6 +12,29 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
     SwStack library = meta.library;
 
     SwCard startingCard = deck.startingCard();
+
+    if (startingCard.type == 'Objective') {
+      Map<String, dynamic> pulled = pullByObjective(startingCard, library);
+      deck.addStack(pulled['mandatory'], wizard.stepNumber);
+      futureStacks.addAll(pulled['optionals']);
+    }
+
+    if (startingCard.type == 'Objective' && futureStacks.isNotEmpty) {
+      wizard.currentStack.title = futureStacks[0].title;
+      wizard.currentStack.refresh(futureStacks.removeAt(0));
+      wizard.addCurrentStepListener(deck);
+    } else {
+      wizard
+          .nextStep(); // Objective is only pulling mandatory cards or is a Location
+    }
+  }, () {
+    if (wizard.futureStacks.isEmpty) {
+      wizard.nextStep();
+    } else {
+      wizard.currentStack.refresh(wizard.futureStacks.removeAt(0));
+    }
+  });
+}
 
 // TESTING
     // SwCard card = library.findByName("Darth Vader, Emperor's Enforcer");
@@ -33,26 +55,3 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
     // print(
     //     "avg number per decklist in archetype: ${archetype.averageFrequency(card)}");
 // TESTING
-
-    if (startingCard.type == 'Objective') {
-      Map<String, dynamic> pulled = pullByObjective(startingCard, library);
-      deck.addStack(pulled['mandatory'], wizard.stepNumber);
-      futureStacks.addAll(pulled['optionals']);
-    }
-
-    if (startingCard.type == 'Objective' && futureStacks.isNotEmpty) {
-      wizard.currentStack.title = futureStacks[0].title;
-      wizard.refreshCurrentStack(futureStacks.removeAt(0));
-      wizard.addCurrentStepListener(deck);
-    } else {
-      wizard
-          .nextStep(); // Objective is only pulling mandatory cards or is a Location
-    }
-  }, () {
-    if (wizard.futureStacks.isEmpty) {
-      wizard.nextStep();
-    } else {
-      wizard.refreshCurrentStack(wizard.futureStacks.removeAt(0));
-    }
-  });
-}
