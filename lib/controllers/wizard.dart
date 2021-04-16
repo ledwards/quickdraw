@@ -43,6 +43,8 @@ class Wizard with ChangeNotifier {
     notifyListeners();
   }
 
+  bool get starting => stepNumber != 6;
+
   void nextStep() {
     stepNumber += 1;
   }
