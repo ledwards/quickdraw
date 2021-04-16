@@ -17,7 +17,7 @@ WizardStep pickObjectiveStep(Wizard wizard, Metagame meta, SwDeck deck) {
     ).bySide(deck.side).byType('Location');
 
     wizard.currentStack.title = '(Choose) Objective or Location';
-    wizard.currentStack.sortByInclusion(meta);
+    wizard.currentStack.sortByInclusion(meta, starting: true);
     wizard.currentStack.refresh(objectives.concat(startingLocations));
 
     wizard.addCurrentStepListener(deck);
@@ -25,7 +25,7 @@ WizardStep pickObjectiveStep(Wizard wizard, Metagame meta, SwDeck deck) {
     deck.archetype = meta.archetypes.firstWhere(
         (archetype) => archetype.startingCard == deck.startingCard());
     print("Chose archetype: ${deck.archetype.title}");
-    wizard.currentStack.sortByInclusion(deck.archetype);
+    wizard.currentStack.sortByInclusion(deck.archetype, starting: true);
     wizard.nextStep();
   });
 }

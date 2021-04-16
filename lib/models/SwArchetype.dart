@@ -21,40 +21,46 @@ class SwArchetype {
     return all;
   }
 
-  int inclusion(SwCard card) {
+  int inclusion(SwCard card, {starting}) {
     return decklists
-        .where((decklist) => decklist.cardNames.contains(card.title))
+        .where((decklist) =>
+            decklist.cardNames(starting: starting).contains(card.title))
         .length;
   }
 
-  int frequency(SwCard card) {
+  int frequency(SwCard card, {starting}) {
     return decklists.fold(
         0,
         (int sum, SwDecklist decklist) =>
             sum +
-            decklist.cardNames.where((name) => name == card.title).length);
+            decklist
+                .cardNames(starting: starting)
+                .where((name) => name == card.title)
+                .length);
     // TODO: match e.g. effect vs. defensive shield
   }
 
-  num rateOfInclusion(SwCard card) {
-    return inclusion(card) / decklists.length;
+  num rateOfInclusion(SwCard card, {starting}) {
+    return inclusion(card, starting: starting) / decklists.length;
   }
 
-  num averageFrequency(SwCard card) {
-    return frequency(card) / decklists.length;
+  num averageFrequency(SwCard card, {starting}) {
+    return frequency(card, starting: starting) / decklists.length;
   }
 
-  num averageFrequencyPerInclusion(SwCard card) {
-    return inclusion(card) == 0 ? 0 : frequency(card) / inclusion(card);
+  num averageFrequencyPerInclusion(SwCard card, {starting}) {
+    return inclusion(card, starting: starting) == 0
+        ? 0
+        : frequency(card) / inclusion(card);
   }
 
   SwArchetype.fromDecklist(SwDecklist decklist, List<SwCard> library)
       : side = decklist.side,
         title = decklist.archetypeName,
         startingCard = library.firstWhere(
-            (SwCard c) =>
-                (c.title.toLowerCase() == decklist.cardNames[1].toLowerCase() &&
-                    c.side == decklist.side),
+            (SwCard c) => (c.title.toLowerCase() ==
+                    decklist.cardNames(starting: true)[1].toLowerCase() &&
+                c.side == decklist.side),
             orElse: () => null),
         decklists = [decklist];
 }

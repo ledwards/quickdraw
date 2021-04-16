@@ -15,6 +15,7 @@ class SwStack {
   addStack(SwStack stack) => cards.addAll(stack.cards);
   SwCard removeAt(int index) => cards.removeAt(index);
   SwCard firstWhere(Function fn) => cards.firstWhere(fn);
+  SwStack where(Function fn) => SwStack(cards.where(fn).toList(), title);
   SwStack uniq() => subset(cards.toSet().toList());
 
   List<SwCard> sublist(int start, int end) => cards.sublist(start, end);
@@ -37,8 +38,8 @@ class SwStack {
   // TODO: Popularity in meta as tie-breaker for popularity in archetype
   // TODO: reverse?
 
-  void sort() {
-    sortRepo == null ? null : sortByInclusion(sortRepo);
+  void sort({starting}) {
+    sortRepo == null ? null : sortByInclusion(sortRepo, starting: starting);
   }
 
   SwStack concat(SwStack that) {
@@ -130,17 +131,19 @@ class SwStack {
   }
 
   // TODO: Should implement an interface?
-  void sortByInclusion(dynamic repo) {
+  void sortByInclusion(dynamic repo, {starting}) {
     sortRepo = repo;
-    cards.sort((SwCard a, SwCard b) =>
-        sortRepo.inclusion(b).compareTo(sortRepo.inclusion(a)));
+    cards.sort((SwCard a, SwCard b) => sortRepo
+        .inclusion(b, starting: starting)
+        .compareTo(sortRepo.inclusion(a, starting: starting)));
   }
 
   // TODO: Should implement an interface?
-  void sortByFrequency(dynamic repo) {
+  void sortByFrequency(dynamic repo, {starting}) {
     sortRepo = repo;
-    cards.sort((SwCard a, SwCard b) =>
-        sortRepo.frequency(b).compareTo(sortRepo.frequency(a)));
+    cards.sort((SwCard a, SwCard b) => sortRepo
+        .frequency(b, starting: starting)
+        .compareTo(sortRepo.frequency(a, starting: starting)));
   }
 
   SwStack.fromStack(SwStack s, String title)

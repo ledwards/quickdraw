@@ -28,30 +28,36 @@ class Metagame {
   }
 
 // TODO: Both here and in Archetype, optional key/value for whether popularity is in starting/main
-  int inclusion(SwCard card) {
+  int inclusion(SwCard card, {starting}) {
     return decklists
-        .where((decklist) => decklist.cardNames.contains(card.title))
+        .where((decklist) =>
+            decklist.cardNames(starting: starting).contains(card.title))
         .length;
   }
 
-  int frequency(SwCard card) {
+  int frequency(SwCard card, {starting}) {
     return decklists.fold(
         0,
         (int sum, SwDecklist decklist) =>
             sum +
-            decklist.cardNames.where((name) => name == card.title).length);
+            decklist
+                .cardNames(starting: starting)
+                .where((name) => name == card.title)
+                .length);
   }
 
-  num rateOfInclusion(SwCard card) {
-    return inclusion(card) / decklists.length;
+  num rateOfInclusion(SwCard card, {starting}) {
+    return inclusion(card, starting: starting) / decklists.length;
   }
 
-  num averageFrequency(SwCard card) {
-    return frequency(card) / decklists.length;
+  num averageFrequency(SwCard card, {starting}) {
+    return frequency(card, starting: starting) / decklists.length;
   }
 
-  num averageFrequencyPerInclusion(SwCard card) {
-    return inclusion(card) == 0 ? 0 : frequency(card) / inclusion(card);
+  num averageFrequencyPerInclusion(SwCard card, {starting}) {
+    return inclusion(card, starting: starting) == 0
+        ? 0
+        : frequency(card) / inclusion(card);
   }
 
   // // TODO: Add a dimension of starting vs. in deck

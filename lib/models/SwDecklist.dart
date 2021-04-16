@@ -1,36 +1,41 @@
 import 'SwCard.dart';
 import 'SwStack.dart';
+import 'SwDecklistCard.dart';
 
 class SwDecklist {
   String side;
   String title;
   String archetypeName;
-  List<String> cardNames;
+  List _decklistCards;
 
-  int get length => cardNames.length;
+  List cardNames({starting}) => (starting == null
+          ? _decklistCards
+          : _decklistCards
+              .where((decklistCard) => decklistCard.starting == starting))
+      .map((decklistCard) => decklistCard.title)
+      .toList();
 
-  String startingCardName() => cardNames[1];
-  SwCard startingCard(SwStack library) {
-    return library.findByName(this.startingCardName());
-  }
+  int get length => _decklistCards.length;
+
+  String get _startingCardName => cardNames()[1];
+  SwCard startingCard(SwStack library) => library.findByName(_startingCardName);
 
 // TODO: Preserve the starting/not-starting info
   SwDecklist.fromJson(Map<String, dynamic> json, String title)
       : side = json['userinfo']['deckside'] == 'DS' ? 'Dark' : 'Light',
         title = title,
         archetypeName = json['userinfo']['deckname'],
-        cardNames = json.keys
-            .where((element) =>
-                ['userinfo', 'deckinfo'].contains(element) == false)
-            .map((k) => json[k])
+        _decklistCards = json.keys
+            .where((key) => ['userinfo', 'deckinfo'].contains(key) == false)
+            .map((key) => json[key]
+                .map((name) => SwDecklistCard(name, key == 'STARTING')))
             .expand((e) => e) // flatten
-            .toList()
-            .cast<String>();
+            .toList();
 
   Map<String, dynamic> toJson() => {
         'side': side,
         'title': title,
         'archetypeName': archetypeName,
-        'cardNames': cardNames,
+        'cardNames': cardNames(),
       };
 }

@@ -19,8 +19,14 @@ class Loader {
         cards.addAll(SwCard.listFromJson(cardsData['cards']));
       });
     }
-    return cards;
+    return cards
+        .where((card) =>
+            card.type != 'Defensive Shield' &&
+            !(card.type == 'Effect' && card.subType == 'Starting'))
+        .toList();
   }
+
+  // TODO: load Starting Effects and Defensive Shields + Frozen captive starting cards into a different list
 
   Future<List<SwDecklist>> decklists() async {
     List<SwDecklist> decklists = [];

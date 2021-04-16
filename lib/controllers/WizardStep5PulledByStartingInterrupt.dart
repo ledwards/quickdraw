@@ -41,18 +41,20 @@ WizardStep pulledByStartingInterrupt(
     });
 
     // TODO: Extract repeat pulls logic into own method
-    String curStr = wizard.currentStack.title
-        .substring(matches.first.start, matches.first.start + 1);
-    String maxStr = wizard.currentStack.title
-        .substring(matches.first.end - 1, matches.first.end);
+    if (matches.isNotEmpty) {
+      String curStr = wizard.currentStack.title
+          .substring(matches.first.start, matches.first.start + 1);
+      String maxStr = wizard.currentStack.title
+          .substring(matches.first.end - 1, matches.first.end);
 
-    if (curStr != null &&
-        maxStr != null &&
-        int.parse(curStr) < int.parse(maxStr)) {
-      String newTitle = wizard.currentStack.title
-          .replaceFirst(curStr, (int.parse(curStr) + 1).toString());
-      SwStack newStack = new SwStack.fromStack(wizard.currentStack, newTitle);
-      wizard.futureStacks.insert(0, newStack);
+      if (curStr != null &&
+          maxStr != null &&
+          int.parse(curStr) < int.parse(maxStr)) {
+        String newTitle = wizard.currentStack.title
+            .replaceFirst(curStr, (int.parse(curStr) + 1).toString());
+        SwStack newStack = new SwStack.fromStack(wizard.currentStack, newTitle);
+        wizard.futureStacks.insert(0, newStack);
+      }
     }
 
     if (wizard.futureStacks.isEmpty) {
