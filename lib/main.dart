@@ -16,6 +16,7 @@ import 'controllers/WizardStep.dart';
 import 'widgets/SwipeableStack.dart';
 import 'widgets/QuickDrawer.dart';
 import 'widgets/CardBackPicker.dart';
+import 'widgets/DecklistScroller.dart';
 
 import 'rules/Metagame.dart';
 
@@ -153,12 +154,16 @@ class _RootPageState extends State<RootPage> {
         break;
 
       case 2:
+        body = DecklistScroller(deck: currentDeck);
         break;
     }
     return Scaffold(
       key: UniqueKey(),
       appBar: AppBar(
-        title: Text(currentStack == null ? 'Loading!' : currentStack.title),
+        title: Text(currentStack == null
+            ? 'Loading!'
+            : currentStack
+                .title), // TODO: Show title correctly for Decklist tab
       ),
       drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
       body: body,
