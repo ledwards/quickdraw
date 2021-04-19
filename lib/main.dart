@@ -105,6 +105,7 @@ class _RootPageState extends State<RootPage> {
   _attachListeners() {
     wizard.addListener(() {
       clearCallbacks();
+      // TODO: clear cards from this step and dependent steps
       setState(() => _setupForStep(wizard.stepNumber));
     });
 
@@ -171,6 +172,7 @@ class _RootPageState extends State<RootPage> {
           currentIndex:
               currentIndex, // Use this to update the Bar giving a position
           onTap: (index) {
+            // TODO: Scroll to the bottom of the page is it's tab 3
             setState(() {
               currentIndex = index;
             });

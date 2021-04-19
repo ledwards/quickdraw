@@ -67,6 +67,17 @@ class Wizard with ChangeNotifier {
     }
   }
 
+  static Map<int, String> get stepNames => {
+        1: 'Choose a Side',
+        2: 'Choose an Objective',
+        3: 'Pulled by Objective',
+        4: 'Choose a Starting Interrupt',
+        5: 'Pulled by Starting Interrupt',
+        6: 'Main Deck',
+        7: 'Starting Effect',
+        8: 'Defensive Shields'
+      };
+
   void buildSteps(SwDeck deck) {
     steps = {
       2: pickObjectiveStep(this, meta, deck),

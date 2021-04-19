@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 import '../models/SwCard.dart';
-import '../models/SwStack.dart';
 import '../models/SwDeck.dart';
+import '../controllers/Wizard.dart';
 
 class DecklistScroller extends StatefulWidget {
   DecklistScroller({
@@ -41,53 +42,61 @@ class _DecklistScrollerState extends State<DecklistScroller> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = _deck.cards
-        .map((SwCard card) => Slidable(
-                  actionPane: SlidableDrawerActionPane(),
-                  actionExtentRatio: 0.25,
-                  child: Container(
-                    color: Colors.white,
-                    child: ListTile(
-                      leading: Image.network(
-                        card.imageUrl,
-                        alignment: Alignment.center,
-                      ),
-                      // leading: CircleAvatar(
-                      //   backgroundColor: Colors.indigoAccent,
-                      //   child: Text('3'),
-                      //   foregroundColor: Colors.white,
-                      // ),
-                      title: Text(card.displayTitle),
-                      subtitle: Text("${card.type}"), // TODO: make Qty work
+    return ListView.builder(
+        itemCount: 7,
+        itemBuilder: (context, index) {
+          return _deck.cardsForStep(index).isEmpty
+              ? Container()
+              : StickyHeader(
+                  header: Container(
+                    height: 50.0,
+                    color: Colors.blueGrey[700],
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Step ${index + 1}: ${Wizard.stepNames[index]}",
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
-                  secondaryActions: <Widget>[
-                    IconSlideAction(
-                      caption: 'add',
-                      color: Colors.green,
-                      icon: Icons.exposure_plus_1,
-                      onTap: () => print('Add'),
-                    ),
-                    IconSlideAction(
-                      caption: 'remove',
-                      color: Colors.red,
-                      icon: Icons.delete,
-                      onTap: () => print('Subtract'),
-                    ),
-                  ],
-                )
-            // Container(
-            //       height: 25,
-            //       child: Center(child: Text(card.displayTitle)),
-            //     ))
-            )
-        .toList();
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
-        children: children,
-      ),
-    );
+                  content: Column(
+                    children: _deck
+                        .cardsForStep(index)
+                        // TODO: Tap to see zoomed in modal
+                        .map((SwCard card) => Slidable(
+                              actionPane: SlidableDrawerActionPane(),
+                              actionExtentRatio: 0.25,
+                              child: Container(
+                                color: Colors.white,
+                                child: ListTile(
+                                  leading: Image.network(
+                                    card.imageUrl,
+                                    alignment: Alignment.center,
+                                  ),
+                                  title: Text(card.displayTitle),
+                                  subtitle: Text(
+                                      "${card.type}"), // TODO: make Qty work
+                                ),
+                              ),
+                              secondaryActions: index == 6
+                                  ? <Widget>[
+                                      IconSlideAction(
+                                        caption: 'add',
+                                        color: Colors.green,
+                                        icon: Icons.exposure_plus_1,
+                                        onTap: () => print('Add'),
+                                      ),
+                                      IconSlideAction(
+                                        caption: 'remove',
+                                        color: Colors.red,
+                                        icon: Icons.delete,
+                                        onTap: () => print('Subtract'),
+                                      ),
+                                    ]
+                                  : null,
+                            ))
+                        .toList(),
+                  ),
+                );
+        });
   }
 }

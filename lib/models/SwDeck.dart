@@ -40,6 +40,13 @@ class SwDeck with ChangeNotifier {
         .toList();
   }
 
+  Map<int, List<SwCard>> get cardsByStep {
+    Map<int, List<SwCard>> map = {};
+    [1, 2, 3, 4, 5, 6, 7].forEach((step) => map[step] = cardsForStep(step));
+    map.removeWhere((key, value) => value.isEmpty);
+    return map;
+  }
+
   add(SwCard card, int stepNumber) {
     _deckCards.add(SwDeckCard(card, stepNumber));
     notifyListeners();

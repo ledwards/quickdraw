@@ -28,7 +28,7 @@ dependencies:
   carousel_slider: ^3.0.0
   titled_navigation_bar: ^5.0.0-nullsafety.0
   flutter_slidable: ^0.5.4
-
+  sticky_headers: "^0.1.8"
 
 dev_dependencies:
   flutter_test:
