@@ -1,4 +1,5 @@
 import 'SwCard.dart';
+import '../rules/ExpansionSets.dart';
 
 class SwStack {
   List<SwCard> cards;
@@ -81,21 +82,24 @@ class SwStack {
     return this.subset(matches);
   }
 
-  SwCard findByName(String query) {
-    return cards
-        .firstWhere((e) => e.title.toLowerCase() == query.toLowerCase());
+  SwCard findByName(String query, {String set}) {
+    return set != null
+        ? cards.firstWhere((e) =>
+            e.title.toLowerCase() == query.toLowerCase() &&
+            e.set == setNumberFromName[set])
+        : cards.firstWhere((e) => e.title.toLowerCase() == query.toLowerCase());
   }
 
-  SwStack findAllByNames(List<String> queries) {
+  SwStack findAllByNames(List<String> queries, {bool includeVirtual}) {
+    String vSub =
+        (includeVirtual == null || includeVirtual == false) ? '' : ' (V)';
     List<SwCard> foundCards = queries
-        .map((query) {
-          return cards.firstWhere(
-              (e) => e.title.toLowerCase() == query.toLowerCase(), orElse: () {
-            print("findAllByName: Failed to find $query");
-            return null;
-          });
-        })
+        .map((query) => cards.where((card) =>
+            card.title.toLowerCase() == query.toLowerCase() ||
+            card.title.toLowerCase() == "$query$vSub".toLowerCase()))
+        .expand((e) => e)
         .whereType<SwCard>()
+        .toSet()
         .toList();
 
     return new SwStack(foundCards, 'Found all by name');

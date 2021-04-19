@@ -14,6 +14,13 @@ Map<String, dynamic> pullByObjective(SwCard objective, SwStack library) {
       ]);
       break;
 
+    case 'Agents of Black Sun':
+      mandatory = library
+          .findAllByNames(['Prince Xizor', 'Coruscant: Imperial Square']);
+      optionals
+          .add(library.findAllByNames(['Coruscant'], includeVirtual: true));
+      break;
+
     case 'Bring Him Before Me':
       mandatory = library.findAllByNames([
         'Death Star II: Throne Room',

@@ -2,6 +2,7 @@ class SwCard {
   int id;
   String side;
   String title;
+  String backTitle;
   String imageUrl;
   String type;
   String subType;
@@ -11,6 +12,8 @@ class SwCard {
   int darkSideIcons;
   List<String> icons;
   List<String> characteristics;
+  int set;
+  String uniqueness;
 
   SwCard.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -24,10 +27,30 @@ class SwCard {
         darkSideIcons = json['front']['darkSideIcons'],
         icons = castListString(json['front']['icons']),
         characteristics = castListString(json['front']['characteristics']),
+        set = int.tryParse(json['set']),
+        uniqueness = json['front']['uniqueness'],
         imageUrl = json['front']['imageUrl'];
 
   // NOTE: This does not put it back into the format with front/back keys
   Map<String, dynamic> toJson() => {'id': id, 'side': side, 'title': title};
+
+  String get displayUniqueness => uniqueness == null
+      ? ''
+      : uniqueness.replaceAll('*', '•').replaceAll('<>', '⬦');
+
+  // TODO: Make this work with Objective backs
+  List<String> _cardsWithDupes = [
+    'Sense',
+    'Alter',
+    'Control',
+    'Boba Fett',
+    'Tatooine',
+    'Coruscant',
+    'Jawa',
+    'Tusken Raider'
+  ];
+  String get displayTitle => "$displayUniqueness$title $displaySet";
+  String get displaySet => _cardsWithDupes.contains(title) ? '($set)' : '';
 
   static String normalizeTitle(String s) {
     List<String> titles = s.split(' / ');

@@ -122,7 +122,7 @@ class _RootPageState extends State<RootPage> {
     ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
         duration: Duration(milliseconds: 600),
         content: new Text(
-          "Added ${card.title}",
+          "Added ${card.displayTitle}",
           style: TextStyle(
             fontSize: 18,
           ),
