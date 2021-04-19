@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:titled_navigation_bar/titled_navigation_bar.dart';
 
 import 'models/SwCard.dart';
 import 'models/SwDecklist.dart';
@@ -62,6 +63,9 @@ class _RootPageState extends State<RootPage> {
   void nextStep() => wizard.nextStep();
   void clearCallbacks() => wizard.clearCallbacks(currentDeck);
   void addStepListener() => wizard.addCurrentStepListener(currentDeck);
+
+  int currentIndex =
+      0; // TODO: default to 1 if no decklists saved or deck not empty
 
   @override
   void initState() {
@@ -132,20 +136,51 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget body;
+
+    switch (currentIndex) {
+      case 0:
+        body = CardBackPicker(_stepOne().callback);
+        break;
+
+      case 1:
+        body = SwipeableStack(
+          step: wizard.stepNumber,
+          wizard: wizard,
+          deck: currentDeck,
+          meta: meta,
+        );
+        break;
+
+      case 2:
+        break;
+    }
     return Scaffold(
-        key: UniqueKey(),
-        appBar: AppBar(
-          title: Text(currentStack == null ? 'Loading!' : currentStack.title),
-        ),
-        drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
-        body: wizard.stepNumber == 1
-            ? CardBackPicker(_stepOne().callback)
-            : SwipeableStack(
-                step: wizard.stepNumber,
-                wizard: wizard,
-                deck: currentDeck,
-                meta: meta,
-              ));
+      key: UniqueKey(),
+      appBar: AppBar(
+        title: Text(currentStack == null ? 'Loading!' : currentStack.title),
+      ),
+      drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
+      body: body,
+      bottomNavigationBar: TitledBottomNavigationBar(
+          currentIndex:
+              currentIndex, // Use this to update the Bar giving a position
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+            print("Selected Index: $index");
+          },
+          items: [
+            TitledNavigationBarItem(
+                title: Text('Saved Decks'), icon: Icon(Icons.storage_outlined)),
+            TitledNavigationBarItem(
+                title: Text('Builder'),
+                icon: Icon(Icons.construction_outlined)),
+            TitledNavigationBarItem(
+                title: Text('Decklist'), icon: Icon(Icons.article_outlined)),
+          ]),
+    );
   }
 
   WizardStep _stepOne() {
@@ -154,6 +189,7 @@ class _RootPageState extends State<RootPage> {
     }, (side) {
       print("Picked $side Side");
       setState(() {
+        currentIndex = 1;
         currentDeck.side = side;
         wizard.setup(side, meta, currentDeck);
       });

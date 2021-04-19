@@ -26,6 +26,8 @@ dependencies:
   provider: ^4.3.3
   flutter_tindercard: ^0.1.7
   carousel_slider: ^3.0.0
+  titled_navigation_bar: ^5.0.0-nullsafety.0
+
 
 dev_dependencies:
   flutter_test:

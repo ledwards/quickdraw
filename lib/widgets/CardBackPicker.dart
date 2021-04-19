@@ -9,7 +9,7 @@ class CardBackPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: MediaQuery.of(context).size.height,
+        height: MediaQuery.of(context).size.height * 0.75,
         child: Column(
           children: ['Dark', 'Light'].map((side) => _cardBack(side)).toList(),
         ),

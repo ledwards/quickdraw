@@ -2,6 +2,7 @@ import 'SwCard.dart';
 import 'SwStack.dart';
 import 'SwDecklist.dart';
 
+// TODO: Need a way for Objectives that don't have an archetype to still work
 class SwArchetype {
   SwArchetype(this.side, this.title, this.startingCard, this.decklists);
 
