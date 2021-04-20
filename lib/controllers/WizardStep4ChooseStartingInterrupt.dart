@@ -11,7 +11,7 @@ WizardStep pickStartingInterrupt(Wizard wizard, Metagame meta, SwDeck deck) {
     SwStack startingInterrupts =
         library.byType('Interrupt').matchesSubType('Starting');
     wizard.currentStack.title = 'Starting Interrupt';
-    wizard.currentStack.refresh(startingInterrupts);
+    wizard.currentStack.refresh(startingInterrupts, starting: true);
     wizard.addCurrentStepListener(deck);
   }, () {
     wizard.nextStep();

@@ -5,6 +5,7 @@ class SwStack {
   List<SwCard> cards;
   String title;
   dynamic sortRepo;
+  bool _starting;
 
   String get side => cards.isEmpty ? null : cards[0].side;
   int get length => cards.length;
@@ -26,11 +27,11 @@ class SwStack {
 
   clear() => cards.clear();
 
-  void refresh(SwStack stack) {
-    clear();
+  void refresh(SwStack stack, {starting}) {
     title = stack.title;
+    clear();
     addStack(stack);
-    sort();
+    sort(starting: starting);
   }
 
   // TODO: 2 params, sort by inclusion/frequency/default, by archetype/meta(overall)
@@ -40,7 +41,10 @@ class SwStack {
   // TODO: reverse?
 
   void sort({starting}) {
-    sortRepo == null ? null : sortByInclusion(sortRepo, starting: starting);
+    _starting = starting == null ? _starting : starting;
+    if (sortRepo != null) {
+      sortByInclusion(sortRepo, starting: _starting);
+    }
   }
 
   SwStack concat(SwStack that) {

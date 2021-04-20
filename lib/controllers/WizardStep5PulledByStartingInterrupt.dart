@@ -25,7 +25,7 @@ WizardStep pulledByStartingInterrupt(
 
     if (startingInterrupt != null && futureStacks.isNotEmpty) {
       wizard.currentStack.title = futureStacks[0].title;
-      wizard.currentStack.refresh(futureStacks.removeAt(0));
+      wizard.currentStack.refresh(futureStacks.removeAt(0), starting: true);
       wizard.addCurrentStepListener(deck);
     } else {
       wizard.nextStep(); // Starting Interrupt is only pulling mandatory cards
@@ -46,12 +46,12 @@ WizardStep pulledByStartingInterrupt(
           .substring(matches.first.start, matches.first.start + 1);
       String maxStr = wizard.currentStack.title
           .substring(matches.first.end - 1, matches.first.end);
+      int cur = int.parse(curStr);
+      int max = int.parse(maxStr);
 
-      if (curStr != null &&
-          maxStr != null &&
-          int.parse(curStr) < int.parse(maxStr)) {
+      if (curStr != null && maxStr != null && cur < max) {
         String newTitle = wizard.currentStack.title
-            .replaceFirst(curStr, (int.parse(curStr) + 1).toString());
+            .replaceFirst(cur.toString(), (cur + 1).toString());
         SwStack newStack = new SwStack.fromStack(wizard.currentStack, newTitle);
         wizard.futureStacks.insert(0, newStack);
       }
@@ -60,7 +60,8 @@ WizardStep pulledByStartingInterrupt(
     if (wizard.futureStacks.isEmpty) {
       wizard.nextStep();
     } else {
-      wizard.currentStack.refresh(wizard.futureStacks.removeAt(0));
+      wizard.currentStack
+          .refresh(wizard.futureStacks.removeAt(0), starting: true);
     }
   });
 }

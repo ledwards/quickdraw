@@ -21,7 +21,7 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
 
     if (startingCard.type == 'Objective' && futureStacks.isNotEmpty) {
       wizard.currentStack.title = futureStacks[0].title;
-      wizard.currentStack.refresh(futureStacks.removeAt(0));
+      wizard.currentStack.refresh(futureStacks.removeAt(0), starting: true);
       wizard.addCurrentStepListener(deck);
     } else {
       wizard
@@ -31,7 +31,8 @@ WizardStep pulledByObjective(Wizard wizard, Metagame meta, SwDeck deck) {
     if (wizard.futureStacks.isEmpty) {
       wizard.nextStep();
     } else {
-      wizard.currentStack.refresh(wizard.futureStacks.removeAt(0));
+      wizard.currentStack
+          .refresh(wizard.futureStacks.removeAt(0), starting: true);
     }
   });
 }

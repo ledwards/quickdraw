@@ -36,14 +36,14 @@ class Wizard with ChangeNotifier {
   WizardStep get currentStep => steps[stepNumber];
   bool get isEmpty => steps.isEmpty;
 
+  bool get starting => stepNumber != 6;
+
   int get stepNumber => _stepNumber;
   set stepNumber(int value) {
     _stepNumber = value;
-    currentStack.sort();
+    currentStack.sort(starting: stepNumber == 6 ? false : true);
     notifyListeners();
   }
-
-  bool get starting => stepNumber != 6;
 
   void nextStep() {
     stepNumber += 1;

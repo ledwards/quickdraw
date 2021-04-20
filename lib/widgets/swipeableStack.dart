@@ -141,7 +141,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
         Text(
           _deck.archetype == null
               ? "\nPopularity: ${_meta.inclusion(_card, starting: _wizard.starting)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card, starting: _wizard.starting))}%)"
-              : "\nIncluded in ${pct.format(100 * _archetype.rateOfInclusion(_card, starting: _wizard.starting))}% of ${_archetype.title} decks, ${pct.format(100 * _meta.rateOfInclusion(_card, starting: _wizard.starting))}% overall, \nan average of ${pct.format(_archetype.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x for this archetype, or ${pct.format(_meta.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x overall",
+              : "\n${_wizard.starting ? 'Started' : 'Included'} in ${pct.format(100 * _archetype.rateOfInclusion(_card, starting: _wizard.starting))}% of ${_archetype.title} decks, ${pct.format(100 * _meta.rateOfInclusion(_card, starting: _wizard.starting))}% overall, \nan average of ${pct.format(_archetype.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x for this archetype, or ${pct.format(_meta.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x overall",
           style: Theme.of(context).textTheme.bodyText1,
           textAlign: TextAlign.center,
         ),

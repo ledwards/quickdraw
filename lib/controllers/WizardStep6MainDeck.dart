@@ -11,7 +11,7 @@ WizardStep buildMainDeck(Wizard wizard, Metagame meta, SwDeck deck) {
     SwStack library = meta.library;
     SwArchetype archetype = deck.archetype;
 
-    wizard.sideStacks['allCards'].refresh(library);
+    wizard.sideStacks['allCards'].refresh(library, starting: false);
 
     SwStack newCurrentStack = library
         .where((SwCard card) => archetype.inclusion(card, starting: false) > 0);
