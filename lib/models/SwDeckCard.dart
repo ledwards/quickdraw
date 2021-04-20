@@ -6,4 +6,6 @@ class SwDeckCard {
   SwCard card;
   int stepNumber;
   bool active = true;
+
+  bool get starting => stepNumber != 6;
 }
