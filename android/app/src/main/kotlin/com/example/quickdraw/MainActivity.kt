@@ -1,4 +1,4 @@
-package com.example.quickdraw
+package com.ledwards.quickdraw
 
 import io.flutter.embedding.android.FlutterActivity
 
