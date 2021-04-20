@@ -139,13 +139,16 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     Widget body;
+    String title;
 
     switch (currentIndex) {
       case 0:
+        title = 'Pick A Side';
         body = CardBackPicker(_stepOne().callback);
         break;
 
       case 1:
+        title = currentStack.title;
         body = SwipeableStack(
           step: wizard.stepNumber,
           wizard: wizard,
@@ -155,17 +158,13 @@ class _RootPageState extends State<RootPage> {
         break;
 
       case 2:
+        title = "Decklist (${currentDeck.length})";
         body = DecklistScroller(deck: currentDeck);
         break;
     }
     return Scaffold(
       key: UniqueKey(),
-      appBar: AppBar(
-        title: Text(currentStack == null
-            ? 'Loading!'
-            : currentStack
-                .title), // TODO: Show title correctly for Decklist tab
-      ),
+      appBar: AppBar(title: Text(title)),
       drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
       body: body,
       bottomNavigationBar: TitledBottomNavigationBar(

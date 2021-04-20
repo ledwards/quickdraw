@@ -150,6 +150,8 @@ class SwStack {
         .compareTo(sortRepo.frequency(a, starting: starting)));
   }
 
+  int qtyFor(SwCard card) => cards.where((c) => card == c).length;
+
   SwStack.fromStack(SwStack s, String title)
       : cards = new List<SwCard>.from(s.cards),
         title = title != null ? title : s.title;

@@ -13,9 +13,24 @@ WizardStep buildMainDeck(Wizard wizard, Metagame meta, SwDeck deck) {
 
     wizard.sideStacks['allCards'].refresh(library);
 
-    wizard.currentStack.refresh(library.where(
-        (SwCard card) => archetype.inclusion(card, starting: false) > 0));
+    SwStack newCurrentStack = library
+        .where((SwCard card) => archetype.inclusion(card, starting: false) > 0);
+    wizard.currentStack.refresh(newCurrentStack);
     wizard.currentStack.title = 'Main Deck';
+
+// TODO: Extract into #pad method and see where else it should be used
+    // duplicate commonly duplicated cards
+    newCurrentStack.cards.forEach((card) {
+      double inclusions =
+          meta.averageFrequencyPerInclusion(card, starting: false);
+      int index = wizard.currentStack.cards.lastIndexWhere((c) => c == card);
+
+      if (index > -1) {
+        for (int i = 0; i < inclusions.ceil() - 1; i = i + 1) {
+          wizard.currentStack.cards.insert(index, card);
+        }
+      }
+    });
 
     wizard.addCurrentStepListener(deck);
   }, () {

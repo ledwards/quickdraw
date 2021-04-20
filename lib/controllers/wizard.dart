@@ -68,10 +68,10 @@ class Wizard with ChangeNotifier {
   }
 
   static Map<int, String> get stepNames => {
-        1: 'Choose a Side',
-        2: 'Choose an Objective',
+        1: 'Pick a Side',
+        2: 'Objective',
         3: 'Pulled by Objective',
-        4: 'Choose a Starting Interrupt',
+        4: 'Starting Interrupt',
         5: 'Pulled by Starting Interrupt',
         6: 'Main Deck',
         7: 'Starting Effect',
