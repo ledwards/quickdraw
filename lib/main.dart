@@ -41,7 +41,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Quick Draw',
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
+        brightness: Brightness.dark,
+        primarySwatch: Colors.grey,
       ),
       home: RootPage(),
     );
@@ -173,25 +174,40 @@ class _RootPageState extends State<RootPage> {
       key: UniqueKey(),
       appBar: AppBar(title: Text(title)),
       drawer: wizard.stepNumber == 1 ? null : QuickDrawer(),
+      drawerEnableOpenDragGesture: false,
       body: body,
       bottomNavigationBar: TitledBottomNavigationBar(
-          currentIndex:
-              currentIndex, // Use this to update the Bar giving a position
+          activeColor: Colors.black,
+          inactiveColor: Colors.grey,
+          inactiveStripColor: Colors.white,
+          indicatorColor: Colors.white,
+          currentIndex: currentIndex,
+          reverse: true,
+          // Use this to update the Bar giving a position
           onTap: (index) {
             // TODO: Scroll to the bottom of the page is it's tab 3
             setState(() {
               currentIndex = index;
             });
-            print("Selected Index: $index");
           },
           items: [
             TitledNavigationBarItem(
-                title: Text('Saved Decks'), icon: Icon(Icons.storage_outlined)),
+                title: Text('Decks',
+                    style:
+                        TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600)),
+                icon: Icon(Icons.storage_outlined)),
             TitledNavigationBarItem(
-                title: Text('Builder'),
+                title: Text(
+                  'Builder',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                ),
                 icon: Icon(Icons.construction_outlined)),
             TitledNavigationBarItem(
-                title: Text('Decklist'), icon: Icon(Icons.article_outlined)),
+                title: Text(
+                  'Decklist',
+                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                ),
+                icon: Icon(Icons.article_outlined)),
           ]),
     );
   }

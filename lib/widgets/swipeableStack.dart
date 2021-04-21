@@ -142,11 +142,12 @@ class _SwipeableStackState extends State<SwipeableStack> {
     );
   }
 
+  // TODO: Most steps, this should show, but show just the current stack
   Widget _stacksCarousel() => CarouselSlider(
         options: CarouselOptions(
           enlargeCenterPage: true,
           height: 150.0,
-          viewportFraction: 0.9,
+          viewportFraction: 0.8,
           enableInfiniteScroll: false,
           onPageChanged: null,
         ),
