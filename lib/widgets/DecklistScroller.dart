@@ -78,13 +78,13 @@ class _DecklistScrollerState extends State<DecklistScroller> {
 
   Widget _stepHeader(index) {
     return Container(
-      height: 45.0,
-      color: Colors.black87,
+      height: 36.0,
+      color: Colors.black,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.centerLeft,
       child: Text(
         Wizard.stepNames[index],
-        style: const TextStyle(color: Colors.white, fontSize: 18),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
     );
   }
@@ -92,7 +92,7 @@ class _DecklistScrollerState extends State<DecklistScroller> {
   Widget _typeHeader(type) {
     return Container(
       height: 25.0,
-      color: Colors.black54,
+      color: Colors.black38,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.center,
       child: Text(

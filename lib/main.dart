@@ -192,7 +192,7 @@ class _RootPageState extends State<RootPage> {
           },
           items: [
             TitledNavigationBarItem(
-                title: Text('Decks',
+                title: Text('Deckbox',
                     style:
                         TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600)),
                 icon: Icon(Icons.storage_outlined)),

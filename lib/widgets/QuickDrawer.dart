@@ -18,24 +18,35 @@ class QuickDrawer extends StatelessWidget {
   List<Widget> _drawerWidgets(context) {
     return [
       DrawerHeader(
+        padding: EdgeInsets.only(top: 50.0, left: 40.0),
         decoration: BoxDecoration(
-          color: Colors.blueGrey,
+          color: Colors.white70,
+          image: DecorationImage(
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.25), BlendMode.dstATop),
+              image: NetworkImage(
+                  'https://res.starwarsccg.org/cards/Dagobah-Light/large/quickdraw.gif')),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '•Quick Draw',
+              // https://res.starwarsccg.org/cards/Dagobah-Light/large/quickdraw.gif
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 36,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+                fontSize: 36.0,
               ),
             ),
             Text(
               'Fast SWCCG Deckbuilder',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
+                color: Colors.black87,
+                fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.italic,
+                fontSize: 18.0,
               ),
             ),
           ],

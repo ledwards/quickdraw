@@ -178,7 +178,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xffffff),
-                        image: new DecorationImage(
+                        image: DecorationImage(
                           fit: BoxFit.cover,
                           colorFilter: ColorFilter.mode(
                               Colors.black.withOpacity(0.25),
