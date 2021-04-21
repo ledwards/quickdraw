@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -116,9 +117,15 @@ class _RootPageState extends State<RootPage> {
       wizard.deckCursor = length;
 
       setState(() {
+        var pct = NumberFormat("###.#", "en_US");
         for (SwCard card in justAddedCards) {
           _showCardAddedNotif(card);
           print("Added: ${card.title}");
+          print(
+            currentDeck.archetype == null
+                ? "\nPopularity: ${meta.inclusion(card, starting: wizard.starting)}/${meta.decklists.length} (${pct.format(100 * meta.rateOfInclusion(card, starting: wizard.starting))}%)"
+                : "\n${wizard.starting ? 'Started' : 'Included'} in ${pct.format(100 * currentDeck.archetype.rateOfInclusion(card, starting: wizard.starting))}% of ${currentDeck.archetype.title} decks, ${pct.format(100 * meta.rateOfInclusion(card, starting: wizard.starting))}% overall, \nan average of ${pct.format(currentDeck.archetype.averageFrequencyPerInclusion(card, starting: wizard.starting))}x for this archetype, or ${pct.format(meta.averageFrequencyPerInclusion(card, starting: wizard.starting))}x overall",
+          );
         }
       });
     });

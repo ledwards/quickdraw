@@ -1,5 +1,4 @@
 import 'dart:math' show pi;
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -41,7 +40,6 @@ class _SwipeableStackState extends State<SwipeableStack> {
   SwStack get _stack => _wizard.currentStack;
   SwStack get _maybe => _wizard.sideStacks['maybe'];
   SwStack get _trash => _wizard.sideStacks['trash'];
-  var pct = NumberFormat("###.#", "en_US");
 
   @override
   void initState() {
@@ -61,21 +59,25 @@ class _SwipeableStackState extends State<SwipeableStack> {
       key: UniqueKey(),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          "\n\nStack (${_stack.length}) Deck (${_deck.length}) Maybe (${_maybe.length}) Trash (${_trash.length})",
-          style: Theme.of(context).textTheme.headline6,
-          textAlign: TextAlign.center,
+        Padding(
+          padding: const EdgeInsets.only(top: 32.0, bottom: 0.0),
+          child: Text(
+            _card.displayTitle,
+            style: Theme.of(context).textTheme.headline6,
+            textAlign: TextAlign.center,
+          ),
         ),
         Container(
+            padding: EdgeInsets.all(0.0),
             key: UniqueKey(),
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: TinderSwapCard(
               swipeUp: true,
               swipeDown: true,
               orientation: AmassOrientation.TOP,
               totalNum: _stack.length,
               stackNum: 6,
-              swipeEdge: 4.0,
+              swipeEdge: 6.0,
               maxWidth: MediaQuery.of(context).size.width,
               maxHeight: MediaQuery.of(context).size.width,
               minWidth: MediaQuery.of(context).size.width * 0.8,
@@ -106,51 +108,17 @@ class _SwipeableStackState extends State<SwipeableStack> {
                 });
               },
             )),
-        // CarouselSlider(
-        //   options: CarouselOptions(
-        //     enlargeCenterPage: true,
-        //     height: 120.0,
-        //     viewportFraction: 0.375,
-        //     enableInfiniteScroll: false,
-        //     onPageChanged: null,
-        //   ),
-        //   items: _wizard.sideStacks.values.map((SwStack stack) {
-        //     return Builder(
-        //       builder: (BuildContext context) {
-        //         return Container(
-        //             width: MediaQuery.of(context).size.width,
-        //             margin: EdgeInsets.symmetric(horizontal: 5.0),
-        //             decoration: BoxDecoration(color: Colors.grey.shade900),
-        //             child: Padding(
-        //               padding: const EdgeInsets.all(18.0),
-        //               child: Text(
-        //                 "${stack.title} (${stack.length})",
-        //                 textAlign: TextAlign.center,
-        //                 style: TextStyle(fontSize: 18.0, color: Colors.white70),
-        //               ),
-        //             ));
-        //       },
-        //     );
-        //   }).toList(),
-        // ),
-        Text(
-          _card.title,
-          style: Theme.of(context).textTheme.headline5,
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          _deck.archetype == null
-              ? "\nPopularity: ${_meta.inclusion(_card, starting: _wizard.starting)}/${_meta.decklists.length} (${pct.format(100 * _meta.rateOfInclusion(_card, starting: _wizard.starting))}%)"
-              : "\n${_wizard.starting ? 'Started' : 'Included'} in ${pct.format(100 * _archetype.rateOfInclusion(_card, starting: _wizard.starting))}% of ${_archetype.title} decks, ${pct.format(100 * _meta.rateOfInclusion(_card, starting: _wizard.starting))}% overall, \nan average of ${pct.format(_archetype.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x for this archetype, or ${pct.format(_meta.averageFrequencyPerInclusion(_card, starting: _wizard.starting))}x overall",
-          style: Theme.of(context).textTheme.bodyText1,
-          textAlign: TextAlign.center,
-        ),
+        _step == 6
+            ? Padding(
+                padding: EdgeInsets.only(top: 16.0), child: _stacksCarousel())
+            : Container(),
       ],
     );
   }
 
   Widget _cardBuilder(context, index) {
     return Card(
+      margin: EdgeInsets.all(0.0),
       child: Transform(
           alignment: Alignment.center,
           transform: _stack[0].subType != 'Site'
@@ -170,4 +138,52 @@ class _SwipeableStackState extends State<SwipeableStack> {
       shadowColor: Colors.transparent,
     );
   }
+
+  Widget _stacksCarousel() => CarouselSlider(
+        options: CarouselOptions(
+          enlargeCenterPage: true,
+          height: 150.0,
+          viewportFraction: 0.9,
+          enableInfiniteScroll: false,
+          onPageChanged: null,
+        ),
+        items: _wizard.sideStacks.values
+            .map((SwStack stack) => Builder(
+                builder: (BuildContext context) => Container(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 38.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                stack.title,
+                                style: TextStyle(
+                                  fontSize: 36.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "${stack.length} cards",
+                                style: TextStyle(
+                                  fontSize: 24.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffffff),
+                        image: new DecorationImage(
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(0.25),
+                              BlendMode.dstATop),
+                          image: AssetImage(
+                              "assets/images/${_stack.side == 'Dark' ? 'ds' : 'ls'}-back.jpg"),
+                        ),
+                      ),
+                    )))
+            .toList(),
+      );
 }
