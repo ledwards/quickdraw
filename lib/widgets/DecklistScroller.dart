@@ -78,7 +78,7 @@ class _DecklistScrollerState extends State<DecklistScroller> {
 
   Widget _stepHeader(index) {
     return Container(
-      height: 36.0,
+      height: 48.0,
       color: Colors.black,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.centerLeft,
@@ -91,7 +91,7 @@ class _DecklistScrollerState extends State<DecklistScroller> {
 
   Widget _typeHeader(type) {
     return Container(
-      height: 25.0,
+      height: 32.0,
       color: Colors.black38,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.center,
@@ -108,12 +108,16 @@ class _DecklistScrollerState extends State<DecklistScroller> {
       actionExtentRatio: 0.25,
       secondaryActions: index == 6 ? _secondaryActions() : [],
       child: ListTile(
-        leading: Image.network(
-          card.imageUrl,
-          alignment: Alignment.centerLeft,
+        leading: Container(
+          width: 125.0,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: NetworkImage(card.imageUrl),
+            ),
+          ),
         ),
-        title: Text(card.displayTitle),
-        subtitle: Text("x${_deck.qtyFor(card, step: index)}"),
+        title: Text("${_deck.qtyFor(card, step: index)}x ${card.displayTitle}"),
       ),
     );
   }

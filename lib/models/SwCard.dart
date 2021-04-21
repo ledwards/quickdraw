@@ -49,6 +49,8 @@ class SwCard {
     'Jawa',
     'Tusken Raider'
   ];
+
+  // TODO: Use the original title from the card, as some newer v-cards don't have uniqueness string set
   String get displayTitle => "$displayUniqueness$title $displaySet";
   String get displaySet => _cardsWithDupes.contains(title) ? '($set)' : '';
 
