@@ -60,10 +60,13 @@ class _SwipeableStackState extends State<SwipeableStack> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 32.0, bottom: 0.0),
+          padding: const EdgeInsets.only(top: 28.0, bottom: 0.0),
           child: Text(
             _card.displayTitle,
-            style: Theme.of(context).textTheme.headline6,
+            style: TextStyle(
+              fontSize: 22.0,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
