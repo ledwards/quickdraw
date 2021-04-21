@@ -6,7 +6,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../models/SwCard.dart';
 import '../models/SwStack.dart';
 import '../models/SwDeck.dart';
-import '../models/SwArchetype.dart';
 
 import '../controllers/Wizard.dart';
 
@@ -35,8 +34,6 @@ class _SwipeableStackState extends State<SwipeableStack> {
   Wizard _wizard;
   SwDeck _deck;
   SwCard _card;
-  SwArchetype _archetype;
-  Metagame _meta;
   SwStack get _stack => _wizard.currentStack;
   SwStack get _maybe => _wizard.sideStacks['maybe'];
   SwStack get _trash => _wizard.sideStacks['trash'];
@@ -47,13 +44,11 @@ class _SwipeableStackState extends State<SwipeableStack> {
     _step = widget.step;
     _wizard = widget.wizard;
     _deck = widget.deck;
-    _meta = widget.meta;
   }
 
   @override
   Widget build(BuildContext context) {
     _card = _stack[0];
-    _archetype = _deck.archetype;
 
     return Column(
       key: UniqueKey(),
