@@ -2,6 +2,7 @@ import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:snaplist/snaplist.dart';
 
 import '../models/SwCard.dart';
 import '../models/SwStack.dart';
@@ -108,7 +109,9 @@ class _SwipeableStackState extends State<SwipeableStack> {
             )),
         _step == 6
             ? Padding(
-                padding: EdgeInsets.only(top: 16.0), child: _stacksCarousel())
+                padding: EdgeInsets.only(top: 16.0),
+                child: _stacksCarousel(),
+              )
             : Container(),
       ],
     );
@@ -137,6 +140,16 @@ class _SwipeableStackState extends State<SwipeableStack> {
     );
   }
 
+  Widget _xstacksCarousel() =>
+    Widget build(BuildContext context) {
+      return SnapList(
+        sizeProvider: (index, data) => Size(100.0, 100.0),
+        separatorProvider: (index, data) => Size(10.0, 10.0),
+        builder: (context, index, data) => SizedBox(),
+        count: 1,
+        );
+    };
+
   // TODO: Most steps, this should show, but show just the current stack
   Widget _stacksCarousel() => CarouselSlider(
         options: CarouselOptions(
@@ -148,6 +161,7 @@ class _SwipeableStackState extends State<SwipeableStack> {
         ),
         items: _wizard.sideStacks.values
             .map((SwStack stack) => Builder(
+                key: UniqueKey(),
                 builder: (BuildContext context) => Container(
                       child: Center(
                         child: Padding(
